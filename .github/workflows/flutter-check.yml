@@ -1,0 +1,42 @@
+name: Flutter Matrix Check on Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  flutter-check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        flutter-version: [3.35.4]
+
+    runs-on: ${{ matrix.os }}
+    name: Verificar Flutter ${{ matrix.flutter-version }} em ${{ matrix.os }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Instalar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+          channel: stable
+
+      - name: Verificar versão do Flutter
+        run: flutter --version
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Verificar erros de lint
+        run: flutter analyze
+
+      - name: Rodar testes unitários
+        run: flutter test
+
+      - name: Compilar APK Android (somente em Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: flutter build apk --release
