@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-
 enum AppLogoSize { small, medium, large }
 enum _ImageSourceType { asset, network }
-
 class AppLogoWidget extends StatelessWidget {
   final AppLogoSize size;
   final String logoPath;
   final _ImageSourceType _source;
-
   final String semanticLabel;
-
   const AppLogoWidget._({
     required this.size,
     required this.logoPath,
     required _ImageSourceType source,
     required this.semanticLabel,
   }) : _source = source;
-
   // Construtor para imagens LOCAIS (assets)
   factory AppLogoWidget.asset({
     Key? key,
@@ -32,7 +27,6 @@ class AppLogoWidget extends StatelessWidget {
       semanticLabel: semanticLabel,
     );
   }
-
   // Construtor para imagens da REDE (Supabase/HTTP)
   factory AppLogoWidget.network({
     Key? key,
@@ -47,7 +41,6 @@ class AppLogoWidget extends StatelessWidget {
       semanticLabel: semanticLabel,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -57,17 +50,15 @@ class AppLogoWidget extends StatelessWidget {
       case AppLogoSize.medium: logoWidth = screenWidth * 0.65; break;
       case AppLogoSize.large: logoWidth = screenWidth * 0.92; break;
     }
-
     // Placeholder Material em caso de erro
     final Widget errorWidget = SizedBox(
       width: logoWidth,
       child: Icon(
         Icons.image_not_supported_outlined,
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),        
         size: logoWidth * 0.5, // Ícone proporcional ao tamanho do logo
       ),
     );
-
     switch (_source) {
       case _ImageSourceType.network:
         return Image.network(
@@ -88,14 +79,11 @@ class AppLogoWidget extends StatelessWidget {
     }
   }
 }
-
 // PREVIEW DO COMPONENTE
-
 const String supabaseLogoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
-
 @Preview(
   name: 'Logo Responsivo (Material)',
-  size: const Size(450, 250),
+  size: Size(450, 250),
 )
 Widget logoMaterialPreview() {
   return Scaffold(
