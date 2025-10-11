@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ScoreCard extends StatelessWidget {
+enum BotaoTipo { primario, secundario }
+class DefaultScorecard extends StatelessWidget {
   final IconData icon;
   final int score;
   final Color? iconColor;
@@ -15,7 +16,7 @@ class ScoreCard extends StatelessWidget {
   final double? fontSize;
   final VoidCallback? onTap;
 
-  const ScoreCard({
+  const DefaultScorecard({
     super.key,
     required this.icon,
     required this.score,
