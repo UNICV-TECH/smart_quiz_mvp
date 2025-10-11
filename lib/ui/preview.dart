@@ -238,7 +238,7 @@ Widget subjectCardListPreview() {
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       body: SubjectCardList(
         padding: const EdgeInsets.all(24),
         subjects: subjects,

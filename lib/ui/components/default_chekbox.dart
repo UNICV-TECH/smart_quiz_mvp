@@ -4,7 +4,6 @@ import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
 // Constante para o tamanho do container de preview
 const Size defaultPreviewSize = Size(300, 250);
-
 // Preview do componente com a primeira opção selecionada
 @Preview(
   name: 'Caixa de Seleção - Padrão',
@@ -27,7 +26,6 @@ Widget selectionBoxDefaultPreview() {
     ),
   );
 }
-
 // Preview do componente com outra opção selecionada
 @Preview(
   name: 'Caixa de Seleção - "Quantidade" ',
@@ -50,7 +48,6 @@ Widget selectionBoxQuantityPreview() {
     ),
   );
 }
-
 // Preview com opções customizadas
 @Preview(
   name: 'Caixa de Seleção - Opções customizadas',
@@ -73,14 +70,12 @@ Widget selectionBoxCustomPreview() {
     ),
   );
 }
-
 // Classe de anotação para o preview
 class Preview {
   final String name;
   final Size? size;
   final double? textScaleFactor;
   final Brightness? brightness;
-
   const Preview({
     required this.name,
     this.size,
@@ -88,28 +83,23 @@ class Preview {
     this.brightness,
   });
 }
-
 // Classe principal do componente de seleção
 class SelectionBox extends StatefulWidget {
   final List<String> options;
   final ValueChanged<String> onOptionSelected;
   final String? initialOption;
-
   const SelectionBox({
     super.key,
     required this.options,
     required this.onOptionSelected,
     this.initialOption,
   });
-
   @override
   State<SelectionBox> createState() => _SelectionBoxState();
 }
-
 // Estado do componente
 class _SelectionBoxState extends State<SelectionBox> {
   String? _currentlySelectedOption;
-
   @override
   void initState() {
     super.initState();
@@ -119,21 +109,18 @@ class _SelectionBoxState extends State<SelectionBox> {
       _currentlySelectedOption = widget.initialOption;
     }
   }
-
   // Constrói um item da lista de seleção
   Widget _buildSelectionOptionItem(String optionText) {
     final bool isSelected = _currentlySelectedOption == optionText;
-
     final Color iconColor = isSelected ? AppColors.white : AppColors.transparent;
     final Color iconBackgroundColor =
-        isSelected ? AppColors.checklistSelected : AppColors.transparent;
+        isSelected ? AppColors.green : AppColors.transparent;
     final Color borderColor =
-        isSelected ? AppColors.checklistSelected : AppColors.checklistUnselectedBorder;
+        isSelected ? AppColors.green : AppColors.checklistUnselectedBorder;
     final Color textColor =
-        isSelected ? AppColors.checklistSelected : AppColors.checklistUnselectedText;
+        isSelected ? AppColors.green : AppColors.checklistUnselectedText;
     final FontWeight fontWeight =
         isSelected ? FontWeight.bold : FontWeight.normal;
-
     return Material(
       color: AppColors.transparent,
       child: InkWell(
@@ -182,7 +169,6 @@ class _SelectionBoxState extends State<SelectionBox> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Column(
