@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-enum BotaoTipo { primario, secundario }
 class DefaultScorecard extends StatelessWidget {
   final IconData icon;
   final int score;
@@ -15,7 +13,6 @@ class DefaultScorecard extends StatelessWidget {
   final double? iconSize;
   final double? fontSize;
   final VoidCallback? onTap;
-
   const DefaultScorecard({
     super.key,
     required this.icon,
@@ -32,14 +29,11 @@ class DefaultScorecard extends StatelessWidget {
     this.fontSize,
     this.onTap,
   });
-
   @override
   Widget build(BuildContext context) {
     final double finalIconSize = iconSize ?? 32.0;
     final double clampedIconSize = finalIconSize.clamp(24.0, 40.0);
-
     final double finalFontSize = fontSize ?? (clampedIconSize * 0.8);
-
     return Container(
       width: width,
       height: height ?? 80,

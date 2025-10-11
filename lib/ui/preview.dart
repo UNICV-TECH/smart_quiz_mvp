@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'components/default_navbar.dart';
+import 'components/default_scoreCard.dart';
 import 'components/default_subject_card.dart';
-import 'components/default_scorecard.dart';
 import 'theme/app_color.dart';
-
 // Constante para tamanho padrão dos previews
 const Size tamanhoPadraoPreview = Size(353, 100);
-
 // Preview do botão primário - apenas texto
 @Preview(
   name: 'Botão Primário (Texto)',
@@ -26,7 +24,6 @@ Widget componenteBotaoPrimarioPreview() {
     ),
   );
 }
-
 // Preview do botão primário - apenas ícone
 @Preview(
   name: 'Botão Primário (Ícone)',
@@ -46,7 +43,6 @@ Widget componenteBotaoPrimarioIconePreview() {
     ),
   );
 }
-
 // Preview do botão primário - texto + ícone
 @Preview(
   name: 'Botão Primário (Texto + Ícone)',
@@ -67,7 +63,6 @@ Widget componenteBotaoPrimarioTextoIconePreview() {
     ),
   );
 }
-
 // Preview do botão secundário - texto
 @Preview(
   name: 'Botão Secundário (Texto)',
@@ -86,7 +81,6 @@ Widget componenteBotaoSecundarioPreview() {
     ),
   );
 }
-
 // Preview do botão desabilitado - texto
 @Preview(
   name: 'Botão Desabilitado (Texto)',
@@ -105,20 +99,18 @@ Widget componenteBotaoDesabilitadoPreview() {
     ),
   );
 }
-
 // ==================== SCORE CARD PREVIEWS ====================
-
-// Preview do ScoreCard - Acertos
+// Preview do DefaultScorecard - Acertos
 @Preview(
-  name: 'ScoreCard - Acertos',
+  name: 'defaultscorecard - Acertos',
   size: tamanhoPadraoPreview,
   textScaleFactor: 1.0,
   brightness: Brightness.light,
 )
-Widget scoreCardAcertosPreview() {
+Widget defaultscorcardAcertosPreview() {
   return Container(
     child: Center(
-      child: const ScoreCard(
+      child: const DefaultScorecard(
         icon: Icons.check_circle,
         score: 15,
         iconColor: Colors.green,
@@ -127,10 +119,9 @@ Widget scoreCardAcertosPreview() {
     ),
   );
 }
-
-// Preview do ScoreCard - Erros
+// Preview do DefaultScorecard - Erros
 @Preview(
-  name: 'ScoreCard - Erros',
+  name: 'DefaultScorecard - Erros',
   size: tamanhoPadraoPreview,
   textScaleFactor: 1.0,
   brightness: Brightness.light,
@@ -138,7 +129,7 @@ Widget scoreCardAcertosPreview() {
 Widget scoreCardErrosPreview() {
   return Container(
     child: Center(
-      child: const ScoreCard(
+      child: const DefaultScorecard(
         icon: Icons.cancel,
         score: 3,
         iconColor: Colors.red,
@@ -147,10 +138,9 @@ Widget scoreCardErrosPreview() {
     ),
   );
 }
-
-// Preview do ScoreCard - Pontos
+// Preview do DefaultScorecard - Pontos
 @Preview(
-  name: 'ScoreCard - Pontos',
+  name: 'DefaultScorecard - Pontos',
   size: tamanhoPadraoPreview,
   textScaleFactor: 1.0,
   brightness: Brightness.light,
@@ -158,7 +148,7 @@ Widget scoreCardErrosPreview() {
 Widget scoreCardPontosPreview() {
   return Container(
     child: Center(
-      child: const ScoreCard(
+      child: const DefaultScorecard(
         icon: Icons.stars,
         score: 150,
         iconColor: Colors.amber,
@@ -169,10 +159,9 @@ Widget scoreCardPontosPreview() {
     ),
   );
 }
-
-// Preview do ScoreCard - Customizado
+// Preview do DefaultScorecard - Customizado
 @Preview(
-  name: 'ScoreCard - Customizado',
+  name: 'DefaultScorecard - Customizado',
   size: tamanhoPadraoPreview,
   textScaleFactor: 1.0,
   brightness: Brightness.light,
@@ -180,7 +169,7 @@ Widget scoreCardPontosPreview() {
 Widget scoreCardCustomizadoPreview() {
   return Container(
     child: Center(
-      child: const ScoreCard(
+      child: const DefaultScorecard(
         icon: Icons.emoji_events,
         score: 42,
         iconColor: Color(0xFF9C27B0),
@@ -191,10 +180,9 @@ Widget scoreCardCustomizadoPreview() {
     ),
   );
 }
-
-// Preview do ScoreCard - Básico
+// Preview do DefaultScorecard - Básico
 @Preview(
-  name: 'ScoreCard - Básico',
+  name: 'DefaultScorecard - Básico',
   size: tamanhoPadraoPreview,
   textScaleFactor: 1.0,
   brightness: Brightness.light,
@@ -202,14 +190,13 @@ Widget scoreCardCustomizadoPreview() {
 Widget scoreCardBasicoPreview() {
   return Container(
     child: Center(
-      child: const ScoreCard(
+      child: const DefaultScorecard(
         icon: Icons.score,
         score: 25,
       ),
     ),
   );
 }
-
 @Preview(
   name: 'Subject Card List',
   size: Size(360, 320),
@@ -248,7 +235,6 @@ Widget subjectCardListPreview() {
       title: 'Pedagogia',
     ),
   ];
-
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Scaffold(
@@ -261,13 +247,11 @@ Widget subjectCardListPreview() {
     ),
   );
 }
-
 class Preview {
   final String name;
   final Size? size;
   final double? textScaleFactor;
   final Brightness? brightness;
-
   const Preview({
     required this.name,
     this.size,
@@ -275,7 +259,6 @@ class Preview {
     this.brightness,
   });
 }
-
 @Preview(
   name: 'Navbar',
   size: tamanhoPadraoPreview,
