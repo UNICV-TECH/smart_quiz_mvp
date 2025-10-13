@@ -87,8 +87,8 @@ class WelcomeScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 26.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 100),
+                 children: [
+                   const SizedBox(height: 50),
                   // Texto "Bem vindo"
                   const Text(
                     AppStrings.welcomeTitle,
