@@ -34,14 +34,15 @@ class AlternativeSelectorVertical extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? AppColors.green : AppColors.webNeutral400
-                  ),
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? AppColors.green
+                          : AppColors.webNeutral400),
                   alignment: Alignment.center,
                   child: Text(
                     option,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

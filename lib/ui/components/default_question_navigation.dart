@@ -22,7 +22,7 @@ class Preview {
 }
 
 class QuestionNavigation extends StatelessWidget {
-  final int totalQuestions; 
+  final int totalQuestions;
   final int currentQuestion;
   final Function(int) onQuestionSelected;
 
@@ -39,29 +39,25 @@ class QuestionNavigation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(15, (index) {
         final questionNumber = index + 1;
-        final isActive = questionNumber <= totalQuestions; 
+        final isActive = questionNumber <= totalQuestions;
 
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 3.0), 
+          margin: const EdgeInsets.symmetric(horizontal: 3.0),
           child: GestureDetector(
             onTap: isActive ? () => onQuestionSelected(questionNumber) : null,
             child: Container(
-              width: 40.0, 
+              width: 40.0,
               height: 40.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isActive 
-                    ? AppColors.green  
-                    : const Color(0xFFE0E0E0), 
+                color: isActive ? AppColors.green : AppColors.greyLight,
               ),
               child: Center(
                 child: Text(
-                  isActive ? questionNumber.toString() : '-', 
+                  isActive ? questionNumber.toString() : '-',
                   style: TextStyle(
-                    color: isActive 
-                        ? AppColors.white  
-                        : const Color(0xFF666666), 
-                    fontSize: 14.0, 
+                    color: isActive ? AppColors.white : AppColors.greyText,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
