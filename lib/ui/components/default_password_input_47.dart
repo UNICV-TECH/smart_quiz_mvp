@@ -106,7 +106,7 @@ class ComponentePasswordInput extends StatefulWidget {
     this.height = 49.0,
     this.backgroundColor = AppColors.greenChart,
     this.borderColor = AppColors.transparent,
-    this.borderColorFocus = AppColors.borderColorFocus,
+    this.borderColorFocus = AppColors.greenChart,
     this.borderColorError = AppColors.borderColorError,
     this.borderRadius = 15.0,
     this.textStyle = const TextStyle(fontSize: 16, color: AppColors.primaryDark),
