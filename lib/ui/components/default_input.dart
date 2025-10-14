@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-
 class Preview {
   final String name;
   final Size? size;
@@ -103,6 +102,7 @@ class ComponenteInput extends StatelessWidget {
   final double borderRadius;
   final TextStyle textStyle;
   final TextStyle labelStyle;
+  final String? Function(String?)? validator;
 
   // Construtor do componente com parâmetros nomeados
   const ComponenteInput({
@@ -116,16 +116,19 @@ class ComponenteInput extends StatelessWidget {
     this.width = double.infinity,
     this.height = 49.0, // Altura padrão para o campo
     this.backgroundColor = AppColors.greenChart,
-    this.borderColor= AppColors.transparent,
+    this.borderColor = AppColors.transparent,
     this.borderColorFocus = AppColors.borderColorFocus,
     this.borderColorError = AppColors.borderColorError,
-    this.borderRadius = 15.0, // Metade da altura para ser totalmente arredondado
-    this.textStyle = const TextStyle(fontSize: 16, color: AppColors.primaryDark),
+    this.borderRadius =
+        15.0, // Metade da altura para ser totalmente arredondado
+    this.textStyle =
+        const TextStyle(fontSize: 16, color: AppColors.primaryDark),
     this.labelStyle = const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: AppColors.estiloLabel,
     ),
+    this.validator,
   });
 
   @override
@@ -171,6 +174,7 @@ class ComponenteInput extends StatelessWidget {
           width: width,
           height: height,
           child: TextFormField(
+            validator: validator,
             controller: controller,
             keyboardType: keyboardType,
             onChanged: onChanged,
@@ -190,7 +194,8 @@ class ComponenteInput extends StatelessWidget {
               // Se quiser um comportamento diferente, pode deixar `errorText` nulo
               // e controlar a exibição do erro fora do componente.
               errorText: errorMessage,
-              errorStyle: const TextStyle(height: 0.1, color: AppColors.transparent, fontSize: 0),
+              errorStyle: const TextStyle(
+                  height: 0.1, color: AppColors.transparent, fontSize: 0),
             ),
           ),
         ),
