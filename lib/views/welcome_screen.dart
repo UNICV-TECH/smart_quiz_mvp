@@ -8,7 +8,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -16,20 +16,18 @@ class WelcomeScreen extends StatelessWidget {
             width: size.width,
             height: size.height,
             decoration: const BoxDecoration(
-              color: Color(0xFFFCFCFC),
+              color: AppColors.whiteBg,
             ),
             child: Image.asset(
               'assets/images/background.jpg',
               fit: BoxFit.cover,
             ),
           ),
-          
           Container(
             width: size.width,
             height: size.height,
-            color: AppColors.green.withValues(alpha:0.8),
+            color: AppColors.green.withValues(alpha: 0.8),
           ),
-          
           Positioned(
             bottom: 0,
             left: 0,
@@ -41,14 +39,13 @@ class WelcomeScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.transparent,
-                    Color(0xFF858585),
+                    AppColors.transparent,
+                    AppColors.greyGradient,
                   ],
                 ),
               ),
             ),
           ),
-          
           Positioned(
             bottom: 0,
             left: 0,
@@ -56,14 +53,13 @@ class WelcomeScreen extends StatelessWidget {
             height: size.height * 0.4,
             child: Container(
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(207),
                 ),
               ),
             ),
           ),
-          
           Positioned(
             top: size.height * 0.07,
             left: 0,
@@ -77,7 +73,6 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          
           Positioned(
             bottom: 0,
             left: 0,
@@ -87,8 +82,8 @@ class WelcomeScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 26.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                 children: [
-                   const SizedBox(height: 50),
+                children: [
+                  const SizedBox(height: 50),
                   // Texto "Bem vindo"
                   const Text(
                     AppStrings.welcomeTitle,
@@ -125,7 +120,7 @@ class WelcomeScreen extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.orange,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -134,7 +129,7 @@ class WelcomeScreen extends StatelessWidget {
                       child: const Text(
                         AppStrings.enterButton,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontSize: 20,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.bold,

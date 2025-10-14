@@ -11,30 +11,31 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
-  final int _splashDuration = 2500; 
+
+  final int _splashDuration = 2500;
 
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500), 
+      duration: const Duration(milliseconds: 1500),
     );
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut, // Curva suave
       ),
     );
-    
+
     _animationController.forward();
-    
+
     Timer(Duration(milliseconds: _splashDuration), () {
       _navigateToNextScreen();
     });
@@ -49,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _navigateToNextScreen() async {
     if (mounted) {
       _animationController.reverse();
-      
+
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) {
@@ -78,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFF4D7B58), 
+          color: AppColors.greenSplash,
         ),
         child: Center(
           child: FadeTransition(
