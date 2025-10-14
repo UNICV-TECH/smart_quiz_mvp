@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_color.dart';
 
 enum BotaoTipo { primario, secundario, desabilitado }
 
@@ -35,15 +36,15 @@ class DefaultButtonOrange extends StatelessWidget {
     switch (tipo) {
       case BotaoTipo.primario:
         background = corFundo ?? const Color.fromRGBO(239, 153, 45, 1.0);
-        textColor = corTexto ?? Colors.white;
+        textColor = corTexto ?? AppColors.white;
         break;
       case BotaoTipo.secundario:
         background = corFundo ?? const Color.fromRGBO(220, 155, 60, 1.0);
-        textColor = corTexto ?? Colors.white;
+        textColor = corTexto ?? AppColors.white;
         break;
       case BotaoTipo.desabilitado:
-        background = corFundo ?? Colors.grey.shade400;
-        textColor = corTexto ?? Colors.grey.shade200;
+        background = corFundo ?? AppColors.greyShade400;
+        textColor = corTexto ?? AppColors.greyShade200;
         break;
     }
 

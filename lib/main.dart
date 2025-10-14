@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'views/splash_screen.dart';
 import 'views/welcome_screen.dart';
+import 'views/signup_screen.dart';
+import 'views/login_screen.dart';
 import 'ui/theme/app_color.dart';
 
 void main() {
@@ -24,14 +26,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/welcome': (context) => const WelcomeScreen(),
-        '/login': (context) => const Scaffold(
-            body: Center(
-                child:
-                    Text('Tela de Login'))), 
-        '/home': (context) => const Scaffold(
-            body: Center(
-                child: Text(
-                    'Tela Principal'))),
+        '/signup': (context) => const SignupScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) =>
+            const Scaffold(body: Center(child: Text('Tela Principal'))),
       },
     );
   }
