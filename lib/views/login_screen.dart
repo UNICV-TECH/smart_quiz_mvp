@@ -124,7 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               alignment: Alignment.centerRight,
                               child: GestureDetector(
                                 onTap: () {
-                                  // Navegar para recuperação de senha
+                                  Navigator.pushReplacementNamed(
+                                      context, '/reset_password');
                                 },
                                 child: Text(
                                   AppStrings.forgotPassword,
