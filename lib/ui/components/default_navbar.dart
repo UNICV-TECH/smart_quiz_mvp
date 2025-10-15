@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
+
 class CustomNavBar extends StatefulWidget {
-  const CustomNavBar({super.key});
+  final int? selectedIndex;
+  final Function(int)? onItemTapped;
+
+  const CustomNavBar({
+    super.key,
+    this.selectedIndex,
+    this.onItemTapped,
+  });
+
   @override
   State<CustomNavBar> createState() => _CustomNavBarState();
 }
-@Preview(name:  'Custom NavBar')
+
+@Preview(name: 'Custom NavBar')
 Widget customNavBarPreview() {
   return const CustomNavBarTest();
 }
+
 class _CustomNavBarState extends State<CustomNavBar> {
-  int _selectedIndex = 0;
+  int _internalSelectedIndex = 0;
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
   final Color _navBarColor = const Color(0xFF38553A);
@@ -23,7 +34,17 @@ class _CustomNavBarState extends State<CustomNavBar> {
     {'icon': Icons.explore, 'label': 'Explorar'},
     {'icon': Icons.person, 'label': 'Perfil'},
   ];
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
+
+  int get _selectedIndex => widget.selectedIndex ?? _internalSelectedIndex;
+
+  void _onItemTapped(int index) {
+    if (widget.onItemTapped != null) {
+      widget.onItemTapped!(index);
+    } else {
+      setState(() => _internalSelectedIndex = index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double w = MediaQuery.of(context).size.width;
@@ -144,6 +165,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
     );
   }
 }
+
 // Clipper
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
@@ -189,6 +211,7 @@ class NavBarClipper extends CustomClipper<Path> {
     path.close();
     return path;
   }
+
   @override
   bool shouldReclip(covariant NavBarClipper oldClipper) {
     return oldClipper.selectedIndex != selectedIndex ||
@@ -198,6 +221,7 @@ class NavBarClipper extends CustomClipper<Path> {
         oldClipper.shoulder != shoulder;
   }
 }
+
 /// ================== Preview (Chamar Classe na Main)  ==================
 class CustomNavBarTest extends StatelessWidget {
   const CustomNavBarTest({super.key});

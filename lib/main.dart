@@ -3,6 +3,10 @@ import 'views/splash_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/signup_screen.dart';
 import 'views/login_screen.dart';
+import 'views/profile_screen.dart';
+import 'views/main_navigation_screen.dart';
+import 'views/help_screen.dart';
+import 'views/about_screen.dart';
 import 'ui/theme/app_color.dart';
 
 void main() {
@@ -28,6 +32,10 @@ class MyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeScreen(),
         '/signup': (context) => const SignupScreen(),
         '/login': (context) => const LoginScreen(),
+        '/main': (context) => const MainNavigationScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/help': (context) => const HelpScreen(),
+        '/about': (context) => const AboutScreen(),
         '/home': (context) =>
             const Scaffold(body: Center(child: Text('Tela Principal'))),
       },
