@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 
 class CustomNavBar extends StatefulWidget {
-  final int? selectedIndex;
-  final Function(int)? onItemTapped;
-
-  const CustomNavBar({
-    super.key,
-    this.selectedIndex,
-    this.onItemTapped,
-  });
+  const CustomNavBar({super.key});
 
   @override
   State<CustomNavBar> createState() => _CustomNavBarState();
@@ -21,7 +14,7 @@ Widget customNavBarPreview() {
 }
 
 class _CustomNavBarState extends State<CustomNavBar> {
-  int _internalSelectedIndex = 0;
+  int _selectedIndex = 0;
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
   final Color _navBarColor = const Color(0xFF38553A);
@@ -29,21 +22,14 @@ class _CustomNavBarState extends State<CustomNavBar> {
   final double _shoulder = 28.0;
   final double _gap = 6.0;
   final Duration _anim = const Duration(milliseconds: 520);
+
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
     {'icon': Icons.explore, 'label': 'Explorar'},
     {'icon': Icons.person, 'label': 'Perfil'},
   ];
 
-  int get _selectedIndex => widget.selectedIndex ?? _internalSelectedIndex;
-
-  void _onItemTapped(int index) {
-    if (widget.onItemTapped != null) {
-      widget.onItemTapped!(index);
-    } else {
-      setState(() => _internalSelectedIndex = index);
-    }
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +39,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double circleLeft =
         (itemWidth * _selectedIndex) + (itemWidth / 2) - (_circleSize / 2);
     final double circleTop = -navBarTopOffset + (_curveDepth - _gap);
+
     return SizedBox(
       height: _navBarHeight,
       child: Stack(
@@ -77,7 +64,6 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      // ignore: deprecated_member_use
                       color: Colors.black.withOpacity(0.2),
                       spreadRadius: 2,
                       blurRadius: 10,
@@ -131,29 +117,39 @@ class _CustomNavBarState extends State<CustomNavBar> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: List.generate(_items.length, (index) {
                 final bool isSelected = _selectedIndex == index;
-                return GestureDetector(
-                  onTap: () => _onItemTapped(index),
-                  child: SizedBox(
-                    width: itemWidth,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (!isSelected)
-                          Icon(
-                            _items[index]['icon'],
-                            color: Colors.white70,
-                            size: 22,
-                          ),
-                        SizedBox(height: isSelected ? 38 : 8),
-                        Text(
-                          _items[index]['label'],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.white70,
-                            fontSize: 12,
-                          ),
+                return SizedBox(
+                  width: itemWidth,
+                  height: 80,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _onItemTapped(index),
+                      splashColor: Colors.white.withOpacity(0.1),
+                      highlightColor: Colors.white.withOpacity(0.15),
+                      child: AnimatedScale(
+                        scale: isSelected ? 1.0 : 0.95,
+                        duration: const Duration(milliseconds: 150),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!isSelected)
+                              Icon(
+                                _items[index]['icon'],
+                                color: Colors.white70,
+                                size: 22,
+                              ),
+                            SizedBox(height: isSelected ? 38 : 8),
+                            Text(
+                              _items[index]['label'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 );
@@ -166,13 +162,14 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
-// Clipper
+// Clipper para o recorte do fundo
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;
   final int selectedIndex;
   final double curveDepth;
   final double shoulder;
+
   NavBarClipper({
     required this.circleSize,
     required this.itemWidth,
@@ -180,6 +177,7 @@ class NavBarClipper extends CustomClipper<Path> {
     required this.curveDepth,
     required this.shoulder,
   });
+
   @override
   Path getClip(Size size) {
     final Path path = Path();
@@ -187,6 +185,7 @@ class NavBarClipper extends CustomClipper<Path> {
     final double notchRadius = circleSize / 2;
     final double startX = notchCenterX - notchRadius - shoulder;
     final double endX = notchCenterX + notchRadius + shoulder;
+
     path.moveTo(0, 0);
     path.lineTo(startX, 0);
     path.cubicTo(
@@ -222,9 +221,10 @@ class NavBarClipper extends CustomClipper<Path> {
   }
 }
 
-/// ================== Preview (Chamar Classe na Main)  ==================
+/// Preview 
 class CustomNavBarTest extends StatelessWidget {
   const CustomNavBarTest({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
