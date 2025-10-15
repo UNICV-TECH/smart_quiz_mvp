@@ -64,7 +64,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha:0.2),
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 5),
@@ -124,8 +124,8 @@ class _CustomNavBarState extends State<CustomNavBar> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => _onItemTapped(index),
-                      splashColor: Colors.white.withOpacity(0.1),
-                      highlightColor: Colors.white.withOpacity(0.15),
+                      splashColor: Colors.white.withValues(alpha:0.1),
+                      highlightColor: Colors.white.withValues(alpha:0.15),
                       child: AnimatedScale(
                         scale: isSelected ? 1.0 : 0.95,
                         duration: const Duration(milliseconds: 150),
