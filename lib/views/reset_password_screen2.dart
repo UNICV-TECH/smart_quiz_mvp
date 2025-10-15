@@ -79,6 +79,7 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
     });
 
     // Mostra modal de sucesso, fecha após 2s e redireciona para login
+    if (!mounted) return;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
