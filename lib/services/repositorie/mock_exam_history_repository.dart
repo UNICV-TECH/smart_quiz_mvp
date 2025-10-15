@@ -188,10 +188,9 @@ class MockExamHistoryRepository implements ExamHistoryRepository {
         )
     ];
   }
-  
+
   @override
   Future loadExamHistory() {
-    // TODO: implement loadExamHistory
     throw UnimplementedError();
   }
 }
