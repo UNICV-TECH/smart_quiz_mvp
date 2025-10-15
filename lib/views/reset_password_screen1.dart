@@ -90,21 +90,21 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
       return;
     }
 
-    // Sucesso: mostra modal e redireciona após 3 segundos
-    await showDialog<void>(
+    // Sucesso: mostra modal, fecha após 3s e redireciona para login
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('E-mail enviado'),
-        content: const Text('Link de recuperação enviado com sucesso!'),
-        actions: const [],
+      builder: (dialogContext) => const AlertDialog(
+        title: Text('E-mail enviado'),
+        content: Text('Link de recuperação enviado com sucesso!'),
       ),
     );
 
-    // Fecha o modal e navega para login após delay
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
+    // Aguarda 3 segundos, fecha o modal e navega para login se ainda estiver montado
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    Navigator.of(context).pop(); // fecha o dialog
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

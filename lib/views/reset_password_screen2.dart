@@ -78,21 +78,20 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
       _isLoading = false;
     });
 
-    // Mostra modal de sucesso
-    await showDialog<void>(
+    // Mostra modal de sucesso, fecha após 2s e redireciona para login
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Senha alterada'),
-        content: const Text('Senha alterada com sucesso!'),
-        actions: const [],
+      builder: (dialogContext) => const AlertDialog(
+        title: Text('Senha alterada'),
+        content: Text('Senha alterada com sucesso!'),
       ),
     );
 
-    // Redireciona para login após 2 segundos
-    Timer(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
