@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
 import 'views/splash_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/signup_screen.dart';
@@ -32,6 +34,8 @@ class MyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeScreen(),
         '/signup': (context) => const SignupScreen(),
         '/login': (context) => const LoginScreen(),
+        '/reset_password': (context) => const ResetPasswordScreen1(),
+        '/reset_password2': (context) => const ResetPasswordScreen2(),
         '/main': (context) => const MainNavigationScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/help': (context) => const HelpScreen(),
