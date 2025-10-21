@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/signup_view_model.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
@@ -22,8 +23,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _acceptedTerms = false;
 
-  final viewModel = SignUpViewModel();
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -34,16 +33,46 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _handleSignup() {
-    // Lógica de cadastro será implementada aqui
-    // Por enquanto, apenas navega para tela de login
+  Future<void> _handleSignup() async {
+    final viewModel = context.read<SignUpViewModel>();
+    viewModel.clearFeedback();
+
     if (!viewModel.isInputsValid(formKey: _formKey)) {
       return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    final result = await viewModel.submitSignup(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      acceptedTerms: _acceptedTerms,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (result.success) {
+      final message = viewModel.successMessage ??
+          'Conta criada com sucesso! Verifique seu e-mail.';
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+
+      if (!result.needsEmailConfirmation) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } else if (viewModel.errorMessage != null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(viewModel.errorMessage!)),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<SignUpViewModel>();
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -159,6 +188,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                 if (value == null || value.isEmpty) {
                                   return 'Por favor, insira seu email';
                                 }
+                                final emailRegex =
+                                    RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                if (!emailRegex.hasMatch(value)) {
+                                  return 'Informe um e-mail válido';
+                                }
                                 return null;
                               },
                             ),
@@ -173,6 +207,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                 if (value == null || value.isEmpty) {
                                   return 'Por favor, insira sua senha';
                                 }
+                                if (value.length < 6) {
+                                  return 'Sua senha deve ter ao menos 6 caracteres';
+                                }
                                 return null;
                               },
                             ),
@@ -185,7 +222,10 @@ class _SignupScreenState extends State<SignupScreen> {
                               labelText: AppStrings.confirmPasswordLabel,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Por favor, insira sua senha';
+                                  return 'Por favor, confirme sua senha';
+                                }
+                                if (value != _passwordController.text) {
+                                  return 'As senhas não conferem';
                                 }
                                 return null;
                               },
@@ -257,9 +297,39 @@ class _SignupScreenState extends State<SignupScreen> {
 
                             // Botão Cadastrar
                             DefaultButtonOrange(
-                              texto: AppStrings.signupButton,
-                              onPressed: _handleSignup,
+                              texto: viewModel.isLoading
+                                  ? 'Cadastrando...'
+                                  : AppStrings.signupButton,
+                              tipo: viewModel.isLoading
+                                  ? BotaoTipo.desabilitado
+                                  : BotaoTipo.primario,
+                              onPressed:
+                                  viewModel.isLoading ? null : _handleSignup,
                             ),
+
+                            if (viewModel.errorMessage != null) ...[
+                              const SizedBox(height: 16),
+                              Text(
+                                viewModel.errorMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+
+                            if (viewModel.successMessage != null) ...[
+                              const SizedBox(height: 16),
+                              Text(
+                                viewModel.successMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.green,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
 
                             const SizedBox(height: 20),
 
