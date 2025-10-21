@@ -26,4 +26,16 @@ class AppStrings {
   static const String dontHaveAccount = 'Não tem conta?';
   static const String signupLink = 'Cadastre-se';
   static const String forgotPassword = 'Esqueceu a senha?';
+
+  // Tela de Perfil
+  static const String profileTitle = 'Perfil';
+  static const String editProfile = 'Editar';
+  static const String help = 'Ajuda';
+  static const String about = 'Sobre';
+
+  // Tela de Ajuda
+  static const String helpTitle = 'Ajuda';
+
+  // Tela de Sobre
+  static const String aboutTitle = 'Sobre';
 }

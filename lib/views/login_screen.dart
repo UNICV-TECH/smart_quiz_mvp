@@ -25,8 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     // Lógica de login será implementada aqui
-    // Por enquanto, apenas navega para home
-    Navigator.pushReplacementNamed(context, '/home');
+    // Navega para tela principal com navbar
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   @override
@@ -57,134 +57,137 @@ class _LoginScreenState extends State<LoginScreen> {
                 constraints: BoxConstraints(
                   minHeight: size.height - MediaQuery.of(context).padding.top,
                 ),
-                child: Column(
-                  children: [
-                    // Logo a 42px do topo
-                    const SizedBox(height: 42),
-                    Center(
-                      child: Image.asset(
-                        'assets/images/logo.webp',
-                        width: 256,
-                        height: 93,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // Container branco com formulário
-                    Container(
-                      width: size.width,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 26.0, vertical: 40.0),
-                      decoration: const BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(207),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      // Logo a 42px do topo
+                      const SizedBox(height: 42),
+                      Center(
+                        child: Image.asset(
+                          'assets/images/logo.webp',
+                          width: 256,
+                          height: 93,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Título
-                          Center(
-                            child: Text(
-                              AppStrings.loginTitle,
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontSize: 40,
-                                fontFamily: 'Open Sans',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+
+                      const Spacer(),
+
+                      // Container branco com formulário
+                      Container(
+                        width: size.width,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 26.0, vertical: 40.0),
+                        decoration: const BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(207),
                           ),
-
-                          const SizedBox(height: 30),
-
-                          // Campo E-mail
-                          ComponenteInput(
-                            controller: _emailController,
-                            labelText: AppStrings.emailLabel,
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Campo Senha
-                          ComponentePasswordInput(
-                            controller: _passwordController,
-                            labelText: AppStrings.passwordLabel,
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Esqueceu a senha
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                              onTap: () {
-                                // Navegar para recuperação de senha
-                              },
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Título
+                            Center(
                               child: Text(
-                                AppStrings.forgotPassword,
+                                AppStrings.loginTitle,
                                 style: TextStyle(
-                                  color: AppColors.orange,
-                                  fontSize: 14,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.green,
+                                  fontSize: 40,
+                                  fontFamily: 'Open Sans',
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          ),
 
-                          const SizedBox(height: 30),
+                            const SizedBox(height: 30),
 
-                          // Botão Login
-                          DefaultButtonOrange(
-                            texto: AppStrings.loginButton,
-                            onPressed: _handleLogin,
-                          ),
+                            // Campo E-mail
+                            ComponenteInput(
+                              controller: _emailController,
+                              labelText: AppStrings.emailLabel,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
 
-                          const SizedBox(height: 20),
+                            const SizedBox(height: 20),
 
-                          // Link para Cadastro
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  AppStrings.dontHaveAccount,
+                            // Campo Senha
+                            ComponentePasswordInput(
+                              controller: _passwordController,
+                              labelText: AppStrings.passwordLabel,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // Esqueceu a senha
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/reset_password');
+                                },
+                                child: Text(
+                                  AppStrings.forgotPassword,
                                   style: TextStyle(
-                                    color: AppColors.secondaryDark,
+                                    color: AppColors.orange,
                                     fontSize: 14,
                                     fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(width: 5),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushReplacementNamed(
-                                        context, '/signup');
-                                  },
-                                  child: Text(
-                                    AppStrings.signupLink,
+                              ),
+                            ),
+
+                            const SizedBox(height: 30),
+
+                            // Botão Login
+                            DefaultButtonOrange(
+                              texto: AppStrings.loginButton,
+                              onPressed: _handleLogin,
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Link para Cadastro
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    AppStrings.dontHaveAccount,
                                     style: TextStyle(
-                                      color: AppColors.orange,
+                                      color: AppColors.secondaryDark,
                                       fontSize: 14,
                                       fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 5),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacementNamed(
+                                          context, '/signup');
+                                    },
+                                    child: Text(
+                                      AppStrings.signupLink,
+                                      style: TextStyle(
+                                        color: AppColors.orange,
+                                        fontSize: 14,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
 
-                          const SizedBox(height: 20),
-                        ],
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

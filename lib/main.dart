@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/splash_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/signup_screen.dart';
 import 'views/login_screen.dart';
+import 'views/profile_screen.dart';
+import 'views/main_navigation_screen.dart';
+import 'views/help_screen.dart';
+import 'views/about_screen.dart';
 import 'ui/theme/app_color.dart';
 import 'constants/supabase_options.dart';
 import 'repositories/auth_repository.dart';
@@ -79,6 +85,12 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/home': (context) =>
               const Scaffold(body: Center(child: Text('Tela Principal'))),
+          '/reset_password': (context) => const ResetPasswordScreen1(),
+          '/reset_password2': (context) => const ResetPasswordScreen2(),
+          '/main': (context) => const MainNavigationScreen(),
+          '/profile': (context) => const ProfileScreen(),
+          '/help': (context) => const HelpScreen(),
+          '/about': (context) => const AboutScreen(),
         },
       ),
     );
