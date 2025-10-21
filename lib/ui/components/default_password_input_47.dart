@@ -86,7 +86,6 @@ class ComponentePasswordInput extends StatefulWidget {
   final String? errorMessage;
   final ValueChanged<String>? onChanged;
   final double width;
-  final double height;
   final Color backgroundColor;
   final Color borderColor;
   final Color borderColorFocus;
@@ -105,7 +104,6 @@ class ComponentePasswordInput extends StatefulWidget {
     this.errorMessage,
     this.onChanged,
     this.width = double.infinity,
-    this.height = 49.0,
     this.backgroundColor = AppColors.greenChart,
     this.borderColor = AppColors.transparent,
     this.borderColorFocus = AppColors.greenChart,
@@ -179,7 +177,6 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
         // Campo de Texto
         SizedBox(
           width: widget.width,
-          height: widget.height,
           child: TextFormField(
             validator: widget.validator,
             controller: widget.controller,
@@ -201,7 +198,10 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
               focusedErrorBorder: errorBorder,
               errorText: widget.errorMessage,
               errorStyle: const TextStyle(
-                  height: 0.1, color: AppColors.transparent, fontSize: 0),
+                color: AppColors.borderColorError,
+                fontSize: 12,
+                height: 1.0,
+              ),
               // Ícone para alternar a visibilidade da senha
               suffixIcon: IconButton(
                 icon: Icon(

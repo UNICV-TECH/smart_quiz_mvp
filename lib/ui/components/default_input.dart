@@ -94,7 +94,6 @@ class ComponenteInput extends StatelessWidget {
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
   final double width;
-  final double height;
   final Color backgroundColor;
   final Color borderColor;
   final Color borderColorFocus;
@@ -114,7 +113,6 @@ class ComponenteInput extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.onChanged,
     this.width = double.infinity,
-    this.height = 49.0, // Altura padrão para o campo
     this.backgroundColor = AppColors.greenChart,
     this.borderColor = AppColors.transparent,
     this.borderColorFocus = AppColors.borderColorFocus,
@@ -172,7 +170,6 @@ class ComponenteInput extends StatelessWidget {
         // Campo de Texto
         SizedBox(
           width: width,
-          height: height,
           child: TextFormField(
             validator: validator,
             controller: controller,
@@ -191,11 +188,12 @@ class ComponenteInput extends StatelessWidget {
               errorBorder: errorBorder,
               focusedErrorBorder: errorBorder,
               // Exibe a mensagem de erro abaixo do campo (padrão do Flutter)
-              // Se quiser um comportamento diferente, pode deixar `errorText` nulo
-              // e controlar a exibição do erro fora do componente.
               errorText: errorMessage,
               errorStyle: const TextStyle(
-                  height: 0.1, color: AppColors.transparent, fontSize: 0),
+                color: AppColors.borderColorError,
+                fontSize: 12,
+                height: 1.0,
+              ),
             ),
           ),
         ),

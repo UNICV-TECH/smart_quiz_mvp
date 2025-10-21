@@ -35,7 +35,7 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await _client.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': name},
+        // data: {'full_name': name},
       );
 
       return AuthRepositorySignUpResponse(
