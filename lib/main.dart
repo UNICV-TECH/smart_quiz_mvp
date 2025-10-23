@@ -16,6 +16,7 @@ import 'ui/theme/app_color.dart';
 import 'constants/supabase_options.dart';
 import 'repositories/auth_repository.dart';
 import 'services/auth_service.dart';
+import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
 
 Future<void> main() async {
@@ -84,7 +85,12 @@ class MyApp extends StatelessWidget {
                 ),
                 child: const SignupScreen(),
               ),
-          '/login': (context) => const LoginScreen(),
+          '/login': (context) => ChangeNotifierProvider(
+                create: (context) => LoginViewModel(
+                  authService: context.read<AuthService>(),
+                ),
+                child: const LoginScreen(),
+              ),
           '/home': (context) =>
               const Scaffold(body: Center(child: Text('Tela Principal'))),
           '/reset_password': (context) => const ResetPasswordScreen1(),

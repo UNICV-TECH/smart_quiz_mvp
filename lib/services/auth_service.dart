@@ -1,16 +1,6 @@
+import '../models/auth_result.dart';
+import '../models/auth_user.dart';
 import '../repositories/auth_repository.dart';
-
-class SignUpResult {
-  const SignUpResult({
-    required this.success,
-    this.needsEmailConfirmation = false,
-    this.message,
-  });
-
-  final bool success;
-  final bool needsEmailConfirmation;
-  final String? message;
-}
 
 class AuthService {
   AuthService({required AuthRepository repository}) : _repository = repository;
@@ -47,6 +37,43 @@ class AuthService {
       return const SignUpResult(
         success: false,
         message: 'Não foi possível concluir o cadastro. Tente novamente.',
+      );
+    }
+  }
+
+  Future<SignInResult> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _repository.signIn(
+        email: email,
+        password: password,
+      );
+
+      final user = AuthUser(
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+      );
+
+      return SignInResult(
+        success: true,
+        user: user,
+      );
+    } on AuthRepositoryException catch (error) {
+      final requiresConfirmation =
+          error.code == AuthRepositoryErrorCode.emailNotConfirmed;
+
+      return SignInResult(
+        success: false,
+        requiresEmailConfirmation: requiresConfirmation,
+        message: error.message,
+      );
+    } catch (_) {
+      return const SignInResult(
+        success: false,
+        message: 'Não foi possível concluir o login. Tente novamente.',
       );
     }
   }
