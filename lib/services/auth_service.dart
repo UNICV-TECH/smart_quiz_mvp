@@ -1,6 +1,7 @@
 import '../models/auth_result.dart';
 import '../models/auth_user.dart';
-import '../repositories/auth_repository.dart';
+import '../repositories/auth/auth_repository.dart';
+import '../repositories/auth/auth_repository_types.dart';
 
 class AuthService {
   AuthService({required AuthRepository repository}) : _repository = repository;
