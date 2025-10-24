@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_back.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-@Preview(name: 'Botão Voltar')
-Widget backButtonPreview() {
+
+// Preview atualizado para usar o nome correto da classe.
+@Preview(name: 'Botão Voltar (Seta)')
+Widget backArrowButtonPreview() { // Renomeado para clareza
   return Container(
     width: 150,
     height: 150,
-    color: AppColors.backgroundGradient1,
+    color: AppColors.backgroundGradient1, // Usando uma cor do seu tema
     alignment: Alignment.center,
-    child: DefaultButtonBack(
+    child: DefaultButtonArrowBack( // Usando o nome correto da classe
       onPressed: () {
-        debugPrint("Botão Voltar pressionado!");
+        debugPrint("Botão Voltar (Seta) pressionado!");
       },
     ),
   );
 }
 
-class DefaultButtonBack extends StatelessWidget {
+// Classe principal renomeada para DefaultButtonArrowBack
+class DefaultButtonArrowBack extends StatelessWidget { 
   /// A ação a ser executada quando o botão for pressionado.
   /// Geralmente será `() => Navigator.of(context).pop()`.
   final VoidCallback? onPressed;
@@ -28,7 +31,8 @@ class DefaultButtonBack extends StatelessWidget {
   /// A cor do ícone. O padrão é `AppColors.deepGreen`.
   final Color? iconColor;
 
-  const DefaultButtonBack({
+  // Construtor CORRIGIDO para usar o nome da classe DefaultButtonArrowBack
+  const DefaultButtonArrowBack({ 
     super.key,
     required this.onPressed,
     this.iconSize = 28.0,
@@ -38,15 +42,13 @@ class DefaultButtonBack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      // O tooltip melhora a acessibilidade, descrevendo a ação do botão.
       tooltip: 'Voltar',
-      // Define um raio para a animação de "splash" ao tocar.
       splashRadius: 24.0,
       icon: Icon(
-        // Ícone padrão do Material Design para "voltar" no iOS.
         Icons.arrow_back_ios_new_rounded,
         size: iconSize,
-        color: iconColor ?? AppColors.deepGreen,
+        // Usando AppColors.deepGreen se iconColor for nulo
+        color: iconColor ?? AppColors.deepGreen, 
       ),
       onPressed: onPressed,
     );
