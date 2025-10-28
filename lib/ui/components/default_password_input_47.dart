@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-
 const Size tamanhoPadraoPreview = Size(350, 150);
 
 // --- PREVIEWS PARA O NOVO COMPONENTE DE SENHA ---
@@ -27,7 +26,10 @@ Widget componentePasswordInputPadraoPreview() {
 }
 
 class Preview {
-  const Preview({required String name, required Size size, required Brightness brightness});
+  const Preview(
+      {required String name,
+      required Size size,
+      required Brightness brightness});
 }
 
 @Preview(
@@ -67,13 +69,12 @@ Widget componentePasswordInputVisivelPreview() {
           labelText: 'Senha',
           hintText: 'Digite sua senha',
           // Para o preview, podemos definir o estado inicial
-          initialObscureText: false, 
+          initialObscureText: false,
         ),
       ),
     ),
   );
 }
-
 
 // --- O NOVO COMPONENTE DE SENHA ---
 
@@ -85,7 +86,6 @@ class ComponentePasswordInput extends StatefulWidget {
   final String? errorMessage;
   final ValueChanged<String>? onChanged;
   final double width;
-  final double height;
   final Color backgroundColor;
   final Color borderColor;
   final Color borderColorFocus;
@@ -94,6 +94,7 @@ class ComponentePasswordInput extends StatefulWidget {
   final TextStyle textStyle;
   final TextStyle labelStyle;
   final bool initialObscureText; // Parâmetro adicional para previews
+  final String? Function(String?)? validator;
 
   const ComponentePasswordInput({
     super.key,
@@ -103,23 +104,25 @@ class ComponentePasswordInput extends StatefulWidget {
     this.errorMessage,
     this.onChanged,
     this.width = double.infinity,
-    this.height = 49.0,
     this.backgroundColor = AppColors.greenChart,
     this.borderColor = AppColors.transparent,
     this.borderColorFocus = AppColors.greenChart,
     this.borderColorError = AppColors.borderColorError,
     this.borderRadius = 15.0,
-    this.textStyle = const TextStyle(fontSize: 16, color: AppColors.primaryDark),
+    this.textStyle =
+        const TextStyle(fontSize: 16, color: AppColors.primaryDark),
     this.labelStyle = const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: AppColors.estiloLabel,
     ),
     this.initialObscureText = true, // Por padrão a senha começa oculta
+    this.validator,
   });
 
   @override
-  State<ComponentePasswordInput> createState() => _ComponentePasswordInputState();
+  State<ComponentePasswordInput> createState() =>
+      _ComponentePasswordInputState();
 }
 
 class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
@@ -137,7 +140,9 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(widget.borderRadius),
       borderSide: BorderSide(
-        color: widget.errorMessage != null ? widget.borderColorError : widget.borderColor,
+        color: widget.errorMessage != null
+            ? widget.borderColorError
+            : widget.borderColor,
         width: 1.0,
       ),
     );
@@ -172,8 +177,8 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
         // Campo de Texto
         SizedBox(
           width: widget.width,
-          height: widget.height,
           child: TextFormField(
+            validator: widget.validator,
             controller: widget.controller,
             onChanged: widget.onChanged,
             style: widget.textStyle,
@@ -181,7 +186,8 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
             keyboardType: TextInputType.visiblePassword,
             decoration: InputDecoration(
               hintText: widget.hintText,
-              hintStyle: widget.textStyle.copyWith(color: AppColors.estiloLabel),
+              hintStyle:
+                  widget.textStyle.copyWith(color: AppColors.estiloLabel),
               filled: true,
               fillColor: widget.backgroundColor,
               contentPadding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -191,7 +197,11 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
               errorBorder: errorBorder,
               focusedErrorBorder: errorBorder,
               errorText: widget.errorMessage,
-              errorStyle: const TextStyle(height: 0.1, color: AppColors.transparent, fontSize: 0),
+              errorStyle: const TextStyle(
+                color: AppColors.borderColorError,
+                fontSize: 12,
+                height: 1.0,
+              ),
               // Ícone para alternar a visibilidade da senha
               suffixIcon: IconButton(
                 icon: Icon(
