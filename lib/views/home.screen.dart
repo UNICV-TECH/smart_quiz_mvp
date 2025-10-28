@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
-import 'package:unicv_tech_mvp/ui/components/default_navbar.dart'; 
 import 'package:unicv_tech_mvp/ui/components/default_subject_card.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
@@ -14,20 +13,44 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _selectedCourseId;
-  int _navBarIndex = 0; 
 
   final List<Map<String, dynamic>> _courses = [
-    {'id': 'psicologia', 'title': 'Psicologia', 'icon': Icons.psychology_outlined},
-    {'id': 'ciencias_sociais', 'title': 'Ciências Sociais', 'icon': Icons.groups_outlined},
-    {'id': 'administracao', 'title': 'Administração', 'icon': Icons.business_center_outlined},
-    {'id': 'gestao_financeira', 'title': 'Gestão Finan.', 'icon': Icons.monetization_on_outlined},
+    {
+      'id': 'psicologia',
+      'title': 'Psicologia',
+      'icon': Icons.psychology_outlined
+    },
+    {
+      'id': 'ciencias_sociais',
+      'title': 'Ciências Sociais',
+      'icon': Icons.groups_outlined
+    },
+    {
+      'id': 'administracao',
+      'title': 'Administração',
+      'icon': Icons.business_center_outlined
+    },
+    {
+      'id': 'gestao_financeira',
+      'title': 'Gestão Finan.',
+      'icon': Icons.monetization_on_outlined
+    },
     {'id': 'pedagogia', 'title': 'Pedagogia', 'icon': Icons.school_outlined},
-    {'id': 'design_grafico', 'title': 'Design Gráfico', 'icon': Icons.palette_outlined},
+    {
+      'id': 'design_grafico',
+      'title': 'Design Gráfico',
+      'icon': Icons.palette_outlined
+    },
     {'id': 'direito', 'title': 'Direito', 'icon': Icons.gavel_outlined},
-    {'id': 'ciencias_contabeis', 'title': 'Ciências Contábeis', 'icon': Icons.calculate_outlined},
+    {
+      'id': 'ciencias_contabeis',
+      'title': 'Ciências Contábeis',
+      'icon': Icons.calculate_outlined
+    },
   ];
 
-  final String _logoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoUrl =
+      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 
   void _onCourseSelected(Map<String, dynamic> course) {
     if (!mounted) return;
@@ -42,68 +65,61 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      extendBody: true,
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset('assets/images/FundoWhiteHome.png', fit: BoxFit.cover),
+            child: Image.asset('assets/images/FundoWhiteHome.png',
+                fit: BoxFit.cover),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 33.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
-                              child: AppLogoWidget.network(
-                                size: AppLogoSize.small,
-                                logoPath: _logoUrl,
-                                semanticLabel: 'Logo UniCV',
-                              ),
-                            ),
-                          ),
-                          const AppText('Para qual prova', style: AppTextStyle.titleSmall, color: AppColors.primaryDark),
-                          const SizedBox(height: 1),
-                          AppText(
-                          'gostaria de se preparar?',
-                            style: AppTextStyle.subtitleMedium,
-                            color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
-                          ),
-                          const SizedBox(height: 35),
-                          Column(
-                            children: _courses.map((course) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: SubjectCard(
-                                  icon: Icon(course['icon'] as IconData, color: AppColors.green, size: 30),
-                                  title: course['title'] as String,
-                                  isSelected: _selectedCourseId == course['id'],
-                                  onTap: () => _onCourseSelected(course),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
+                        child: AppLogoWidget.network(
+                          size: AppLogoSize.small,
+                          logoPath: _logoUrl,
+                          semanticLabel: 'Logo UniCV',
+                        ),
                       ),
                     ),
-                  ),
+                    const AppText('Para qual prova',
+                        style: AppTextStyle.titleSmall,
+                        color: AppColors.primaryDark),
+                    const SizedBox(height: 1),
+                    AppText(
+                      'gostaria de se preparar?',
+                      style: AppTextStyle.subtitleMedium,
+                      color: AppColors.secondaryDark
+                          .withAlpha((0.8 * 255).round()),
+                    ),
+                    const SizedBox(height: 35),
+                    Column(
+                      children: _courses.map((course) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: SubjectCard(
+                            icon: Icon(course['icon'] as IconData,
+                                color: AppColors.green, size: 30),
+                            title: course['title'] as String,
+                            isSelected: _selectedCourseId == course['id'],
+                            onTap: () => _onCourseSelected(course),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 120), // Espaço para o navbar
+                  ],
                 ),
-                CustomNavBar(
-                  selectedIndex: _navBarIndex,
-                  onItemTapped: (index) {
-                    setState(() {
-                      _navBarIndex = index;
-                    });    
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -111,4 +127,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

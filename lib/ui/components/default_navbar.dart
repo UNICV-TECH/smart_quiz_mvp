@@ -10,13 +10,13 @@ class Preview extends StatelessWidget {
 }
 
 class CustomNavBar extends StatefulWidget {
-  final int? selectedIndex; 
-  final Function(int)? onItemTapped; 
+  final int? selectedIndex;
+  final Function(int)? onItemTapped;
 
   const CustomNavBar({
     super.key,
-    this.selectedIndex, 
-    this.onItemTapped, 
+    this.selectedIndex,
+    this.onItemTapped,
   });
 
   @override
@@ -24,7 +24,7 @@ class CustomNavBar extends StatefulWidget {
 }
 
 class _CustomNavBarState extends State<CustomNavBar> {
-  int _internalSelectedIndex = 0; 
+  int _internalSelectedIndex = 0;
 
   void _internalOnItemTapped(int index) {
     setState(() {
@@ -33,7 +33,8 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 
   int get _currentIndex => widget.selectedIndex ?? _internalSelectedIndex;
-  Function(int) get _currentOnTap => widget.onItemTapped ?? _internalOnItemTapped;
+  Function(int) get _currentOnTap =>
+      widget.onItemTapped ?? _internalOnItemTapped;
 
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
@@ -54,8 +55,9 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
 
-    final double circleLeft =
-        (itemWidth * _currentIndex) + (itemWidth / 2) - (_circleSize / 2); // Usar _currentIndex
+    final double circleLeft = (itemWidth * _currentIndex) +
+        (itemWidth / 2) -
+        (_circleSize / 2); // Usar _currentIndex
     final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
 
     return SizedBox(
@@ -135,7 +137,8 @@ class _CustomNavBarState extends State<CustomNavBar> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(_items.length, (index) {
-                  final bool isSelected = _currentIndex == index; // Usar _currentIndex
+                  final bool isSelected =
+                      _currentIndex == index; // Usar _currentIndex
                   return GestureDetector(
                     onTap: () => _currentOnTap(index), // Usar _currentOnTap
                     child: SizedBox(
@@ -184,7 +187,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
-// Classe NavBarClipper 
+// Classe NavBarClipper
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;
@@ -273,7 +276,6 @@ class _CustomNavBarTestState extends State<CustomNavBarTest> {
             const Center(child: Text('Conteúdo de teste')),
             Align(
               alignment: Alignment.bottomCenter,
-      
               child: CustomNavBar(
                 selectedIndex: _selectedIndex,
                 onItemTapped: _onItemTapped,

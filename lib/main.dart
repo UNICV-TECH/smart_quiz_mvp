@@ -42,8 +42,6 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpScreen(),
         '/about': (context) => const AboutScreen(),
         '/exam': (context) => const ExamScreen(),
-        '/home': (context) =>
-            const Scaffold(body: Center(child: Text('Tela Principal'))),
       },
     );
   }
