@@ -105,7 +105,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                         AppText(
                           'Alinhe ao seu tempo disponível!',
                           style: AppTextStyle.subtitleMedium,
-                          color: AppColors.secondaryDark.withOpacity(0.8),
+                          color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
                         ),
                         const SizedBox(height: 30),
                         SelectionBox(
