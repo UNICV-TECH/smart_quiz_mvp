@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
 // Classe Preview (sem alterações)
 class Preview extends StatelessWidget {
@@ -36,7 +37,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
 
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
-  final Color _navBarColor = const Color(0xFF38553A);
+  final Color _navBarColor = AppColors.greenNavBar;
   final double _curveDepth = 24.0;
   final double _shoulder = 28.0;
   final double _gap = 18.0; // Ajustado de volta, se necessário
@@ -80,7 +81,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   color: _navBarColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: AppColors.fosco,
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 5),
@@ -103,7 +104,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: AppColors.fosco,
                     blurRadius: 10,
                     spreadRadius: 2,
                     offset: const Offset(0, 5),
