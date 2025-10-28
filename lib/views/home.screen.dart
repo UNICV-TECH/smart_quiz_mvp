@@ -71,7 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const AppText('Para qual prova', style: AppTextStyle.titleSmall, color: AppColors.primaryDark),
                           const SizedBox(height: 1),
-                          AppText('gostaria de se preparar?', style: AppTextStyle.subtitleMedium, color: AppColors.secondaryDark.withOpacity(0.8)),
+                          AppText(
+                          'gostaria de se preparar?',
+                            style: AppTextStyle.subtitleMedium,
+                            color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+                          ),
                           const SizedBox(height: 35),
                           Column(
                             children: _courses.map((course) {
