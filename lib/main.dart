@@ -12,7 +12,6 @@ import 'views/profile_screen.dart';
 import 'views/main_navigation_screen.dart';
 import 'views/help_screen.dart';
 import 'views/about_screen.dart';
-import 'views/exam_screen.dart';
 import 'ui/theme/app_color.dart';
 import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
