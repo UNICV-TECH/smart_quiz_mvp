@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
+// Classe Preview 
 class Preview extends StatelessWidget {
   final String name;
   const Preview({super.key, required this.name});
@@ -8,13 +10,13 @@ class Preview extends StatelessWidget {
 }
 
 class CustomNavBar extends StatefulWidget {
-  final int selectedIndex;
-  final Function(int) onItemTapped;
+  final int? selectedIndex; 
+  final Function(int)? onItemTapped; 
 
   const CustomNavBar({
     super.key,
-    required this.selectedIndex, // Tornamos obrigatórios
-    required this.onItemTapped, // Tornamos obrigatórios
+    this.selectedIndex, 
+    this.onItemTapped, 
   });
 
   @override
@@ -22,13 +24,23 @@ class CustomNavBar extends StatefulWidget {
 }
 
 class _CustomNavBarState extends State<CustomNavBar> {
+  int _internalSelectedIndex = 0; 
+
+  void _internalOnItemTapped(int index) {
+    setState(() {
+      _internalSelectedIndex = index;
+    });
+  }
+
+  int get _currentIndex => widget.selectedIndex ?? _internalSelectedIndex;
+  Function(int) get _currentOnTap => widget.onItemTapped ?? _internalOnItemTapped;
 
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
-  final Color _navBarColor = const Color(0xFF38553A);
+  final Color _navBarColor = AppColors.greenNavBar;
   final double _curveDepth = 24.0;
   final double _shoulder = 28.0;
-  final double _gap = 18.0;
+  final double _gap = 18.0; // Ajustado de volta, se necessário
   final Duration _anim = const Duration(milliseconds: 520);
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
@@ -43,7 +55,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double navBarTopOffset = _circleSize / 2;
 
     final double circleLeft =
-        (itemWidth * widget.selectedIndex) + (itemWidth / 2) - (_circleSize / 2);
+        (itemWidth * _currentIndex) + (itemWidth / 2) - (_circleSize / 2); // Usar _currentIndex
     final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
 
     return SizedBox(
@@ -59,8 +71,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
               clipper: NavBarClipper(
                 circleSize: _circleSize,
                 itemWidth: itemWidth,
-                // --- ALTERAÇÃO 4: Usar "widget.selectedIndex" ---
-                selectedIndex: widget.selectedIndex,
+                selectedIndex: _currentIndex, // Usar _currentIndex
                 curveDepth: _curveDepth,
                 shoulder: _shoulder,
               ),
@@ -70,7 +81,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   color: _navBarColor,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2), // Isso está correto!
+                      color: AppColors.fosco,
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 5),
@@ -93,7 +104,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2), // Isso está correto!
+                    color: AppColors.fosco,
                     blurRadius: 10,
                     spreadRadius: 2,
                     offset: const Offset(0, 5),
@@ -106,8 +117,8 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   transitionBuilder: (child, anim) =>
                       FadeTransition(opacity: anim, child: child),
                   child: Icon(
-                    _items[widget.selectedIndex]['icon'],
-                    key: ValueKey(widget.selectedIndex), // Boa prática
+                    _items[_currentIndex]['icon'], // Usar _currentIndex
+                    key: ValueKey(_currentIndex),
                     color: Colors.white,
                     size: 28,
                   ),
@@ -124,10 +135,9 @@ class _CustomNavBarState extends State<CustomNavBar> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(_items.length, (index) {
-                  // --- ALTERAÇÃO 6: Usar "widget.selectedIndex" ---
-                  final bool isSelected = widget.selectedIndex == index;
+                  final bool isSelected = _currentIndex == index; // Usar _currentIndex
                   return GestureDetector(
-                    onTap: () => widget.onItemTapped(index),
+                    onTap: () => _currentOnTap(index), // Usar _currentOnTap
                     child: SizedBox(
                       width: itemWidth,
                       child: Column(
@@ -174,6 +184,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
+// Classe NavBarClipper 
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;
@@ -228,6 +239,8 @@ class NavBarClipper extends CustomClipper<Path> {
         oldClipper.shoulder != shoulder;
   }
 }
+
+// Preview Widget (sem alterações, ele já usava estado interno antes)
 @Preview(name: 'Custom NavBar')
 Widget customNavBarPreview() {
   return const CustomNavBarTest();
@@ -241,7 +254,6 @@ class CustomNavBarTest extends StatefulWidget {
 }
 
 class _CustomNavBarTestState extends State<CustomNavBarTest> {
-  // O estado agora vive aqui, no "pai" de preview
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -261,7 +273,7 @@ class _CustomNavBarTestState extends State<CustomNavBarTest> {
             const Center(child: Text('Conteúdo de teste')),
             Align(
               alignment: Alignment.bottomCenter,
-              // Passamos o estado para a NavBar
+      
               child: CustomNavBar(
                 selectedIndex: _selectedIndex,
                 onItemTapped: _onItemTapped,

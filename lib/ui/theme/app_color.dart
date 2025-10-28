@@ -77,4 +77,11 @@ class AppColors {
   static const Color webNeutral700 = Color(0xFF595959);
   static const Color webNeutral800 = Color(0xFF404040);
   static const Color webNeutral900 = Color(0xFF262626);
+
+  static const fosco = Color.fromRGBO(0, 0, 0, 0.2);
+
+  //navbar 
+  static const greenNavBar = Color(0xFF38553A);
+
+
 }
