@@ -9,6 +9,7 @@ import 'views/profile_screen.dart';
 import 'views/main_navigation_screen.dart';
 import 'views/help_screen.dart';
 import 'views/about_screen.dart';
+import 'views/exam_screen.dart';
 import 'ui/theme/app_color.dart';
 
 void main() {
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/help': (context) => const HelpScreen(),
         '/about': (context) => const AboutScreen(),
+        '/exam': (context) => const ExamScreen(),
         '/home': (context) =>
             const Scaffold(body: Center(child: Text('Tela Principal'))),
       },
