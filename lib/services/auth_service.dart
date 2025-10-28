@@ -7,6 +7,10 @@ class AuthService {
   AuthService({required AuthRepository repository}) : _repository = repository;
 
   final AuthRepository _repository;
+  AuthUser? _currentUser;
+
+  AuthUser? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null;
 
   Future<SignUpResult> signUp({
     required String email,
@@ -46,6 +50,8 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    _currentUser = null;
+
     try {
       final response = await _repository.signIn(
         email: email,
@@ -58,11 +64,21 @@ class AuthService {
         name: response.user.name,
       );
 
+      _currentUser = user;
+
+      final trimmedName = user.name?.trim();
+      final greetingMessage = (trimmedName != null && trimmedName.isNotEmpty)
+          ? 'Bem-vindo de volta, $trimmedName!'
+          : 'Bem-vindo de volta!';
+
       return SignInResult(
         success: true,
         user: user,
+        message: greetingMessage,
       );
     } on AuthRepositoryException catch (error) {
+      _currentUser = null;
+
       final requiresConfirmation =
           error.code == AuthRepositoryErrorCode.emailNotConfirmed;
 
@@ -72,6 +88,8 @@ class AuthService {
         message: error.message,
       );
     } catch (_) {
+      _currentUser = null;
+
       return const SignInResult(
         success: false,
         message: 'Não foi possível concluir o login. Tente novamente.',

@@ -76,7 +76,11 @@ class SupabaseAuthRepository implements AuthRepository {
     } on AuthException catch (error) {
       final normalizedMessage = error.message.toLowerCase();
       final errorCode = (error.code ?? '').toLowerCase();
-      final statusCode = error.statusCode;
+      final statusCodeRaw = error.statusCode;
+      final statusCode =
+          statusCodeRaw != null ? int.tryParse(statusCodeRaw) : null;
+      final isInvalidCredentialsStatusCode =
+          statusCode == 400 || statusCode == 401;
 
       if (errorCode == 'email_not_confirmed' ||
           normalizedMessage.contains('email not confirmed')) {
@@ -87,7 +91,7 @@ class SupabaseAuthRepository implements AuthRepository {
       }
 
       if (errorCode == 'invalid_credentials' ||
-          statusCode == '400' ||
+          isInvalidCredentialsStatusCode ||
           normalizedMessage.contains('invalid login credentials') ||
           normalizedMessage.contains('invalid login')) {
         throw const AuthRepositoryException(
