@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Substituí por uma anotação vazia para o código ser autônomo.
 class Preview extends StatelessWidget {
   final String name;
   const Preview({super.key, required this.name});
@@ -169,7 +168,6 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
-// Clipper (sem alterações)
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;
@@ -225,7 +223,7 @@ class NavBarClipper extends CustomClipper<Path> {
   }
 }
 
-/// ================== Preview (Chamar Classe na Main)  ==================
+/// ================== Preview ==================
 class CustomNavBarTest extends StatelessWidget {
   const CustomNavBarTest({super.key});
   @override
