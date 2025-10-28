@@ -12,6 +12,7 @@ import 'views/profile_screen.dart';
 import 'views/main_navigation_screen.dart';
 import 'views/help_screen.dart';
 import 'views/about_screen.dart';
+import 'views/exam_screen.dart';
 import 'ui/theme/app_color.dart';
 import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   AuthRepository authRepository;
   await dotenv.load(fileName: ".env");
 
+// <<<<<<< first-integration
   if (SupabaseOptions.isConfigured) {
     await Supabase.initialize(
       url: SupabaseOptions.url,
@@ -38,6 +40,34 @@ Future<void> main() async {
   } else {
     debugPrint(
       'Supabase credentials are missing. Signup features will be disabled until configured.',
+// =======
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'UniCV Tech',
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green),
+//         useMaterial3: true,
+//         fontFamily: 'Poppins',
+//       ),
+//       home: const SplashScreen(),
+//       routes: {
+//         '/splash': (context) => const SplashScreen(),
+//         '/welcome': (context) => const WelcomeScreen(),
+//         '/signup': (context) => const SignupScreen(),
+//         '/login': (context) => const LoginScreen(),
+//         '/reset_password': (context) => const ResetPasswordScreen1(),
+//         '/reset_password2': (context) => const ResetPasswordScreen2(),
+//         '/main': (context) => const MainNavigationScreen(),
+//         '/profile': (context) => const ProfileScreen(),
+//         '/help': (context) => const HelpScreen(),
+//         '/about': (context) => const AboutScreen(),
+//         '/exam': (context) => const ExamScreen(),
+//         '/home': (context) =>
+//             const Scaffold(body: Center(child: Text('Tela Principal'))),
+//       },
+// >>>>>>> main
     );
     authRepository = const DisabledAuthRepository();
   }
