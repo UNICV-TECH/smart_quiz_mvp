@@ -1,360 +1,440 @@
 # UI Components Inventory
 
-This document provides a comprehensive catalog of all 17 reusable UI components in the `lib/ui/components/` directory, organized by category with their properties, usage examples, and role in the application's test-taking flow.
+Comprehensive documentation of all UI components in the UniCV Tech MVP application, including their properties, usage examples, and role in the test-taking flow.
 
 ---
 
 ## Table of Contents
 
-1. [Navigation Components](#navigation-components)
-2. [Button Components](#button-components)
-3. [Input Components](#input-components)
-4. [Card Components](#card-components)
-5. [Display Components](#display-components)
-6. [Layout Components](#layout-components)
-7. [Component Usage Flow](#component-usage-flow)
+1. [Test-Taking Flow Overview](#test-taking-flow-overview)
+2. [Navigation Components](#navigation-components)
+3. [Button Components](#button-components)
+4. [Input Components](#input-components)
+5. [Selection Components](#selection-components)
+6. [Card Components](#card-components)
+7. [Display Components](#display-components)
+8. [Layout Components](#layout-components)
+
+---
+
+## Test-Taking Flow Overview
+
+The test-taking flow consists of three main screens:
+
+1. **HomeScreen** (`home.screen.dart`) - Subject selection
+2. **QuizConfigScreen** (`QuizConfig_screen.dart`) - Quiz configuration (question quantity)
+3. **ExamScreen** (`exam_screen.dart`) - Test execution and navigation
+
+### Flow Diagram
+
+```
+HomeScreen → QuizConfigScreen → ExamScreen
+   ↓              ↓                  ↓
+SubjectCard → SelectionBox → AlternativeSelectorVertical
+              DefaultButton    QuestionNavigation
+                               NavigationButtons
+```
 
 ---
 
 ## Navigation Components
 
-### 1. CustomNavBar
-**File:** `default_navbar.dart`
+### CustomNavBar
 
-**Description:** A custom bottom navigation bar with a unique curved design featuring an animated elevated circle that highlights the selected item.
+**File:** `lib/ui/components/default_navbar.dart`
 
-**Properties:**
-- `selectedIndex` (int?): The currently selected tab index (0-2)
-- `onItemTapped` (Function(int)?): Callback when a tab is tapped
+**Description:** Bottom navigation bar with animated circular indicator that follows the selected item. Features a curved notch effect around the active item.
 
-**Items:**
-- 0: Início (Home)
-- 1: Explorar (Explore)
-- 2: Perfil (Profile)
+#### Properties
 
-**Styling:**
-- Background Color: `AppColors.greenNavBar`
-- Height: 110px with 70px circular indicator
-- Animation Duration: 520ms with easeInOut curve
-- Custom clipper creates curved notch for selected item
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `selectedIndex` | `int?` | No | `null` | Currently selected tab index (0-based) |
+| `onItemTapped` | `Function(int)?` | No | `null` | Callback when a tab is tapped |
 
-**Usage in Flow:**
+#### Usage
+
 ```dart
 CustomNavBar(
   selectedIndex: _navBarIndex,
   onItemTapped: (index) {
-    setState(() { _navBarIndex = index; });
+    setState(() {
+      _navBarIndex = index;
+    });
+    if (index == 0) {
+      Navigator.popUntil(context, ModalRoute.withName('/home'));
+    }
   },
 )
 ```
 
-**Used in:**
-- `home.screen.dart` - Main navigation
-- `QuizConfig_screen.dart` - Quiz configuration navigation
+#### Test-Taking Flow Role
+
+- **Used in:** HomeScreen, QuizConfigScreen
+- **Purpose:** Global navigation between Home, Explore, and Profile sections
+- **Behavior:** In QuizConfigScreen, tapping "Início" returns to HomeScreen
 
 ---
 
-### 2. QuestionNavigation
-**File:** `default_question_navigation.dart`
+### QuestionNavigation
 
-**Description:** A horizontal scrollable navigation bar displaying numbered circles representing exam questions with visual feedback for answered/current/inactive states.
+**File:** `lib/ui/components/default_question_navigation.dart`
 
-**Properties:**
-- `totalQuestions` (int): Total number of questions in the exam
-- `currentQuestion` (int): Currently displayed question number (1-based)
-- `onQuestionSelected` (Function(int)): Callback when a question circle is tapped
-- `answeredQuestions` (Set<int>): Set of question numbers that have been answered
+**Description:** Horizontal scrollable question navigation bar displaying numbered circles for each question. Shows visual feedback for answered/current questions.
 
-**Visual States:**
-- **Current/Answered:** Green background (`AppColors.green`), white text
-- **Active (unanswered):** White background, green text, grey border
-- **Inactive:** Grey background and text
+#### Properties
 
-**Dimensions:**
-- Circle size: 40x40px
-- Spacing: 3px horizontal margin
-- Fixed count: 15 circles displayed
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `totalQuestions` | `int` | Yes | - | Total number of questions in the exam |
+| `currentQuestion` | `int` | Yes | - | Currently displayed question (1-based) |
+| `onQuestionSelected` | `Function(int)` | Yes | - | Callback when a question is tapped |
+| `answeredQuestions` | `Set<int>` | Yes | - | Set of answered question numbers |
 
-**Usage in Flow:**
+#### Visual States
+
+- **Current Question:** Green circle with white number
+- **Answered Question:** Green circle with white number
+- **Unanswered Active:** White circle with green number and grey border
+- **Inactive:** Grey circle with grey dash
+
+#### Usage
+
 ```dart
 QuestionNavigation(
   totalQuestions: exam.questions.length,
   currentQuestion: currentQuestionIndex + 1,
   onQuestionSelected: (questionNumber) {
-    setState(() { currentQuestionIndex = questionNumber - 1; });
+    setState(() {
+      currentQuestionIndex = questionNumber - 1;
+    });
   },
   answeredQuestions: selectedAnswers.keys.toSet(),
 )
 ```
 
-**Used in:**
-- `exam_screen.dart` - Question navigation during exam
+#### Test-Taking Flow Role
+
+- **Used in:** ExamScreen
+- **Purpose:** Quick navigation between exam questions
+- **Behavior:** Displays up to 15 questions, auto-scrolls to current question
 
 ---
 
 ## Button Components
 
-### 3. DefaultButtonOrange
-**File:** `default_button_orange.dart`
+### DefaultButtonOrange
 
-**Description:** Primary action button with orange background, used for main CTAs throughout the application.
+**File:** `lib/ui/components/default_button_orange.dart`
 
-**Properties:**
-- `texto` (String): Button text
-- `icone` (IconData?): Optional leading icon
-- `onPressed` (VoidCallback?): Action callback
-- `corFundo` (Color?): Custom background color
-- `corTexto` (Color?): Custom text color
-- `altura` (double): Button height (default: 67.0)
-- `largura` (double): Button width (default: double.infinity)
-- `tipo` (BotaoTipo): Button type enum
+**Description:** Primary action button with orange background. Supports three visual states: primary, secondary, and disabled.
 
-**Button Types:**
-- `BotaoTipo.primario`: Orange background (RGB 239, 153, 45)
-- `BotaoTipo.secundario`: Darker orange (RGB 220, 155, 60)
-- `BotaoTipo.desabilitado`: Grey background, disabled state
+#### Properties
 
-**Styling:**
-- Border radius: 19px
-- Font size: 20px, bold
-- Full width by default
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `texto` | `String` | Yes | - | Button text |
+| `onPressed` | `VoidCallback?` | Yes | - | Tap callback |
+| `icone` | `IconData?` | No | `null` | Optional leading icon |
+| `tipo` | `BotaoTipo` | No | `primario` | Button type (primario/secundario/desabilitado) |
+| `corFundo` | `Color?` | No | Per type | Custom background color |
+| `corTexto` | `Color?` | No | Per type | Custom text color |
+| `altura` | `double` | No | `67.0` | Button height |
+| `largura` | `double` | No | `infinity` | Button width |
 
-**Usage in Flow:**
+#### Button Types
+
+- **primario:** Orange background (#EF992D), white text
+- **secundario:** Lighter orange (#DC9B3C), white text  
+- **desabilitado:** Grey background, grey text, non-interactive
+
+#### Usage
+
 ```dart
 DefaultButtonOrange(
   texto: 'Iniciar',
-  onPressed: _startQuiz,
-  tipo: BotaoTipo.primario,
+  onPressed: isButtonEnabled ? _startQuiz : null,
+  tipo: isButtonEnabled ? BotaoTipo.primario : BotaoTipo.desabilitado,
 )
 ```
 
-**Used in:**
-- `QuizConfig_screen.dart` - "Iniciar" button to start quiz
-- `default_exam_history_accordion.dart` - "Expandir" and "Tentar novamente" buttons
+#### Test-Taking Flow Role
+
+- **Used in:** QuizConfigScreen ("Iniciar" button), ExamHistoryAccordion ("Expandir" button)
+- **Purpose:** Primary action to start quiz or expand exam details
+- **Behavior:** Disabled until required selections are made
 
 ---
 
-### 4. DefaultButtonArrowBack
-**File:** `default_button_arrow_back.dart`
+### DefaultButtonBack
 
-**Description:** Icon-only back button with iOS-style arrow, typically used in top-left navigation.
+**File:** `lib/ui/components/default_button_back.dart`
 
-**Properties:**
-- `onPressed` (VoidCallback?): Action callback (usually `Navigator.pop`)
-- `iconSize` (double): Icon size (default: 28.0)
-- `iconColor` (Color?): Icon color (default: `AppColors.deepGreen`)
+**Description:** Text button with left arrow icon for backward navigation in exam.
 
-**Styling:**
-- Icon: `Icons.arrow_back_ios_new_rounded`
-- Splash radius: 24px
-- Tooltip: "Voltar"
+#### Properties
 
-**Usage in Flow:**
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `text` | `String` | Yes | - | Button text (e.g., "Anterior") |
+| `onPressed` | `VoidCallback` | Yes | - | Tap callback |
+| `icon` | `IconData?` | No | `null` | Optional leading icon |
+| `fontSize` | `double` | No | `14` | Text font size |
+
+#### Usage
+
+```dart
+DefaultButtonBack(
+  text: 'Anterior',
+  icon: Icons.arrow_back_ios,
+  onPressed: () {
+    if (currentQuestionIndex > 0) {
+      setState(() {
+        currentQuestionIndex--;
+      });
+    }
+  },
+)
+```
+
+#### Test-Taking Flow Role
+
+- **Used in:** ExamScreen
+- **Purpose:** Navigate to previous question
+- **Behavior:** Hidden on first question, decrements question index
+
+---
+
+### DefaultButtonForward
+
+**File:** `lib/ui/components/default_button_forward.dart`
+
+**Description:** Text button with right arrow icon for forward navigation in exam.
+
+#### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `text` | `String` | Yes | - | Button text (e.g., "Próxima", "Finalizar") |
+| `onPressed` | `VoidCallback` | Yes | - | Tap callback |
+| `icon` | `IconData?` | No | `null` | Optional trailing icon |
+| `fontSize` | `double` | No | `14` | Text font size |
+
+#### Usage
+
+```dart
+DefaultButtonForward(
+  text: isLastQuestion ? 'Finalizar' : 'Próxima',
+  icon: Icons.arrow_forward_ios,
+  onPressed: () {
+    if (isLastQuestion) {
+      _showFinishDialog();
+    } else {
+      setState(() {
+        currentQuestionIndex++;
+      });
+    }
+  },
+)
+```
+
+#### Test-Taking Flow Role
+
+- **Used in:** ExamScreen
+- **Purpose:** Navigate to next question or finish exam
+- **Behavior:** Text changes to "Finalizar" on last question
+
+---
+
+### DefaultButtonArrowBack
+
+**File:** `lib/ui/components/default_button_arrow_back.dart`
+
+**Description:** Icon-only back button with arrow icon, used for screen-level navigation.
+
+#### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `onPressed` | `VoidCallback?` | Yes | - | Tap callback (typically Navigator.pop) |
+| `iconSize` | `double` | No | `28.0` | Icon size |
+| `iconColor` | `Color?` | No | `deepGreen` | Icon color |
+
+#### Usage
+
 ```dart
 DefaultButtonArrowBack(
   onPressed: () => Navigator.of(context).pop(),
 )
 ```
 
-**Used in:**
-- `QuizConfig_screen.dart` - Back navigation
-- `exam_screen.dart` - Exit exam navigation
+#### Test-Taking Flow Role
 
----
-
-### 5. DefaultButtonBack
-**File:** `default_button_back.dart`
-
-**Description:** Text button with icon for "Previous" navigation in multi-step flows.
-
-**Properties:**
-- `text` (String): Button label (e.g., "Anterior")
-- `onPressed` (VoidCallback): Action callback
-- `icon` (IconData?): Optional leading icon
-- `fontSize` (double): Text size (default: 14)
-
-**Styling:**
-- Icon color: `AppColors.primaryDark`
-- Text color: `AppColors.webNeutral800`
-- Font weight: w600, size: 16
-
-**Usage in Flow:**
-```dart
-DefaultButtonBack(
-  text: 'Anterior',
-  icon: Icons.arrow_back_ios,
-  onPressed: () {
-    setState(() { currentQuestionIndex--; });
-  },
-)
-```
-
-**Used in:**
-- `exam_screen.dart` - Navigate to previous question
-
----
-
-### 6. DefaultButtonForward
-**File:** `default_button_forward.dart`
-
-**Description:** Text button with trailing icon for "Next/Finish" navigation in multi-step flows.
-
-**Properties:**
-- `text` (String): Button label (e.g., "Próxima", "Finalizar")
-- `onPressed` (VoidCallback): Action callback
-- `icon` (IconData?): Optional trailing icon
-- `fontSize` (double): Text size (default: 14)
-
-**Styling:**
-- Text and icon color: `AppColors.primaryDark`
-- Font weight: w600, size: 16
-- Icon positioned after text
-
-**Usage in Flow:**
-```dart
-DefaultButtonForward(
-  text: isLastQuestion ? 'Finalizar' : 'Próxima',
-  icon: Icons.arrow_forward_ios,
-  onPressed: _handleNext,
-)
-```
-
-**Used in:**
-- `exam_screen.dart` - Navigate to next question or finish exam
+- **Used in:** QuizConfigScreen, ExamScreen
+- **Purpose:** Return to previous screen
+- **Behavior:** Pops current route from navigation stack
 
 ---
 
 ## Input Components
 
-### 7. ComponenteInput
-**File:** `default_input.dart`
+### ComponenteInput
 
-**Description:** Standard text input field with label, hint text, and validation support.
+**File:** `lib/ui/components/default_input.dart`
 
-**Properties:**
-- `controller` (TextEditingController?): Text controller
-- `labelText` (String): Field label above input
-- `hintText` (String): Placeholder text (default: '')
-- `errorMessage` (String?): Validation error message
-- `keyboardType` (TextInputType): Keyboard type (default: text)
-- `onChanged` (ValueChanged<String>?): Change callback
-- `validator` (String? Function(String?)?): Validation function
-- `width` (double): Field width (default: double.infinity)
-- `backgroundColor` (Color): Background color (default: `AppColors.greenChart`)
-- `borderColor`, `borderColorFocus`, `borderColorError` (Color): Border colors
-- `borderRadius` (double): Corner radius (default: 15.0)
-- `textStyle`, `labelStyle` (TextStyle): Text styling
+**Description:** Standard text input field with label, hint text, and error state support.
 
-**Styling:**
-- Label: Bold 18px, color `AppColors.estiloLabel`
-- Input: 16px, color `AppColors.primaryDark`
-- Padding: 20px horizontal
-- Error text: 12px, red color
+#### Properties
 
-**Usage Example:**
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `controller` | `TextEditingController?` | No | `null` | Text editing controller |
+| `labelText` | `String` | Yes | - | Field label |
+| `hintText` | `String` | No | `''` | Placeholder text |
+| `errorMessage` | `String?` | No | `null` | Error message to display |
+| `keyboardType` | `TextInputType` | No | `text` | Keyboard type |
+| `onChanged` | `ValueChanged<String>?` | No | `null` | Text change callback |
+| `validator` | `String? Function(String?)?` | No | `null` | Form validator |
+| `width` | `double` | No | `infinity` | Input width |
+| `backgroundColor` | `Color` | No | `greenChart` | Background fill color |
+| `borderColor` | `Color` | No | `transparent` | Default border color |
+| `borderColorFocus` | `Color` | No | `borderColorFocus` | Focused border color |
+| `borderColorError` | `Color` | No | `borderColorError` | Error border color |
+| `borderRadius` | `double` | No | `15.0` | Border radius |
+| `textStyle` | `TextStyle` | No | 16px primaryDark | Input text style |
+| `labelStyle` | `TextStyle` | No | 18px bold | Label text style |
+
+#### Usage
+
 ```dart
 ComponenteInput(
   labelText: 'E-mail',
   hintText: 'exemplo@email.com',
+  controller: _emailController,
   keyboardType: TextInputType.emailAddress,
-  validator: _validateEmail,
+  errorMessage: _emailError,
+  onChanged: (value) {
+    setState(() {
+      _emailError = _validateEmail(value);
+    });
+  },
 )
 ```
 
+#### Test-Taking Flow Role
+
+- **Used in:** Login, signup, and profile screens (not directly in test flow)
+- **Purpose:** Collect user text input
+
 ---
 
-### 8. ComponentePasswordInput
-**File:** `default_password_input_47.dart`
+### ComponentePasswordInput
 
-**Description:** Password input field with visibility toggle icon, inheriting ComponenteInput styling.
+**File:** `lib/ui/components/default_password_input_47.dart`
 
-**Properties:**
-- Same as ComponenteInput, plus:
-- `initialObscureText` (bool): Initial visibility state (default: true)
+**Description:** Password input field with visibility toggle. Extends ComponenteInput with obscureText functionality.
 
-**Features:**
-- Toggle icon: `Icons.visibility` / `Icons.visibility_off`
-- Suffix icon button to toggle password visibility
-- State management for obscureText property
-- KeyboardType: `TextInputType.visiblePassword`
+#### Properties
 
-**Usage Example:**
+Inherits all properties from `ComponenteInput`, plus:
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `initialObscureText` | `bool` | No | `true` | Initial visibility state |
+
+#### Features
+
+- Toggle icon (eye/eye-off) in suffix position
+- Automatic keyboard type: `visiblePassword`
+- Maintains obscured state locally
+
+#### Usage
+
 ```dart
 ComponentePasswordInput(
   labelText: 'Senha',
   hintText: 'Digite sua senha',
+  controller: _passwordController,
   errorMessage: _passwordError,
 )
 ```
 
+#### Test-Taking Flow Role
+
+- **Used in:** Login and signup screens (authentication, not test flow)
+- **Purpose:** Secure password entry
+
 ---
 
-### 9. SelectionBox
-**File:** `default_chekbox.dart`
+## Selection Components
 
-**Description:** Custom checkbox list for single-selection from multiple options, used for quiz configuration.
+### SelectionBox
 
-**Properties:**
-- `options` (List<String>): List of option texts
-- `onOptionSelected` (ValueChanged<String>): Selection callback
-- `initialOption` (String?): Initially selected option
+**File:** `lib/ui/components/default_chekbox.dart`
 
-**Visual States:**
+**Description:** Single-choice selection list with checkmark indicators. Used for selecting from multiple options.
+
+#### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `options` | `List<String>` | Yes | - | List of selectable options |
+| `onOptionSelected` | `ValueChanged<String>` | Yes | - | Selection callback |
+| `initialOption` | `String?` | No | `null` | Initially selected option |
+
+#### Visual States
+
 - **Selected:** Green checkmark in green box, bold green text
-- **Unselected:** Empty grey-bordered box, normal grey text
+- **Unselected:** Transparent box with grey border, normal grey text
 
-**Styling:**
-- Checkbox size: 24.07x24.07px
-- Border radius: 8px
-- Spacing: 12px between checkbox and text
-- Font: Montserrat, 16px
+#### Usage
 
-**Usage in Flow:**
 ```dart
 SelectionBox(
   options: ['5', '10', '15', '20'],
   initialOption: _selectedQuantity,
   onOptionSelected: (quantity) {
-    setState(() { _selectedQuantity = quantity; });
+    setState(() {
+      _selectedQuantity = quantity;
+    });
   },
 )
 ```
 
-**Used in:**
-- `QuizConfig_screen.dart` - Select number of questions (5, 10, 15, 20)
+#### Test-Taking Flow Role
+
+- **Used in:** QuizConfigScreen
+- **Purpose:** Select number of questions for the quiz
+- **Behavior:** Enables start button when selection is made
 
 ---
 
-### 10. AlternativeSelectorVertical
-**File:** `default_radio_group.dart`
+### AlternativeSelectorVertical
 
-**Description:** Vertical radio button group for multiple-choice question alternatives (A, B, C, D, E).
+**File:** `lib/ui/components/default_radio_group.dart`
 
-**Properties:**
-- `labels` (List<String>): Alternative text options
-- `selectedOption` (String?): Currently selected option letter
-- `onChanged` (Function(String)): Selection callback
+**Description:** Radio button group for exam question alternatives. Displays options with letter labels (A, B, C, etc.).
 
-**Features:**
-- Automatically generates letters A-E based on list length
-- Circular button with letter inside
-- Tappable row including text
+#### Properties
 
-**Visual States:**
-- **Selected:** Green circle (`AppColors.green`)
-- **Unselected:** Grey circle (`AppColors.webNeutral400`)
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `labels` | `List<String>` | Yes | - | Alternative text labels |
+| `selectedOption` | `String?` | Yes | - | Currently selected letter (A, B, C...) |
+| `onChanged` | `Function(String)` | Yes | - | Selection callback with letter |
 
-**Styling:**
-- Circle size: 36x36px
-- Text color: Always white
-- Spacing: 12px between circle and text
-- Vertical padding: 6px
+#### Features
 
-**Usage in Flow:**
+- Auto-generates letter labels (A, B, C, D, E...)
+- Circular indicators with letters
+- Selected: green circle, Unselected: grey circle
+
+#### Usage
+
 ```dart
 AlternativeSelectorVertical(
   labels: currentQuestion.alternatives,
-  selectedOption: currentAnswer,
+  selectedOption: selectedAnswers[currentQuestion.id],
   onChanged: (option) {
     setState(() {
       selectedAnswers[currentQuestion.id] = option;
@@ -363,491 +443,438 @@ AlternativeSelectorVertical(
 )
 ```
 
-**Used in:**
-- `exam_screen.dart` - Select answer for each question
+#### Test-Taking Flow Role
+
+- **Used in:** ExamScreen
+- **Purpose:** Select answer for current question
+- **Behavior:** Stores selection in map by question ID
 
 ---
 
 ## Card Components
 
-### 11. SubjectCard
-**File:** `default_subject_card.dart`
+### SubjectCard
 
-**Description:** Interactive card for displaying and selecting academic subjects/courses with icon and title.
+**File:** `lib/ui/components/default_subject_card.dart`
 
-**Properties:**
-- `icon` (Widget): Subject icon widget
-- `title` (String): Subject name
-- `onTap` (VoidCallback?): Selection callback
-- `isSelected` (bool): Selection state (default: false)
-- `borderRadius` (double): Corner radius (default: 20)
-- `padding` (EdgeInsetsGeometry): Internal padding (default: 20h, 18v)
+**Description:** Selectable card representing a subject/course. Features hover effects and selection state.
 
-**Visual States:**
-- **Selected:** White background, green border (1.4px), green text, stronger shadow
-- **Hover:** Same as selected
-- **Default:** Light grey background, grey border (1px), dark text, subtle shadow
+#### Properties
 
-**Styling:**
-- Icon size: 44x44px container
-- Font: 16px, weight w500/w600
-- Border radius: 20px
-- Animated transitions: 180ms easeOutCubic
-- Box shadow with hover/selection enhancement
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `icon` | `Widget` | Yes | - | Subject icon (usually Icon widget) |
+| `title` | `String` | Yes | - | Subject name |
+| `onTap` | `VoidCallback?` | No | `null` | Tap callback |
+| `isSelected` | `bool` | No | `false` | Selection state |
+| `borderRadius` | `double` | No | `20` | Card corner radius |
+| `padding` | `EdgeInsetsGeometry` | No | `20h, 18v` | Internal padding |
 
-**Usage in Flow:**
+#### Visual States
+
+- **Selected:** White background, green border (1.4px), green icon and text
+- **Hover:** Same as selected but without green text
+- **Default:** Light grey background, light border (1px), dark text
+
+#### Usage
+
 ```dart
 SubjectCard(
   icon: Icon(Icons.psychology_outlined, color: AppColors.green, size: 30),
   title: 'Psicologia',
   isSelected: _selectedCourseId == 'psicologia',
-  onTap: () => _onCourseSelected(course),
+  onTap: () => _onCourseSelected(courseData),
 )
 ```
 
-**Used in:**
-- `home.screen.dart` - Select subject for exam (8 subjects displayed)
+#### Additional Components
+
+- **SubjectCardData:** Data model for subject information
+- **SubjectCardList:** ListView wrapper for multiple SubjectCards
+
+#### Test-Taking Flow Role
+
+- **Used in:** HomeScreen
+- **Purpose:** Select subject for quiz
+- **Behavior:** Selection required to proceed to QuizConfigScreen
 
 ---
 
-### 12. UserProfileCard
-**File:** `default_user_profile_card.dart`
+### UserProfileCard
 
-**Description:** Profile card with avatar, editable name, email, and inline editing functionality.
+**File:** `lib/ui/components/default_user_profile_card.dart`
 
-**Properties:**
-- `userName` (String): User's display name
-- `userEmail` (String): User's email address
-- `profileImageUrl` (String?): Optional profile image URL
-- `onNameUpdate` (Future<bool> Function(String)?): Async name update callback
-- `onShowFeedback` (void Function(String, {bool isError})?): Feedback callback
-- `padding`, `margin` (EdgeInsets): Card spacing
-- `backgroundColor` (Color): Card background (default: white)
-- `borderRadius` (double): Corner radius (default: 12.0)
+**Description:** User profile display with editable name field. Shows avatar, name, and email.
 
-**Features:**
-- Editable name field with inline edit/cancel buttons
-- Loading state during name update
-- Default avatar icon fallback
-- Error handling with image loading
-- Keyboard support (Enter key to save)
+#### Properties
 
-**Visual Elements:**
-- Avatar: 60x60px circle with green border
-- Edit icon: 16px green
-- Check/close buttons: 32x32px constraints
-- Name: 18px bold
-- Email: 14px regular grey
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `userName` | `String` | Yes | - | User's display name |
+| `userEmail` | `String` | Yes | - | User's email address |
+| `profileImageUrl` | `String?` | No | `null` | Profile image URL |
+| `onNameUpdate` | `Future<bool> Function(String)?` | No | `null` | Name update handler |
+| `onShowFeedback` | `void Function(String, {bool})?` | No | `null` | Feedback message handler |
+| `padding` | `EdgeInsets` | No | `16 all` | Card padding |
+| `margin` | `EdgeInsets` | No | `zero` | Card margin |
+| `backgroundColor` | `Color` | No | `white` | Background color |
+| `borderRadius` | `double` | No | `12.0` | Corner radius |
 
-**Usage Example:**
+#### Features
+
+- Inline name editing with confirm/cancel buttons
+- Loading state during save
+- Circular avatar with fallback icon
+- Network image support with error handling
+
+#### Usage
+
 ```dart
 UserProfileCard(
-  userName: "João Silva",
-  userEmail: "joao.silva@gmail.com",
+  userName: _currentUser.name,
+  userEmail: _currentUser.email,
+  profileImageUrl: _currentUser.avatarUrl,
   onNameUpdate: (newName) async {
-    // API call to update name
-    return true;
+    return await _userService.updateName(newName);
   },
   onShowFeedback: (message, {isError = false}) {
-    // Show snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   },
 )
 ```
 
+#### Test-Taking Flow Role
+
+- **Used in:** Profile screen (not directly in test flow)
+- **Purpose:** Display and edit user profile information
+
 ---
 
-### 13. DefaultScorecard
-**File:** `default_scoreCard.dart`
+### DefaultScorecard
 
-**Description:** Simple card displaying an icon with a numerical score, used for statistics display.
+**File:** `lib/ui/components/default_scoreCard.dart`
 
-**Properties:**
-- `icon` (IconData): Score icon
-- `score` (int): Numerical score value
-- `iconColor` (Color?): Icon color
-- `scoreColor` (Color?): Score text color
-- `backgroundColor` (Color?): Card background (default: white)
-- `borderColor` (Color?): Border color (default: grey)
-- `width`, `height` (double?): Dimensions (height default: 80)
-- `padding`, `margin` (EdgeInsets?): Spacing
-- `iconSize` (double?): Icon size (default: 32, clamped 24-40)
-- `fontSize` (double?): Score font size (auto-calculated from icon size)
-- `onTap` (VoidCallback?): Optional tap callback
+**Description:** Card component displaying an icon with a numeric score value.
 
-**Styling:**
-- Border radius: 12px
-- Border width: 1px
-- Elevation: 0
-- Icon and score in horizontal row with 16px spacing
-- Font weight: Bold
+#### Properties
 
-**Usage Example:**
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `icon` | `IconData` | Yes | - | Score category icon |
+| `score` | `int` | Yes | - | Numeric score value |
+| `iconColor` | `Color?` | No | `grey[600]` | Icon color |
+| `scoreColor` | `Color?` | No | `grey[800]` | Score text color |
+| `backgroundColor` | `Color?` | No | `white` | Card background |
+| `borderColor` | `Color?` | No | `grey[300]` | Border color |
+| `width` | `double?` | No | `null` | Card width |
+| `height` | `double?` | No | `80` | Card height |
+| `padding` | `EdgeInsets?` | No | `16h, 12v` | Internal padding |
+| `margin` | `EdgeInsets?` | No | `8h, 4v` | External margin |
+| `iconSize` | `double?` | No | `32.0` | Icon size (24-40 range) |
+| `fontSize` | `double?` | No | Auto | Score font size |
+| `onTap` | `VoidCallback?` | No | `null` | Tap callback |
+
+#### Usage
+
 ```dart
 DefaultScorecard(
-  icon: Icons.check_circle_outline,
+  icon: Icons.check_circle,
   score: 85,
   iconColor: AppColors.green,
   scoreColor: AppColors.primaryDark,
 )
 ```
 
+#### Test-Taking Flow Role
+
+- **Used in:** Results/statistics screens
+- **Purpose:** Display test scores and metrics
+
 ---
 
 ## Display Components
 
-### 14. AppLogoWidget
-**File:** `default_Logo.dart`
+### AppLogoWidget
 
-**Description:** Responsive logo widget supporting both local assets and network images with size presets.
+**File:** `lib/ui/components/default_Logo.dart`
 
-**Factories:**
-- `AppLogoWidget.asset()`: Load from local assets
-- `AppLogoWidget.network()`: Load from network URL
+**Description:** Responsive logo image component supporting both local assets and network URLs.
 
-**Properties:**
-- `size` (AppLogoSize): Predefined size enum
-- `logoPath` (String): Image path or URL
-- `semanticLabel` (String): Accessibility label (default: 'Logo do aplicativo')
+#### Properties
 
-**Size Presets (relative to screen width):**
-- `AppLogoSize.small`: 24% of screen width
-- `AppLogoSize.medium`: 65% of screen width
-- `AppLogoSize.large`: 92% of screen width
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `size` | `AppLogoSize` | Yes | - | Logo size (small/medium/large) |
+| `logoPath` | `String` | Yes | - | Path to logo (asset or URL) |
+| `semanticLabel` | `String` | No | 'Logo do aplicativo' | Accessibility label |
 
-**Features:**
-- Automatic error handling with placeholder icon
-- Responsive sizing based on screen dimensions
-- BoxFit.contain for aspect ratio preservation
+#### Size Options
 
-**Usage in Flow:**
+- **small:** 24% of screen width
+- **medium:** 65% of screen width
+- **large:** 92% of screen width
+
+#### Constructors
+
+- `AppLogoWidget.asset()` - For local asset images
+- `AppLogoWidget.network()` - For network/Supabase images
+
+#### Usage
+
 ```dart
+// Network image
 AppLogoWidget.network(
   size: AppLogoSize.small,
-  logoPath: 'https://...supabase.../LogoFundoClaro.png',
+  logoPath: 'https://example.com/logo.png',
   semanticLabel: 'Logo UniCV',
 )
-```
 
-**Used in:**
-- `home.screen.dart` - Header logo
-- `QuizConfig_screen.dart` - Header logo
-- `exam_screen.dart` - Header logo
-
----
-
-### 15. AppText
-**File:** `ui/theme/string_text.dart`
-
-**Description:** Reusable text component with predefined style system and optional click handling.
-
-**Constructors:**
-- `AppText(String)`: Single-style text
-- `AppText.rich(TextSpan)`: Multi-style rich text
-
-**Properties:**
-- `data` (String?): Text content (for single-style)
-- `textSpan` (TextSpan?): Rich text content
-- `style` (AppTextStyle): Predefined style enum
-- `color` (Color?): Text color override
-- `textAlign` (TextAlign?): Text alignment
-- `onPressed` (VoidCallback?): Makes text tappable
-
-**Style Presets:**
-- `titleLarge`: 56px bold
-- `titleMedium`: 40px bold
-- `titleSmall`: 20px bold
-- `subtitleMedium`: 16px regular
-- `subtitleSmall`: 15px regular
-
-**Features:**
-- Google Fonts Montserrat integration
-- Automatic padding for clickable text (2px)
-- InkWell ripple effect when tappable
-
-**Usage in Flow:**
-```dart
-AppText(
-  'Para qual prova',
-  style: AppTextStyle.titleSmall,
-  color: AppColors.primaryDark,
-)
-
-AppText.rich(
-  TextSpan(
-    children: [
-      TextSpan(text: 'Texto com uma '),
-      TextSpan(
-        text: 'palavra importante',
-        style: TextStyle(fontWeight: FontWeight.w900),
-      ),
-    ],
-  ),
-  style: AppTextStyle.subtitleMedium,
+// Asset image
+AppLogoWidget.asset(
+  size: AppLogoSize.medium,
+  logoPath: 'assets/images/logo_color.png',
 )
 ```
 
-**Used in:**
-- `home.screen.dart` - Headings and descriptions
-- `QuizConfig_screen.dart` - Titles and instructions
+#### Test-Taking Flow Role
+
+- **Used in:** HomeScreen, QuizConfigScreen, ExamScreen
+- **Purpose:** Brand consistency across all screens
+- **Behavior:** Responsive sizing, error fallback icon
 
 ---
 
-## Layout Components
+### DefaultAccordion
 
-### 16. DefaultAccordion
-**File:** `default_accordion.dart`
+**File:** `lib/ui/components/default_accordion.dart`
 
-**Description:** Expandable accordion item with icon, title, and collapsible content.
+**Description:** Expandable/collapsible accordion with title, content, and optional icon.
 
-**Properties:**
-- `title` (String): Accordion header text
-- `content` (String): Expandable content text
-- `icon` (IconData?): Optional leading icon
-- `titleColor` (Color?): Title text color (default: `AppColors.primaryDark`)
-- `contentColor` (Color?): Content text color (default: `AppColors.secondaryDark`)
-- `backgroundColor` (Color?): Card background (default: white)
-- `iconColor` (Color?): Icon and expand arrow color (default: `AppColors.green`)
+#### Properties
 
-**Styling:**
-- Border radius: 15px
-- Box shadow: 6px blur, offset (0, 2)
-- Title: 16px, Poppins, w600
-- Content: 14px, Poppins, line-height 1.5
-- Icon container: 10px padding, 10px border radius
-- Padding: 20h, 8v (tile) / 20h, 20v (content)
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `title` | `String` | Yes | - | Accordion title |
+| `content` | `String` | Yes | - | Expandable content text |
+| `icon` | `IconData?` | No | `null` | Leading icon |
+| `titleColor` | `Color?` | No | `primaryDark` | Title text color |
+| `contentColor` | `Color?` | No | `secondaryDark` | Content text color |
+| `backgroundColor` | `Color?` | No | `white` | Card background |
+| `iconColor` | `Color?` | No | `green` | Icon color |
 
-**Features:**
-- ExpansionTile with custom theme
-- Icon with colored background
-- No divider color (transparent)
-- Left-aligned content text
+#### Features
 
-**Usage Example:**
+- Rounded corners (15px)
+- Shadow effect
+- Icon in colored circular background
+- Smooth expand/collapse animation
+
+#### Usage
+
 ```dart
 DefaultAccordion(
-  title: 'Resultados',
-  content: 'Aqui você pode ver seus resultados...',
-  icon: Icons.assessment_outlined,
+  title: 'Sobre o Aplicativo',
+  content: 'Este aplicativo foi desenvolvido para...',
+  icon: Icons.info_outline,
 )
 ```
 
+#### Test-Taking Flow Role
+
+- **Used in:** Help, About screens
+- **Purpose:** Display collapsible information sections
+
 ---
 
-### 17. ExamHistoryAccordion
-**File:** `default_exam_history_accordion.dart`
+### ExamHistoryAccordion
 
-**Description:** Complex accordion component displaying exam history by subject with nested attempt details, timelines, and expansion controls.
+**File:** `lib/ui/components/default_exam_history_accordion.dart`
 
-**Properties:**
-- `service` (ExamHistoryRepository): Data service
-- `iconByKey` (Map<String, IconData>): Subject icon mapping
-- `onExpandExam` (Function(SubjectExamHistory, ExamAttempt)?): Expand callback
+**Description:** Complex accordion component for displaying exam history with detailed statistics and question timeline.
 
-**Architecture:**
-- Uses Provider pattern with `ExamHistoryViewModel`
-- Nested components: `_SubjectHistoryTile`, `_SubjectTotals`, `_AttemptBlock`, `_QuestionTimeline`
+#### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `service` | `ExamHistoryRepository` | Yes | - | Data repository |
+| `iconByKey` | `Map<String, IconData>` | No | `{}` | Icon mapping by subject key |
+| `onExpandExam` | `Function(subject, attempt)?` | No | `null` | Exam expansion callback |
+
+#### Features
+
+- Integrates with `ExamHistoryViewModel`
+- Displays per-subject statistics (total exams, questions, correct answers)
+- Individual attempt cards with date and duration
+- Question timeline with color-coded dots:
+  - **Green:** Correct answer
+  - **Red:** Incorrect answer
+  - **Transparent with border:** Unanswered
 - Loading, error, and empty states
+- "Expandir" button to view full exam details
 
-**Visual Structure:**
+#### Data Models
 
-**Subject Tile (collapsed):**
-- 54x54px icon container with border
-- Subject name with "Prova " prefix
-- Animated circular expand button (32x32px)
-- Padding: 16h, 18v
+- `SubjectExamHistory`: Subject-level aggregated data
+- `ExamAttempt`: Individual exam attempt data
+- `QuestionOutcome`: Enum (correct/incorrect/unanswered)
 
-**Expanded Content:**
-- Subject totals (total exams, questions, correct answers)
-- List of exam attempts with dividers
-- Each attempt shows:
-  - Date (DD/MM/YY format)
-  - Duration (minutes and seconds)
-  - Question timeline (circles colored by outcome)
-  - "Expandir" button
+#### Usage
 
-**Question Timeline:**
-- Circular indicators (28x28px) for each question
-- Color coding:
-  - **Correct:** Green background (#3F8B3A)
-  - **Incorrect:** Red background (#D9503F)
-  - **Unanswered:** Transparent with grey border
-
-**Styling:**
-- Gradient background: Light green to beige
-- Deep green (#2F4A2B) for primary text
-- Accent green (#3A6B3F) for highlights
-- Card fill: #EFF4EA
-- Border radius: 20px throughout
-- Animation: 250ms easeInOut for expansion
-
-**Usage Example:**
 ```dart
 ExamHistoryAccordion(
-  service: examHistoryRepository,
+  service: ExamHistoryRepository(),
   iconByKey: {
     'psicologia': Icons.psychology_outlined,
     'direito': Icons.gavel_outlined,
   },
   onExpandExam: (subject, attempt) {
-    // Navigate to detailed exam review
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ExamDetailScreen(
+          subject: subject,
+          attempt: attempt,
+        ),
+      ),
+    );
   },
 )
 ```
 
----
+#### Test-Taking Flow Role
 
-## Component Usage Flow
-
-### Test-Taking Journey
-
-#### 1. Home Screen (`home.screen.dart`)
-**Components Used:**
-- `AppLogoWidget` - Branding in header
-- `AppText` - Headings and descriptions
-- `SubjectCard` - Subject selection (8 cards)
-- `CustomNavBar` - Bottom navigation
-
-**Flow:**
-```
-User lands → Views logo → Reads "Para qual prova gostaria de se preparar?" 
-→ Scrolls through SubjectCards → Selects subject (card highlights) 
-→ Navigates using CustomNavBar or card action
-```
+- **Used in:** History/Results screen
+- **Purpose:** Review past exam performance
+- **Behavior:** Loads exam history from repository, displays statistics
 
 ---
 
-#### 2. Quiz Configuration Screen (`QuizConfig_screen.dart`)
-**Components Used:**
-- `AppLogoWidget` - Consistent header branding
-- `DefaultButtonArrowBack` - Back navigation
-- `AppText` - Instructions ("Escolha a quantidade de questões")
-- `SelectionBox` - Question count selection (5, 10, 15, 20)
-- `DefaultButtonOrange` - "Iniciar" CTA
-- `CustomNavBar` - Bottom navigation
+## Layout Components
 
-**Flow:**
+### ItemConfiguracao
+
+**File:** `lib/ui/components/default_config.dart`
+
+**Description:** List item component for configuration/settings menus with icon, text, and arrow.
+
+#### Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `icone` | `IconData` | Yes | - | Leading icon |
+| `texto` | `String` | Yes | - | Item text |
+| `onTap` | `VoidCallback` | Yes | - | Tap callback |
+| `corIcone` | `Color?` | No | `webNeutral700` | Icon color |
+| `corTexto` | `Color?` | No | `primaryDark` | Text color |
+| `corSeta` | `Color?` | No | `webNeutral700` | Arrow color |
+| `corDivider` | `Color?` | No | `webNeutral200` | Divider color |
+| `padding` | `EdgeInsets?` | No | `16h, 16v` | Item padding |
+| `tamanhoIcone` | `double?` | No | `24.0` | Icon size |
+| `tamanhoFonte` | `double?` | No | `16.0` | Font size |
+
+#### Features
+
+- Divider line below each item
+- Trailing arrow icon
+- InkWell tap effect
+
+#### Usage
+
+```dart
+ItemConfiguracao(
+  icone: Icons.help_outline,
+  texto: 'Ajuda',
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => HelpScreen()),
+    );
+  },
+)
 ```
-User enters from subject selection → Sees back button (DefaultButtonArrowBack) 
-→ Reads instructions (AppText) → Selects question count (SelectionBox) 
-→ Button becomes enabled (orange) → Clicks "Iniciar" (DefaultButtonOrange) 
-→ Navigates to exam or uses CustomNavBar to switch views
-```
+
+#### Test-Taking Flow Role
+
+- **Used in:** Profile/Settings screen
+- **Purpose:** Navigation to configuration screens
 
 ---
 
-#### 3. Exam Screen (`exam_screen.dart`)
-**Components Used:**
-- `AppLogoWidget` - Branding consistency
-- `DefaultButtonArrowBack` - Exit exam
-- `QuestionNavigation` - Question tracker (15 circles)
-- `AlternativeSelectorVertical` - Answer selection (A-E)
-- `DefaultButtonBack` - Previous question
-- `DefaultButtonForward` - Next question / Finish
+## Component Summary by Screen
 
-**Flow:**
-```
-User starts exam → Sees logo + back button → Question tracker shows progress 
-→ Reads question enunciation → Selects answer (AlternativeSelectorVertical) 
-→ Question circle turns green in QuestionNavigation 
-→ Clicks "Próxima" (DefaultButtonForward) → Moves through questions 
-→ Can jump to any question via QuestionNavigation 
-→ Can go back with "Anterior" (DefaultButtonBack) 
-→ Last question shows "Finalizar" → Confirmation dialog → Submits exam
-```
+### HomeScreen Components
 
----
+1. **AppLogoWidget** - Branding
+2. **SubjectCard** - Subject selection (multiple instances)
+3. **CustomNavBar** - Bottom navigation
 
-#### 4. Profile/Settings Screens (Inferred)
-**Components Used:**
-- `UserProfileCard` - User info with editable name
-- `DefaultScorecard` - Statistics display
-- `ItemConfiguracao` - Settings menu items
-- `DefaultAccordion` - FAQ or help sections
-- `ExamHistoryAccordion` - Historical exam results
+### QuizConfigScreen Components
 
-**Flow:**
-```
-User navigates via CustomNavBar → Views profile (UserProfileCard) 
-→ Edits name inline → Views scores (DefaultScorecard) 
-→ Browses settings (ItemConfiguracao) → Expands history (ExamHistoryAccordion) 
-→ Views past attempts with question-by-question breakdown 
-→ Expands individual exams for review
-```
+1. **AppLogoWidget** - Branding
+2. **DefaultButtonArrowBack** - Back navigation
+3. **SelectionBox** - Question quantity selection
+4. **DefaultButtonOrange** - "Iniciar" action
+5. **CustomNavBar** - Bottom navigation
+
+### ExamScreen Components
+
+1. **AppLogoWidget** - Branding
+2. **DefaultButtonArrowBack** - Back navigation
+3. **QuestionNavigation** - Question progress indicator
+4. **AlternativeSelectorVertical** - Answer selection
+5. **DefaultButtonBack** - Previous question
+6. **DefaultButtonForward** - Next question / Finish
 
 ---
 
 ## Design System Notes
 
-### Color Palette
-- **Primary Green:** `AppColors.green` - Used for selections, CTAs, success states
-- **Primary Dark:** `AppColors.primaryDark` - Main text color
-- **Secondary Dark:** `AppColors.secondaryDark` - Secondary text
-- **Orange:** Used in `DefaultButtonOrange` for primary actions
-- **Neutrals:** `AppColors.webNeutral` series for borders, backgrounds
+### Color Scheme
+
+- **Primary Green:** `AppColors.green` - Used for selected states, primary actions
+- **Deep Green:** `AppColors.deepGreen` - Text, icons
+- **Orange:** `AppColors.orange` - Primary action buttons
+- **Grey Shades:** Various neutral colors for borders, backgrounds
 
 ### Typography
-- **Font Family:** Montserrat (via Google Fonts) for AppText
-- **Hierarchy:**
-  - Titles: 56px, 40px, 20px (bold)
-  - Body: 16px, 15px (regular)
-  - Labels: 18px bold, 14px regular
+
+- **Title:** Bold, 18-20px
+- **Subtitle:** Medium weight, 14-16px
+- **Body:** Regular, 14-16px
+- **Font Family:** Poppins (primary), Montserrat (selection components)
 
 ### Spacing
-- **Horizontal Padding:** 33px (home), 24px (exam)
-- **Vertical Spacing:** 16-35px between sections
-- **Component Padding:** 16-20px internal
 
-### Interaction Patterns
-- **Selection:** Green highlight with border change
-- **Hover:** Subtle shadow enhancement, color shift
-- **Disabled:** Grey colors, no interaction
-- **Loading:** CircularProgressIndicator with theme color
-- **Navigation:** Consistent back buttons, forward progression
+- **Screen Padding:** 24-33px horizontal
+- **Card Padding:** 16-20px horizontal, 12-18px vertical
+- **Component Spacing:** 12-16px between elements
 
-### Accessibility
-- **Semantic Labels:** All logos and icons have labels
-- **Touch Targets:** Minimum 44x44px (mobile best practice)
-- **Color Contrast:** Dark text on light backgrounds
-- **Visual Feedback:** Clear selection states, hover effects
-- **Error States:** Explicit error messages with color coding
+### Border Radius
 
----
-
-## Component Dependencies
-
-### External Packages
-- `google_fonts` - Montserrat font in AppText, SelectionBox
-- `provider` - State management in ExamHistoryAccordion
-
-### Internal Dependencies
-- `ui/theme/app_color.dart` - All components use AppColors
-- `ui/theme/string_text.dart` - AppText component
-- `models/exam_history.dart` - ExamHistoryAccordion data models
-- `services/repositorie/exam_history_repository.dart` - ExamHistoryAccordion service
-- `viewmodels/exam_history_view_model.dart` - ExamHistoryAccordion ViewModel
+- **Cards:** 15-20px
+- **Buttons:** 15-19px
+- **Inputs:** 15px
 
 ---
 
 ## Best Practices
 
-### Usage Guidelines
-1. **Consistency:** Always use these components instead of creating one-off widgets
-2. **Theming:** Rely on AppColors constants rather than hardcoded colors
-3. **State Management:** Use setState for local state, Provider for complex components
-4. **Validation:** Use built-in validators for input components
-5. **Navigation:** Prefer DefaultButtonArrowBack for top-level navigation
-6. **Feedback:** Provide visual feedback for all user interactions
-7. **Loading States:** Show loading indicators during async operations
-8. **Error Handling:** Display clear error messages using component error properties
-
-### Performance
-- Components use `const` constructors where possible
-- Animated components use efficient duration (180-520ms)
-- ScrollControllers are properly disposed
-- Image loading includes error builders
+1. **State Management:** Use `setState()` for local component state, Provider for shared state
+2. **Navigation:** Use `Navigator.push()` for forward navigation, `Navigator.pop()` for back
+3. **Validation:** Enable/disable buttons based on required input validation
+4. **Feedback:** Provide visual feedback (loading states, selection indicators)
+5. **Accessibility:** Include semantic labels for images and interactive elements
+6. **Responsiveness:** Components use relative sizing (percentage of screen width)
+7. **Error Handling:** Display error states with retry options
 
 ---
 
-*Last Updated: 2024*  
-*Total Components: 17*  
-*Framework: Flutter 3.1.0+*
+## Future Enhancements
+
+- Add loading skeleton screens for async data
+- Implement haptic feedback on button taps
+- Add animation transitions between questions
+- Support dark mode color schemes
+- Internationalization support for component text
