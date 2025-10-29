@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-// Classe Preview (sem alterações)
+// Classe Preview 
 class Preview extends StatelessWidget {
   final String name;
   const Preview({super.key, required this.name});
