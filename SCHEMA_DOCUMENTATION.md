@@ -8,19 +8,34 @@ This document defines the database schema for the Smart Quiz application, docume
 ## 1. Database Schema
 
 ### 1.1 User Table
-Stores authenticated user information.
+Stores authenticated user information linked to Supabase Auth.
 
 ```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.user (
+  id uuid NOT NULL,
+  first_name text NOT NULL,
+  surename text NOT NULL,
+  created_at timestamp without time zone NOT NULL,
+  updated_at timestamp without time zone NOT NULL,
+  email text NOT NULL,
+  CONSTRAINT user_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
 ```
 
-**Purpose**: Manages user authentication and identity across the application.
+**Purpose**: Manages user authentication and identity across the application, directly linked to Supabase Auth users.
+
+**Columns**:
+- `id`: UUID primary key, references auth.users(id)
+- `first_name`: User's first name
+- `surename`: User's surname
+- `created_at`: Creation timestamp (without time zone)
+- `updated_at`: Last update timestamp (without time zone)
+- `email`: User's email address
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key to `auth.users(id)`
 
 ---
 
@@ -28,223 +43,271 @@ CREATE TABLE users (
 Represents academic courses available for quiz preparation.
 
 ```sql
-CREATE TABLE courses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_key TEXT UNIQUE NOT NULL,  -- e.g., 'psicologia', 'direito'
-  title TEXT NOT NULL,               -- e.g., 'Psicologia', 'Direito'
-  description TEXT,
-  icon_key TEXT,                     -- Icon identifier for UI
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.course (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  name text NOT NULL UNIQUE,
+  icon text NOT NULL,
+  CONSTRAINT course_pkey PRIMARY KEY (id)
 );
 ```
 
 **Purpose**: Defines the courses users can select for exam preparation.
 
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `name`: Course name (unique)
+- `icon`: Icon identifier for UI
+
+**Constraints**:
+- Primary key on `id`
+- Unique constraint on `name`
+
 **Relationships**:
+- One course has many questions
 - One course has many exams
-- One course has many user exam attempts
 
 ---
 
-### 1.3 Exam Table
-Defines exam metadata and configuration.
-
-```sql
-CREATE TABLE exams (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  description TEXT,
-  total_available_questions INTEGER NOT NULL DEFAULT 0,
-  time_limit_minutes INTEGER,       -- NULL = unlimited
-  passing_score_percentage DECIMAL(5,2) DEFAULT 70.0,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_exams_course_id ON exams(course_id);
-CREATE INDEX idx_exams_active ON exams(is_active);
-```
-
-**Purpose**: Stores exam metadata used during quiz configuration to determine available question pools.
-
-**Relationships**:
-- Many exams belong to one course
-- One exam has many questions
-- One exam has many user attempts
-
----
-
-### 1.4 Question Table
+### 1.3 Question Table
 Stores individual exam questions.
 
 ```sql
-CREATE TABLE questions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
-  enunciation TEXT NOT NULL,         -- Question text/prompt
-  question_order INTEGER,            -- Optional ordering within exam
-  difficulty_level TEXT CHECK (difficulty_level IN ('easy', 'medium', 'hard')),
-  points DECIMAL(5,2) DEFAULT 1.0,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.question (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  number smallint NOT NULL,
+  statement text NOT NULL,
+  idcourse uuid NOT NULL,
+  CONSTRAINT question_pkey PRIMARY KEY (id),
+  CONSTRAINT question_idcourse_fkey FOREIGN KEY (idcourse) REFERENCES public.course(id)
 );
-
-CREATE INDEX idx_questions_exam_id ON questions(exam_id);
-CREATE INDEX idx_questions_active ON questions(is_active);
-CREATE INDEX idx_questions_difficulty ON questions(difficulty_level);
 ```
 
-**Purpose**: Contains the question text presented during exam taking.
+**Purpose**: Contains question text and metadata for each course.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `number`: Question number (smallint)
+- `statement`: Question text/prompt
+- `idcourse`: Foreign key to course
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key `idcourse` references `course(id)`
 
 **Relationships**:
-- Many questions belong to one exam
+- Many questions belong to one course
 - One question has many answer choices
-- One question may have supporting text
-- One question has many user responses
+- One question can have many supporting texts (via junction table)
+- One question can appear in many exams (via junction table)
 
 ---
 
-### 1.5 Answer Choice Table
+### 1.4 Answer Choice Table
 Stores possible answers for multiple-choice questions.
 
 ```sql
-CREATE TABLE answer_choices (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
-  choice_key TEXT NOT NULL,          -- 'A', 'B', 'C', 'D', 'E'
-  choice_text TEXT NOT NULL,
-  is_correct BOOLEAN DEFAULT FALSE,
-  choice_order INTEGER NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.answerchoice (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  upload_at timestamp without time zone NOT NULL,
+  letter text NOT NULL,
+  content text NOT NULL,
+  correctanswer boolean NOT NULL,
+  idquestion uuid NOT NULL,
+  CONSTRAINT answerchoice_pkey PRIMARY KEY (id),
+  CONSTRAINT answerchoices_idquestion_fkey FOREIGN KEY (idquestion) REFERENCES public.question(id)
 );
-
-CREATE INDEX idx_answer_choices_question_id ON answer_choices(question_id);
-CREATE INDEX idx_answer_choices_correct ON answer_choices(is_correct);
-
--- Ensure unique choice keys per question
-CREATE UNIQUE INDEX idx_answer_choice_unique ON answer_choices(question_id, choice_key);
 ```
 
-**Purpose**: Provides multiple-choice alternatives displayed during question presentation.
+**Purpose**: Provides multiple-choice alternatives for each question.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `upload_at`: Upload timestamp (without time zone)
+- `letter`: Choice letter identifier (A, B, C, D, E)
+- `content`: Answer choice text
+- `correctanswer`: Boolean flag indicating if this is the correct answer
+- `idquestion`: Foreign key to question
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key `idquestion` references `question(id)`
 
 **Relationships**:
 - Many answer choices belong to one question
-- One answer choice can be referenced by many user responses
 
 ---
 
-### 1.6 Supporting Text Table
+### 1.5 Supporting Text Table
 Stores supplementary materials like passages, images, or context for questions.
 
 ```sql
-CREATE TABLE supporting_texts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
-  content_type TEXT NOT NULL CHECK (content_type IN ('text', 'image', 'code', 'table')),
-  content TEXT NOT NULL,             -- Text content or URL for images
-  display_order INTEGER DEFAULT 1,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.supportingtext (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  content text NOT NULL,
+  CONSTRAINT supportingtext_pkey PRIMARY KEY (id)
 );
-
-CREATE INDEX idx_supporting_texts_question_id ON supporting_texts(question_id);
 ```
 
-**Purpose**: Enhances questions with additional context, passages, diagrams, or reference material.
+**Purpose**: Contains supplementary content that can be associated with questions.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `content`: Supporting text content
+
+**Constraints**:
+- Primary key on `id`
 
 **Relationships**:
-- Many supporting texts belong to one question
+- Many supporting texts can be linked to many questions (via junction table)
 
 ---
 
-### 1.7 User Exam Attempt Table
-Records each time a user takes an exam.
+### 1.6 Question Supporting Text Junction Table
+Links questions to their supporting texts.
 
 ```sql
-CREATE TABLE user_exam_attempts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  question_count INTEGER NOT NULL,   -- Number of questions in this attempt
-  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  completed_at TIMESTAMP WITH TIME ZONE,
-  duration_seconds INTEGER,          -- Calculated from started_at to completed_at
-  total_score DECIMAL(5,2),
-  percentage_score DECIMAL(5,2),
-  status TEXT DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'abandoned')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.questionsupportingtext (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  idquestion uuid NOT NULL DEFAULT gen_random_uuid(),
+  idsupportingtext uuid NOT NULL DEFAULT gen_random_uuid(),
+  CONSTRAINT questionsupportingtext_pkey PRIMARY KEY (id),
+  CONSTRAINT questionsupportingtext_idsupportingtext_fkey FOREIGN KEY (idsupportingtext) REFERENCES public.supportingtext(id),
+  CONSTRAINT questionsupportingtext_idquestion_fkey FOREIGN KEY (idquestion) REFERENCES public.question(id)
 );
-
-CREATE INDEX idx_user_exam_attempts_user_id ON user_exam_attempts(user_id);
-CREATE INDEX idx_user_exam_attempts_exam_id ON user_exam_attempts(exam_id);
-CREATE INDEX idx_user_exam_attempts_course_id ON user_exam_attempts(course_id);
-CREATE INDEX idx_user_exam_attempts_status ON user_exam_attempts(status);
-CREATE INDEX idx_user_exam_attempts_completed ON user_exam_attempts(completed_at);
 ```
 
-**Purpose**: Tracks individual exam sessions including timing, score, and completion status.
+**Purpose**: Many-to-many relationship between questions and supporting texts.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `idquestion`: Foreign key to question
+- `idsupportingtext`: Foreign key to supporting text
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key `idquestion` references `question(id)`
+- Foreign key `idsupportingtext` references `supportingtext(id)`
 
 **Relationships**:
-- Many attempts belong to one user
-- Many attempts belong to one exam
-- Many attempts belong to one course
-- One attempt has many user responses
+- Links questions to supporting texts in a many-to-many relationship
 
 ---
 
-### 1.8 User Response Table
-Records individual answers submitted by users.
+### 1.7 Exam Table
+Records exam sessions taken by users.
 
 ```sql
-CREATE TABLE user_responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  attempt_id UUID REFERENCES user_exam_attempts(id) ON DELETE CASCADE,
-  question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
-  answer_choice_id UUID REFERENCES answer_choices(id) ON DELETE SET NULL,
-  selected_choice_key TEXT,          -- 'A', 'B', 'C', etc., or NULL if unanswered
-  is_correct BOOLEAN,
-  points_earned DECIMAL(5,2) DEFAULT 0,
-  time_spent_seconds INTEGER,        -- Time spent on this question
-  answered_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+CREATE TABLE public.exam (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  date_start timestamp without time zone NOT NULL,
+  date_end timestamp without time zone NOT NULL,
+  is_completed boolean NOT NULL DEFAULT false,
+  id_user uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_course uuid NOT NULL DEFAULT gen_random_uuid(),
+  CONSTRAINT exam_pkey PRIMARY KEY (id),
+  CONSTRAINT exam_id_course_fkey FOREIGN KEY (id_course) REFERENCES public.course(id),
+  CONSTRAINT exam_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.user(id)
 );
-
-CREATE INDEX idx_user_responses_attempt_id ON user_responses(attempt_id);
-CREATE INDEX idx_user_responses_question_id ON user_responses(question_id);
-CREATE INDEX idx_user_responses_correct ON user_responses(is_correct);
 ```
 
-**Purpose**: Captures user answers for scoring and performance analysis.
+**Purpose**: Tracks individual exam attempts including timing and completion status.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `date_start`: Exam start timestamp
+- `date_end`: Exam end timestamp
+- `is_completed`: Boolean completion status (default false)
+- `id_user`: Foreign key to user
+- `id_course`: Foreign key to course
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key `id_user` references `user(id)`
+- Foreign key `id_course` references `course(id)`
 
 **Relationships**:
-- Many responses belong to one attempt
-- Many responses reference one question
-- Many responses reference one answer choice
+- Many exams belong to one user
+- Many exams belong to one course
+- One exam can have many questions (via junction table)
+
+---
+
+### 1.8 Exam Question Junction Table
+Links exams to their questions.
+
+```sql
+CREATE TABLE public.examquestion (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp without time zone NOT NULL,
+  update_at timestamp without time zone NOT NULL,
+  id_exam uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_question uuid NOT NULL DEFAULT gen_random_uuid(),
+  CONSTRAINT examquestion_pkey PRIMARY KEY (id),
+  CONSTRAINT examquestion_id_exam_fkey FOREIGN KEY (id_exam) REFERENCES public.exam(id),
+  CONSTRAINT examquestion_id_question_fkey FOREIGN KEY (id_question) REFERENCES public.question(id)
+);
+```
+
+**Purpose**: Many-to-many relationship between exams and questions.
+
+**Columns**:
+- `id`: UUID primary key with default random generation
+- `created_at`: Creation timestamp (without time zone)
+- `update_at`: Last update timestamp (without time zone)
+- `id_exam`: Foreign key to exam
+- `id_question`: Foreign key to question
+
+**Constraints**:
+- Primary key on `id`
+- Foreign key `id_exam` references `exam(id)`
+- Foreign key `id_question` references `question(id)`
+
+**Relationships**:
+- Links exams to questions in a many-to-many relationship
 
 ---
 
 ## 2. Entity Relationships Diagram (ERD)
 
 ```
-users (1) ────── (M) user_exam_attempts (M) ────── (1) exams (M) ────── (1) courses
-                        │
-                        │ (1)
-                        │
-                        ▼ (M)
-                   user_responses (M) ────── (1) questions (M) ────── (1) exams
-                        │                           │
-                        │                           │ (1)
-                        │                           ▼ (M)
-                        │                    answer_choices
-                        │                           
-                        │ (M)                       │ (1)
-                        └────────────(1)────────────┘
-                        
-                                         questions (1) ────── (M) supporting_texts
+auth.users (1) ────── (1) user (1) ────── (M) exam (M) ────── (1) course
+                                             │                    │
+                                             │ (M)                │ (1)
+                                             │                    │
+                                             ▼ (1)                ▼ (M)
+                                        examquestion          question (M) ────── (1) course
+                                             │                    │
+                                             │ (M)                │ (1)
+                                             │                    │
+                                             ▼ (1)                ▼ (M)
+                                         question            answerchoice
+                                             │
+                                             │ (1)
+                                             │
+                                             ▼ (M)
+                                   questionsupportingtext (M) ────── (1) supportingtext
 ```
 
 ---
@@ -259,15 +322,14 @@ users (1) ────── (M) user_exam_attempts (M) ────── (1) e
 
 **Queries Executed**:
 ```sql
--- Fetch all active courses for display
-SELECT id, course_key, title, icon_key
-FROM courses
-WHERE is_active = TRUE
-ORDER BY title;
+-- Fetch all courses for display
+SELECT id, name, icon
+FROM course
+ORDER BY name;
 ```
 
 **Data Displayed**:
-- Course list with titles and icons
+- Course list with names and icons
 - User selects a course (stored in app state, not database yet)
 
 **Screen State**: No database writes occur at this stage.
@@ -282,19 +344,10 @@ ORDER BY title;
 
 **Queries Executed**:
 ```sql
--- Fetch exam metadata for selected course
-SELECT e.id, e.title, e.total_available_questions, e.time_limit_minutes
-FROM exams e
-JOIN courses c ON e.course_id = c.id
-WHERE c.course_key = $selected_course_key
-  AND e.is_active = TRUE
-LIMIT 1;
-
--- Verify sufficient questions are available
+-- Verify available questions for selected course
 SELECT COUNT(*) as available_count
-FROM questions
-WHERE exam_id = $exam_id
-  AND is_active = TRUE;
+FROM question
+WHERE idcourse = $selected_course_id;
 ```
 
 **Data Displayed**:
@@ -310,62 +363,73 @@ WHERE exam_id = $exam_id
 
 **Screen Purpose**: Display questions, collect answers, track progress.
 
-**Data Operations**: **READ during loading, WRITE on completion**
+**Data Operations**: **READ during loading, WRITE on start and completion**
 
-#### 3.3.1 Exam Initialization (READ)
+#### 3.3.1 Exam Initialization (WRITE)
 
 **Queries Executed**:
 ```sql
--- Create exam attempt record
-INSERT INTO user_exam_attempts (
-  user_id, 
-  exam_id, 
-  course_id, 
-  question_count, 
-  started_at, 
-  status
+-- Create exam record
+INSERT INTO exam (
+  created_at,
+  update_at,
+  date_start,
+  date_end,
+  is_completed,
+  id_user,
+  id_course
 )
-VALUES ($user_id, $exam_id, $course_id, $question_count, NOW(), 'in_progress')
+VALUES (NOW(), NOW(), NOW(), NOW(), false, $user_id, $course_id)
 RETURNING id;
 
 -- Fetch random questions for the exam
 SELECT 
   q.id,
-  q.enunciation,
-  q.difficulty_level,
-  q.points
-FROM questions q
-WHERE q.exam_id = $exam_id
-  AND q.is_active = TRUE
+  q.number,
+  q.statement,
+  q.idcourse
+FROM question q
+WHERE q.idcourse = $course_id
 ORDER BY RANDOM()
 LIMIT $question_count;
+
+-- Link selected questions to exam
+INSERT INTO examquestion (
+  created_at,
+  update_at,
+  id_exam,
+  id_question
+)
+VALUES 
+  (NOW(), NOW(), $exam_id, $question_id_1),
+  (NOW(), NOW(), $exam_id, $question_id_2),
+  ...;
 
 -- For each question, fetch answer choices
 SELECT 
   ac.id,
-  ac.choice_key,
-  ac.choice_text,
-  ac.is_correct,
-  ac.choice_order
-FROM answer_choices ac
-WHERE ac.question_id = ANY($question_ids)
-ORDER BY ac.question_id, ac.choice_order;
+  ac.letter,
+  ac.content,
+  ac.correctanswer,
+  ac.idquestion
+FROM answerchoice ac
+WHERE ac.idquestion = ANY($question_ids)
+ORDER BY ac.idquestion, ac.letter;
 
 -- For each question, fetch supporting texts (if any)
 SELECT 
-  st.question_id,
-  st.content_type,
-  st.content,
-  st.display_order
-FROM supporting_texts st
-WHERE st.question_id = ANY($question_ids)
-ORDER BY st.question_id, st.display_order;
+  qst.idquestion,
+  st.id,
+  st.content
+FROM questionsupportingtext qst
+JOIN supportingtext st ON qst.idsupportingtext = st.id
+WHERE qst.idquestion = ANY($question_ids);
 ```
 
 **Data Displayed**:
-- Question enunciation
+- Question statement
 - Answer choices (A, B, C, D, E)
-- Supporting text/images (if applicable)
+- Supporting text (if applicable)
 - Progress indicator (e.g., Question 3 of 10)
 - Navigation controls
 
@@ -381,39 +445,16 @@ ORDER BY st.question_id, st.display_order;
 
 **Queries Executed**:
 ```sql
--- Insert all user responses in batch
-INSERT INTO user_responses (
-  attempt_id,
-  question_id,
-  answer_choice_id,
-  selected_choice_key,
-  is_correct,
-  points_earned,
-  answered_at
-)
-VALUES
-  ($attempt_id, $question_id_1, $answer_choice_id_1, 'A', TRUE, 1.0, NOW()),
-  ($attempt_id, $question_id_2, $answer_choice_id_2, 'C', FALSE, 0.0, NOW()),
-  ...;
-
--- Calculate score
-SELECT 
-  COUNT(*) as total_questions,
-  SUM(CASE WHEN ur.is_correct THEN 1 ELSE 0 END) as correct_answers,
-  SUM(ur.points_earned) as total_score
-FROM user_responses ur
-WHERE ur.attempt_id = $attempt_id;
-
--- Update exam attempt with results
-UPDATE user_exam_attempts
+-- Update exam as completed
+UPDATE exam
 SET 
-  completed_at = NOW(),
-  duration_seconds = EXTRACT(EPOCH FROM (NOW() - started_at)),
-  total_score = $total_score,
-  percentage_score = ($correct_answers::DECIMAL / $total_questions) * 100,
-  status = 'completed'
-WHERE id = $attempt_id;
+  update_at = NOW(),
+  date_end = NOW(),
+  is_completed = true
+WHERE id = $exam_id;
 ```
+
+**Note**: The current schema does not include a table for storing individual user responses to questions. User answers and scoring are calculated in the application layer based on locally stored responses compared against the `correctanswer` field in the `answerchoice` table.
 
 ---
 
@@ -427,20 +468,20 @@ WHERE id = $attempt_id;
 ```sql
 -- Fetch user's exam history for a course
 SELECT 
-  uea.id,
-  uea.completed_at,
-  uea.duration_seconds,
-  uea.question_count,
-  uea.percentage_score,
-  COUNT(ur.id) as answered_count,
-  SUM(CASE WHEN ur.is_correct THEN 1 ELSE 0 END) as correct_count
-FROM user_exam_attempts uea
-LEFT JOIN user_responses ur ON ur.attempt_id = uea.id
-WHERE uea.user_id = $user_id
-  AND uea.course_id = $course_id
-  AND uea.status = 'completed'
-GROUP BY uea.id
-ORDER BY uea.completed_at DESC;
+  e.id,
+  e.date_start,
+  e.date_end,
+  e.is_completed,
+  c.name as course_name,
+  COUNT(eq.id_question) as question_count
+FROM exam e
+JOIN course c ON e.id_course = c.id
+LEFT JOIN examquestion eq ON eq.id_exam = e.id
+WHERE e.id_user = $user_id
+  AND e.id_course = $course_id
+  AND e.is_completed = true
+GROUP BY e.id, c.name
+ORDER BY e.date_end DESC;
 ```
 
 ---
@@ -451,70 +492,90 @@ ORDER BY uea.completed_at DESC;
 
 | Screen | Entity | Purpose |
 |--------|--------|---------|
-| **Home Screen** | `courses` | Load available courses for selection |
-| **Quiz Config** | `exams` | Fetch exam metadata (title, question count) |
-| **Quiz Config** | `questions` | Verify available question count |
-| **Exam Screen** | `questions` | Load question enunciations |
-| **Exam Screen** | `answer_choices` | Load answer alternatives |
-| **Exam Screen** | `supporting_texts` | Load supplementary materials (if any) |
-| **History View** | `user_exam_attempts` | Display past exam results |
-| **History View** | `user_responses` | Show detailed answer history |
+| **Home Screen** | `course` | Load available courses for selection |
+| **Quiz Config** | `question` | Verify available question count for course |
+| **Exam Screen** | `question` | Load question statements |
+| **Exam Screen** | `answerchoice` | Load answer alternatives |
+| **Exam Screen** | `supportingtext` (via junction) | Load supplementary materials (if any) |
+| **History View** | `exam` | Display past exam records |
+| **History View** | `examquestion` | Show questions included in past exams |
 
 ### 4.2 WRITE Operations (Data Modification)
 
 | Screen | Entity | Operation | Trigger |
 |--------|--------|-----------|---------|
-| **Exam Screen** (init) | `user_exam_attempts` | INSERT | When "Iniciar" clicked from Quiz Config |
-| **Exam Screen** (completion) | `user_responses` | INSERT (batch) | When "Finalizar" clicked |
-| **Exam Screen** (completion) | `user_exam_attempts` | UPDATE | After responses inserted |
+| **Exam Screen** (init) | `exam` | INSERT | When "Iniciar" clicked from Quiz Config |
+| **Exam Screen** (init) | `examquestion` | INSERT (batch) | After exam created, link selected questions |
+| **Exam Screen** (completion) | `exam` | UPDATE | When "Finalizar" clicked |
 
 ---
 
 ## 5. Key Design Considerations
 
-### 5.1 Performance Optimizations
+### 5.1 Schema Characteristics
 
-1. **Batch Operations**: User responses inserted in single transaction on completion
-2. **Indexing**: Foreign keys and frequently queried columns indexed
-3. **Random Sampling**: `ORDER BY RANDOM()` used for question selection (consider pre-generated exam versions for scale)
+1. **UUID Keys**: All tables use UUID primary keys with `gen_random_uuid()` defaults
+2. **Timestamp Fields**: All tables track `created_at` and update timestamps (`update_at` or `upload_at`)
+3. **Timestamps Without Time Zone**: All timestamp columns are defined without time zone
+4. **Junction Tables**: Many-to-many relationships implemented via `examquestion` and `questionsupportingtext`
+5. **No Indexes**: The schema does not define any indexes beyond primary keys and foreign key constraints
 
 ### 5.2 Data Integrity
 
-1. **Referential Integrity**: Foreign keys with appropriate CASCADE/SET NULL
-2. **Unique Constraints**: Prevent duplicate choice keys per question
-3. **Check Constraints**: Validate status values, difficulty levels, content types
+1. **Referential Integrity**: Foreign keys enforce relationships between tables
+2. **Unique Constraints**: Course names must be unique
+3. **Auth Integration**: User table links to Supabase `auth.users` table
 
-### 5.3 Scalability
+### 5.3 Missing Features (Not in Current Schema)
 
-1. **Soft Deletes**: `is_active` flags instead of hard deletes
-2. **Timestamps**: Track creation and updates for audit trails
-3. **Partitioning Ready**: `user_exam_attempts` can be partitioned by date for growth
+The following elements mentioned in application requirements are **NOT** present in the actual SQL schema:
+
+1. **User Response Tracking**: No table to store individual user answers to questions
+2. **Scoring Fields**: No fields for points, scores, or percentages in exam table
+3. **Question Metadata**: No difficulty level, question order, points, or is_active flags
+4. **Exam Metadata**: No title, description, time limits, passing scores, or total question counts
+5. **Answer Choice Ordering**: No explicit choice_order field
+6. **Status Fields**: No status tracking (in_progress, completed, abandoned) beyond boolean `is_completed`
+7. **Performance Fields**: No time tracking fields (duration_seconds, time_spent_seconds, answered_at)
+8. **Soft Deletes**: No is_active flags for soft deletion
+9. **Indexes**: No performance indexes defined on foreign keys or commonly queried columns
+10. **Unique Constraints**: No unique constraint on answer choice letters per question
 
 ---
 
 ## 6. Migration Path
 
-Since the application currently uses mock data, implement the schema in this order:
+The current schema represents the baseline implementation. Future enhancements may include:
 
-1. **Phase 1**: Create core tables (`users`, `courses`, `exams`, `questions`, `answer_choices`)
-2. **Phase 2**: Add supporting tables (`supporting_texts`)
-3. **Phase 3**: Add tracking tables (`user_exam_attempts`, `user_responses`)
-4. **Phase 4**: Migrate Flutter repositories from mock data to Supabase queries
-5. **Phase 5**: Add RLS (Row-Level Security) policies for multi-tenant data isolation
+1. **Phase 1**: Add user response tracking table
+2. **Phase 2**: Add scoring and performance tracking fields
+3. **Phase 3**: Add question and exam metadata (difficulty, ordering, time limits)
+4. **Phase 4**: Add status tracking and soft delete capabilities
+5. **Phase 5**: Add performance indexes on foreign keys and commonly queried fields
+6. **Phase 6**: Add RLS (Row-Level Security) policies for data isolation
 
 ---
 
 ## 7. Current Implementation Status
 
-**Status**: ❌ Schema **NOT IMPLEMENTED**
+**Status**: ✅ Schema **PARTIALLY IMPLEMENTED**
+
+The database schema exists in Supabase with the following tables:
+- `user` (linked to auth.users)
+- `course`
+- `question`
+- `answerchoice`
+- `supportingtext`
+- `questionsupportingtext`
+- `exam`
+- `examquestion`
 
 The application currently uses:
 - **Mock data** in `lib/services/repositorie/question_repository.dart`
 - **Hardcoded courses** in `lib/views/home.screen.dart`
-- **Hardcoded questions** in `lib/views/exam_screen.dart`
 
 **Next Steps**:
-1. Create SQL migration scripts in `supabase/migrations/`
-2. Implement repository pattern for database access
-3. Replace mock data with Supabase queries
-4. Add error handling and offline support
+1. Implement repository pattern for database access
+2. Replace mock data with Supabase queries
+3. Add error handling and offline support
+4. Consider adding user response tracking table for detailed analytics
