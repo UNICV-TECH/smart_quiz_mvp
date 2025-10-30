@@ -1,50 +1,70 @@
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
+import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
+
+// Classe Preview
+class Preview extends StatelessWidget {
+  final String name;
+  const Preview({super.key, required this.name});
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
 
 class CustomNavBar extends StatefulWidget {
-  const CustomNavBar({super.key});
+  final int? selectedIndex;
+  final Function(int)? onItemTapped;
+
+  const CustomNavBar({
+    super.key,
+    this.selectedIndex,
+    this.onItemTapped,
+  });
 
   @override
   State<CustomNavBar> createState() => _CustomNavBarState();
 }
 
-@Preview(name: 'Custom NavBar')
-Widget customNavBarPreview() {
-  return const CustomNavBarTest();
-}
-
 class _CustomNavBarState extends State<CustomNavBar> {
-  int _selectedIndex = 0;
+  int _internalSelectedIndex = 0;
+
+  void _internalOnItemTapped(int index) {
+    setState(() {
+      _internalSelectedIndex = index;
+    });
+  }
+
+  int get _currentIndex => widget.selectedIndex ?? _internalSelectedIndex;
+  Function(int) get _currentOnTap =>
+      widget.onItemTapped ?? _internalOnItemTapped;
+
   final double _circleSize = 70.0;
   final double _navBarHeight = 110.0;
-  final Color _navBarColor = const Color(0xFF38553A);
+  final Color _navBarColor = AppColors.greenNavBar;
   final double _curveDepth = 24.0;
   final double _shoulder = 28.0;
-  final double _gap = 6.0;
+  final double _gap = 18.0;
   final Duration _anim = const Duration(milliseconds: 520);
-
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
     {'icon': Icons.explore, 'label': 'Explorar'},
     {'icon': Icons.person, 'label': 'Perfil'},
   ];
 
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
-
   @override
   Widget build(BuildContext context) {
     final double w = MediaQuery.of(context).size.width;
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
+
     final double circleLeft =
-        (itemWidth * _selectedIndex) + (itemWidth / 2) - (_circleSize / 2);
-    final double circleTop = -navBarTopOffset + (_curveDepth - _gap);
+        (itemWidth * _currentIndex) + (itemWidth / 2) - (_circleSize / 2);
+    final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
 
     return SizedBox(
       height: _navBarHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Fundo com ClipPath 
           Positioned(
             bottom: 0,
             left: 0,
@@ -53,7 +73,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
               clipper: NavBarClipper(
                 circleSize: _circleSize,
                 itemWidth: itemWidth,
-                selectedIndex: _selectedIndex,
+                selectedIndex: _currentIndex,
                 curveDepth: _curveDepth,
                 shoulder: _shoulder,
               ),
@@ -61,10 +81,9 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 height: _navBarHeight - navBarTopOffset,
                 decoration: BoxDecoration(
                   color: _navBarColor,
-                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha:0.2),
+                      color: AppColors.fosco,
                       spreadRadius: 2,
                       blurRadius: 10,
                       offset: const Offset(0, 5),
@@ -74,6 +93,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
               ),
             ),
           ),
+          // Círculo animado
           AnimatedPositioned(
             duration: _anim,
             curve: Curves.easeInOut,
@@ -87,7 +107,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.20),
+                    color: AppColors.fosco,
                     blurRadius: 10,
                     spreadRadius: 2,
                     offset: const Offset(0, 5),
@@ -100,8 +120,8 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   transitionBuilder: (child, anim) =>
                       FadeTransition(opacity: anim, child: child),
                   child: Icon(
-                    _items[_selectedIndex]['icon'],
-                    key: ValueKey(_selectedIndex),
+                    _items[_currentIndex]['icon'],
+                    key: ValueKey(_currentIndex),
                     color: Colors.white,
                     size: 28,
                   ),
@@ -109,51 +129,62 @@ class _CustomNavBarState extends State<CustomNavBar> {
               ),
             ),
           ),
+
           Positioned(
-            top: 28,
             left: 0,
             right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: List.generate(_items.length, (index) {
-                final bool isSelected = _selectedIndex == index;
-                return SizedBox(
-                  width: itemWidth,
-                  height: 80,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _onItemTapped(index),
-                      splashColor: Colors.white.withValues(alpha:0.1),
-                      highlightColor: Colors.white.withValues(alpha:0.15),
-                      child: AnimatedScale(
-                        scale: isSelected ? 1.0 : 0.95,
-                        duration: const Duration(milliseconds: 150),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!isSelected)
-                              Icon(
+            bottom: 0, // Posição original
+            child: SizedBox(
+              height: _navBarHeight - navBarTopOffset, 
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: List.generate(_items.length, (index) {
+                  final bool isSelected = _currentIndex == index;
+                  
+                  return GestureDetector(
+                    onTap: () => _currentOnTap(index),
+                    behavior: HitTestBehavior.opaque, // Captura cliques no vazio
+                    child: SizedBox(
+                      width: itemWidth,
+                      height: _navBarHeight - navBarTopOffset, // Ocupa a altura
+                      child: Column(
+
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: isSelected ? 0.0 : 1.0,
+                            child: SizedBox(
+                              height: 28,
+                              child: Icon(
                                 _items[index]['icon'],
                                 color: Colors.white70,
-                                size: 22,
+                                size: 24,
                               ),
-                            SizedBox(height: isSelected ? 38 : 8),
-                            Text(
+                            ),
+                          ),
+                          Padding(
+                            // Padding original (correto)
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text(
                               _items[index]['label'],
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.white70,
+                                color:
+                                    isSelected ? Colors.white : Colors.white70,
                                 fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }),
+              ),
             ),
           ),
         ],
@@ -162,14 +193,13 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
-// Clipper para o recorte do fundo
+// Classe NavBarClipper (Sem alterações)
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;
   final int selectedIndex;
   final double curveDepth;
   final double shoulder;
-
   NavBarClipper({
     required this.circleSize,
     required this.itemWidth,
@@ -177,7 +207,6 @@ class NavBarClipper extends CustomClipper<Path> {
     required this.curveDepth,
     required this.shoulder,
   });
-
   @override
   Path getClip(Size size) {
     final Path path = Path();
@@ -185,7 +214,6 @@ class NavBarClipper extends CustomClipper<Path> {
     final double notchRadius = circleSize / 2;
     final double startX = notchCenterX - notchRadius - shoulder;
     final double endX = notchCenterX + notchRadius + shoulder;
-
     path.moveTo(0, 0);
     path.lineTo(startX, 0);
     path.cubicTo(
@@ -221,9 +249,27 @@ class NavBarClipper extends CustomClipper<Path> {
   }
 }
 
-/// Preview 
-class CustomNavBarTest extends StatelessWidget {
+// Preview Widget 
+@Preview(name: 'Custom NavBar')
+Widget customNavBarPreview() {
+  return const CustomNavBarTest();
+}
+
+class CustomNavBarTest extends StatefulWidget {
   const CustomNavBarTest({super.key});
+
+  @override
+  State<CustomNavBarTest> createState() => _CustomNavBarTestState();
+}
+
+class _CustomNavBarTestState extends State<CustomNavBarTest> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,12 +277,15 @@ class CustomNavBarTest extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.grey[200],
-        body: const Stack(
+        body: Stack(
           children: [
-            Center(child: Text('Conteúdo de teste')),
+            const Center(child: Text('Conteúdo de teste')),
             Align(
               alignment: Alignment.bottomCenter,
-              child: CustomNavBar(),
+              child: CustomNavBar(
+                selectedIndex: _selectedIndex,
+                onItemTapped: _onItemTapped,
+              ),
             ),
           ],
         ),
