@@ -128,11 +128,10 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                   ),
                 ),
                 CustomNavBar(
-                  selectedIndex: _navBarIndex, // Informa qual item está ativo
-                  onItemTapped: (index) {      // Define o que acontece ao tocar
-                    setState(() { _navBarIndex = index; }); // Atualiza o item ativo
+                  selectedIndex: _navBarIndex,
+                  onItemTapped: (index) {
+                    setState(() { _navBarIndex = index; });
                     if (index == 0) {
-                      // Se clicar em Início, volta para a HomeScreen
                        Navigator.popUntil(context, ModalRoute.withName('/home'));
                     } else {
                       debugPrint("NavBar Tapped: $index");
@@ -147,4 +146,3 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     );
   }
 }
-
