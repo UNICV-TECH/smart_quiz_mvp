@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
+
 class Course {
   final String id;
   final String courseKey;
   final String title;
   final String? description;
   final String? iconKey;
+  final IconData? iconData;
   final bool isActive;
   final DateTime createdAt;
 
@@ -13,6 +16,7 @@ class Course {
     required this.title,
     this.description,
     this.iconKey,
+    this.iconData,
     this.isActive = true,
     required this.createdAt,
   });
@@ -47,6 +51,7 @@ class Course {
     String? title,
     String? description,
     String? iconKey,
+    IconData? iconData,
     bool? isActive,
     DateTime? createdAt,
   }) {
@@ -56,6 +61,7 @@ class Course {
       title: title ?? this.title,
       description: description ?? this.description,
       iconKey: iconKey ?? this.iconKey,
+      iconData: iconData ?? this.iconData,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
     );

@@ -23,6 +23,13 @@ class UserResponse {
     required this.createdAt,
   });
 
+  bool get wasAnswered => selectedChoiceKey != null;
+  bool get isAnswered => selectedChoiceKey != null && answerChoiceId != null;
+  bool get isUnanswered => selectedChoiceKey == null;
+
+  Duration? get timeSpent =>
+      timeSpentSeconds != null ? Duration(seconds: timeSpentSeconds!) : null;
+
   factory UserResponse.fromJson(Map<String, dynamic> json) {
     return UserResponse(
       id: json['id'] as String,
@@ -54,12 +61,6 @@ class UserResponse {
       'created_at': createdAt.toIso8601String(),
     };
   }
-
-  bool get isAnswered => selectedChoiceKey != null && answerChoiceId != null;
-  bool get isUnanswered => selectedChoiceKey == null;
-
-  Duration? get timeSpent =>
-      timeSpentSeconds != null ? Duration(seconds: timeSpentSeconds!) : null;
 
   UserResponse copyWith({
     String? id,

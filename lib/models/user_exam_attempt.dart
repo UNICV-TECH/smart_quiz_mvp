@@ -27,6 +27,15 @@ class UserExamAttempt {
     required this.createdAt,
   });
 
+  bool get isInProgress => status == 'in_progress';
+  bool get isCompleted => status == 'completed';
+  bool get isAbandoned => status == 'abandoned';
+
+  Duration? get duration {
+    if (durationSeconds == null) return null;
+    return Duration(seconds: durationSeconds!);
+  }
+
   factory UserExamAttempt.fromJson(Map<String, dynamic> json) {
     return UserExamAttempt(
       id: json['id'] as String,
@@ -62,13 +71,6 @@ class UserExamAttempt {
       'created_at': createdAt.toIso8601String(),
     };
   }
-
-  bool get isCompleted => status == 'completed';
-  bool get isInProgress => status == 'in_progress';
-  bool get isAbandoned => status == 'abandoned';
-
-  Duration? get duration =>
-      durationSeconds != null ? Duration(seconds: durationSeconds!) : null;
 
   UserExamAttempt copyWith({
     String? id,
