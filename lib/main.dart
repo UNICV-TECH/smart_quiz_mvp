@@ -20,6 +20,8 @@ import 'repositories/auth/supabase_auth_repository.dart';
 import 'services/auth_service.dart';
 import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
+import 'viewmodels/exam_view_model.dart';
+import 'views/exam_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +132,32 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
           '/help': (context) => const HelpScreen(),
           '/about': (context) => const AboutScreen(),
+          '/exam': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?;
+            if (args == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Missing exam arguments'),
+                ),
+              );
+            }
+            return ChangeNotifierProvider(
+              create: (context) => ExamViewModel(
+                supabase: Supabase.instance.client,
+                userId: args['userId'] as String,
+                examId: args['examId'] as String,
+                courseId: args['courseId'] as String,
+                questionCount: args['questionCount'] as int,
+              ),
+              child: ExamScreen(
+                userId: args['userId'] as String,
+                examId: args['examId'] as String,
+                courseId: args['courseId'] as String,
+                questionCount: args['questionCount'] as int,
+              ),
+            );
+          },
         },
       ),
     );

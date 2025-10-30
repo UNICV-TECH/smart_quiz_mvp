@@ -37,18 +37,19 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     setState(() { _isLoading = true; });
     debugPrint('Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
 
-    await Future.delayed(const Duration(seconds: 1));
-
     if (mounted) {
       setState(() { _isLoading = false; });
-      debugPrint('Navegação para a tela do Quiz a ser implementada aqui.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Simulado para ${widget.course['title']} (${_selectedQuantity} questões) iniciado! (Navegação pendente)'),
-          duration: const Duration(seconds: 2),
-        ),
+      
+      await Navigator.pushNamed(
+        context,
+        '/exam',
+        arguments: {
+          'userId': 'REPLACE_WITH_ACTUAL_USER_ID',
+          'examId': widget.course['examId'] ?? 'REPLACE_WITH_EXAM_ID',
+          'courseId': widget.course['courseId'] ?? widget.course['id'],
+          'questionCount': int.parse(_selectedQuantity!),
+        },
       );
-   
     }
   }
 

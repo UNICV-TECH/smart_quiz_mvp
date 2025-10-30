@@ -1,291 +1,198 @@
-import 'package:flutter/material.dart';
-import '../models/question.dart';
-import '../models/exam.dart';
-import '../models/course.dart';
-import '../models/user_exam_attempt.dart';
-import '../models/user_response.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unicv_tech_mvp/models/exam_history.dart';
 
 class ExamViewModel extends ChangeNotifier {
-  final Exam exam;
-  final Course course;
+  final SupabaseClient _supabase;
+  final String userId;
+  final String examId;
+  final String courseId;
   final int questionCount;
 
   ExamViewModel({
-    required this.exam,
-    required this.course,
+    required SupabaseClient supabase,
+    required this.userId,
+    required this.examId,
+    required this.courseId,
     required this.questionCount,
-  });
+  }) : _supabase = supabase;
 
-  List<Question> _questions = [];
-  UserExamAttempt? _currentAttempt;
-  int _currentQuestionIndex = 0;
+  List<ExamQuestion> _examQuestions = [];
   Map<String, String> _selectedAnswers = {};
-  Map<String, DateTime> _answerTimestamps = {};
-  bool _isLoading = false;
-  bool _isSubmitting = false;
-  String? _errorMessage;
-  DateTime? _startTime;
-  DateTime? _endTime;
+  bool _loading = false;
+  String? _error;
+  String? _attemptId;
+  DateTime? _startedAt;
 
-  List<Question> get questions => List.unmodifiable(_questions);
-  UserExamAttempt? get currentAttempt => _currentAttempt;
-  int get currentQuestionIndex => _currentQuestionIndex;
-  Map<String, String> get selectedAnswers => Map.unmodifiable(_selectedAnswers);
-  bool get isLoading => _isLoading;
-  bool get isSubmitting => _isSubmitting;
-  String? get errorMessage => _errorMessage;
-  
-  Question? get currentQuestion {
-    if (_questions.isEmpty || _currentQuestionIndex >= _questions.length) {
-      return null;
-    }
-    return _questions[_currentQuestionIndex];
-  }
-
-  String? get currentAnswer {
-    final question = currentQuestion;
-    if (question == null) return null;
-    return _selectedAnswers[question.id];
-  }
-  
-  int get totalQuestions => _questions.length;
-  int get answeredCount => _selectedAnswers.length;
-  int get unansweredCount => totalQuestions - answeredCount;
-  
-  bool get isFirstQuestion => _currentQuestionIndex == 0;
-  bool get isLastQuestion => _currentQuestionIndex == _questions.length - 1;
-  bool get hasAnsweredCurrent {
-    final question = currentQuestion;
-    if (question == null) return false;
-    return _selectedAnswers.containsKey(question.id);
-  }
-  
-  Set<String> get answeredQuestionIds => _selectedAnswers.keys.toSet();
-  
-  Duration? get elapsedTime {
-    if (_startTime == null) return null;
-    final endTime = _endTime ?? DateTime.now();
-    return endTime.difference(_startTime!);
-  }
+  List<ExamQuestion> get examQuestions => _examQuestions;
+  Map<String, String> get selectedAnswers => _selectedAnswers;
+  bool get loading => _loading;
+  String? get error => _error;
+  String? get attemptId => _attemptId;
 
   Future<void> initialize() async {
     _setLoading(true);
-    _clearError();
-
     try {
-      _startTime = DateTime.now();
-      
-      _currentAttempt = UserExamAttempt(
-        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-        userId: 'temp_user',
-        examId: exam.id,
-        courseId: course.id,
-        questionCount: questionCount,
-        startedAt: _startTime!,
-        status: 'in_progress',
-        createdAt: DateTime.now(),
-      );
-
+      await _createAttempt();
       await _loadQuestions();
-
-      _currentQuestionIndex = 0;
-      _selectedAnswers = {};
-      _answerTimestamps = {};
-      _setLoading(false);
-    } catch (error) {
-      _setError('Erro ao inicializar simulado. Tente novamente.');
+      _error = null;
+    } catch (err, stack) {
+      _error = err.toString();
+      debugPrint('Failed to initialize exam: $err');
+      debugPrintStack(stackTrace: stack);
+    } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> _createAttempt() async {
+    _startedAt = DateTime.now();
+    final response = await _supabase.from('user_exam_attempts').insert({
+      'user_id': userId,
+      'exam_id': examId,
+      'course_id': courseId,
+      'question_count': questionCount,
+      'started_at': _startedAt!.toIso8601String(),
+      'status': 'in_progress',
+    }).select('id').single();
+
+    _attemptId = response['id'] as String;
   }
 
   Future<void> _loadQuestions() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    final questionsResponse = await _supabase
+        .from('questions')
+        .select('id, enunciation, difficulty_level, points')
+        .eq('exam_id', examId)
+        .eq('is_active', true);
+
+    final List<dynamic> allQuestionsData = questionsResponse as List<dynamic>;
     
-    _questions = List.generate(questionCount, (index) {
-      return Question(
-        id: 'question_${index + 1}',
-        examId: exam.id,
-        enunciation: 'Esta é a questão ${index + 1} do simulado de ${course.title}.',
-        questionOrder: index + 1,
-        difficultyLevel: 'medium',
-        points: 1.0,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        answerChoices: _generateAnswerChoices(index),
-      );
-    });
-  }
-
-  List<AnswerChoice> _generateAnswerChoices(int questionIndex) {
-    final choices = ['A', 'B', 'C', 'D', 'E'];
-    return List.generate(5, (index) {
-      return AnswerChoice(
-        id: 'choice_${questionIndex}_${index}',
-        questionId: 'question_${questionIndex + 1}',
-        choiceKey: choices[index],
-        choiceText: 'Alternativa ${choices[index]}',
-        isCorrect: index == 1,
-        choiceOrder: index,
-        createdAt: DateTime.now(),
-      );
-    });
-  }
-
-  void selectAnswer(String choiceKey) {
-    final question = currentQuestion;
-    if (question == null) return;
-
-    _selectedAnswers[question.id] = choiceKey;
-    _answerTimestamps[question.id] = DateTime.now();
-    _clearError();
-    notifyListeners();
-  }
-
-  void clearAnswer(String questionId) {
-    if (_selectedAnswers.containsKey(questionId)) {
-      _selectedAnswers.remove(questionId);
-      _answerTimestamps.remove(questionId);
-      notifyListeners();
-    }
-  }
-
-  void goToQuestion(int index) {
-    if (index < 0 || index >= _questions.length) return;
-    if (_currentQuestionIndex == index) return;
+    allQuestionsData.shuffle();
+    final List<dynamic> questionsData = allQuestionsData.take(questionCount).toList();
     
-    _currentQuestionIndex = index;
-    _clearError();
-    notifyListeners();
-  }
+    final questionIds = questionsData.map((q) => q['id'] as String).toList();
 
-  void goToNextQuestion() {
-    if (_currentQuestionIndex < _questions.length - 1) {
-      _currentQuestionIndex++;
-      _clearError();
-      notifyListeners();
+    final answerChoicesResponse = await _supabase
+        .from('answer_choices')
+        .select('*')
+        .inFilter('question_id', questionIds)
+        .order('choice_order');
+
+    final supportingTextsResponse = await _supabase
+        .from('supporting_texts')
+        .select('*')
+        .inFilter('question_id', questionIds)
+        .order('display_order');
+
+    final List<dynamic> answerChoicesData =
+        answerChoicesResponse as List<dynamic>;
+    final List<dynamic> supportingTextsData =
+        supportingTextsResponse as List<dynamic>;
+
+    final Map<String, List<AnswerChoice>> answerChoicesByQuestion = {};
+    for (var ac in answerChoicesData) {
+      final answerChoice = AnswerChoice.fromJson(ac);
+      answerChoicesByQuestion
+          .putIfAbsent(answerChoice.questionId, () => [])
+          .add(answerChoice);
     }
-  }
 
-  void goToPreviousQuestion() {
-    if (_currentQuestionIndex > 0) {
-      _currentQuestionIndex--;
-      _clearError();
-      notifyListeners();
+    final Map<String, List<SupportingText>> supportingTextsByQuestion = {};
+    for (var st in supportingTextsData) {
+      final supportingText = SupportingText.fromJson(st);
+      supportingTextsByQuestion
+          .putIfAbsent(supportingText.questionId, () => [])
+          .add(supportingText);
     }
-  }
 
-  Future<UserExamAttempt?> submitExam() async {
-    if (_isSubmitting || _currentAttempt == null) return null;
-
-    _isSubmitting = true;
-    _clearError();
-    notifyListeners();
-
-    try {
-      _endTime = DateTime.now();
-      final durationSeconds = _endTime!.difference(_startTime!).inSeconds;
-
-      final responses = _buildUserResponses();
-      final score = _calculateScore(responses);
-      final percentageScore = (score / totalQuestions) * 100;
-
-      final completedAttempt = _currentAttempt!.copyWith(
-        completedAt: _endTime,
-        durationSeconds: durationSeconds,
-        totalScore: score.toDouble(),
-        percentageScore: percentageScore,
-        status: 'completed',
-      );
-
-      await Future.delayed(const Duration(seconds: 1));
-      
-      _isSubmitting = false;
-      notifyListeners();
-      return completedAttempt;
-    } catch (error) {
-      _setError('Erro ao enviar simulado. Tente novamente.');
-      _isSubmitting = false;
-      notifyListeners();
-      return null;
-    }
-  }
-
-  List<UserResponse> _buildUserResponses() {
-    return _questions.map((question) {
-      final selectedChoice = _selectedAnswers[question.id];
-      final answerChoice = selectedChoice != null
-          ? question.answerChoices.firstWhere(
-              (choice) => choice.choiceKey == selectedChoice,
-              orElse: () => question.answerChoices.first,
-            )
-          : null;
-
-      final isCorrect = answerChoice?.isCorrect ?? false;
-      final pointsEarned = isCorrect ? question.points : 0.0;
-
-      return UserResponse(
-        id: 'response_${question.id}',
-        attemptId: _currentAttempt!.id,
-        questionId: question.id,
-        answerChoiceId: answerChoice?.id,
-        selectedChoiceKey: selectedChoice,
-        isCorrect: isCorrect,
-        pointsEarned: pointsEarned,
-        answeredAt: _answerTimestamps[question.id],
-        createdAt: DateTime.now(),
+    _examQuestions = questionsData.map((q) {
+      final question = Question.fromJson(q);
+      return ExamQuestion(
+        question: question,
+        answerChoices: answerChoicesByQuestion[question.id] ?? [],
+        supportingTexts: supportingTextsByQuestion[question.id] ?? [],
       );
     }).toList();
   }
 
-  int _calculateScore(List<UserResponse> responses) {
-    return responses.where((r) => r.isCorrect == true).length;
+  void selectAnswer(String questionId, String choiceKey) {
+    _selectedAnswers[questionId] = choiceKey;
+    notifyListeners();
   }
 
-  int calculateScore() {
-    int correctCount = 0;
-    for (var entry in _selectedAnswers.entries) {
-      final question = _questions.firstWhere((q) => q.id == entry.key);
-      final answerChoice = question.answerChoices.firstWhere(
-        (choice) => choice.choiceKey == entry.value,
-        orElse: () => question.answerChoices.first,
-      );
-      if (answerChoice.isCorrect) {
-        correctCount++;
-      }
+  Future<Map<String, dynamic>> finalize() async {
+    if (_attemptId == null) {
+      throw Exception('No attempt ID available');
     }
-    return correctCount;
-  }
 
-  void setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
+    _setLoading(true);
+    try {
+      final responses = <Map<String, dynamic>>[];
+      int correctCount = 0;
+      double totalScore = 0.0;
 
-  void clearError() {
-    _clearError();
-  }
+      for (var examQuestion in _examQuestions) {
+        final questionId = examQuestion.question.id;
+        final selectedChoiceKey = _selectedAnswers[questionId];
 
-  void _clearError() {
-    if (_errorMessage == null) return;
-    
-    _errorMessage = null;
-    notifyListeners();
-  }
+        final selectedChoice = selectedChoiceKey != null
+            ? examQuestion.answerChoices
+                .where((ac) => ac.choiceKey == selectedChoiceKey)
+                .firstOrNull
+            : null;
 
-  void _setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
+        final isCorrect = selectedChoice?.isCorrect ?? false;
+        final pointsEarned = isCorrect ? examQuestion.question.points : 0.0;
+
+        if (isCorrect) correctCount++;
+        totalScore += pointsEarned;
+
+        responses.add({
+          'attempt_id': _attemptId,
+          'question_id': questionId,
+          'answer_choice_id': selectedChoice?.id,
+          'selected_choice_key': selectedChoiceKey,
+          'is_correct': isCorrect,
+          'points_earned': pointsEarned,
+          'answered_at': DateTime.now().toIso8601String(),
+        });
+      }
+
+      await _supabase.from('user_responses').insert(responses);
+
+      final percentageScore =
+          (_examQuestions.isNotEmpty ? (correctCount / _examQuestions.length) * 100 : 0.0);
+      final durationSeconds =
+          _startedAt != null ? DateTime.now().difference(_startedAt!).inSeconds : 0;
+
+      await _supabase.from('user_exam_attempts').update({
+        'completed_at': DateTime.now().toIso8601String(),
+        'duration_seconds': durationSeconds,
+        'total_score': totalScore,
+        'percentage_score': percentageScore,
+        'status': 'completed',
+      }).eq('id', _attemptId!);
+
+      _error = null;
+      return {
+        'totalQuestions': _examQuestions.length,
+        'correctCount': correctCount,
+        'totalScore': totalScore,
+        'percentageScore': percentageScore,
+      };
+    } catch (err, stack) {
+      _error = err.toString();
+      debugPrint('Failed to finalize exam: $err');
+      debugPrintStack(stackTrace: stack);
+      rethrow;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   void _setLoading(bool value) {
-    if (_isLoading == value) return;
-    
-    _isLoading = value;
+    _loading = value;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
