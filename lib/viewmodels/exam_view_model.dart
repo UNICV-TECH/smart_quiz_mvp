@@ -260,12 +260,25 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     required String examId,
     required String courseId,
   }) async {
-    final List<dynamic> response = await _client
-        .from('question')
-        .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at, update_at')
-        .eq('id_course', courseId)
-        .eq('is_active', true)
-        .order('created_at');
+    List<dynamic> response;
+    try {
+      response = await _client
+          .from('question')
+          .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
+          .eq('id_course', courseId)
+          .eq('is_active', true)
+          .order('created_at');
+    } on PostgrestException catch (error) {
+      if (error.code != '42703') {
+        rethrow;
+      }
+      response = await _client
+          .from('question')
+          .select('id, enunciation, difficulty_level, points, is_active, created_at, update_at')
+          .eq('id_course', courseId)
+          .eq('is_active', true)
+          .order('created_at');
+    }
 
     final mapped = <Map<String, dynamic>>[];
     for (var i = 0; i < response.length; i++) {
