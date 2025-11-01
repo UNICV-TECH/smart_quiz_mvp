@@ -11,4 +11,11 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  Future<AuthRepositoryUser> updateUserName({
+    required String userId,
+    required String newName,
+  });
+  
 }
+

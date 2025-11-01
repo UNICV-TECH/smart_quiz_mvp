@@ -96,4 +96,25 @@ class AuthService {
       );
     }
   }
+  
+   Future<void> updateUserName(String newName) async {
+  if (_currentUser == null) return;
+
+  try {
+    await _repository.updateUserName(
+      userId: _currentUser!.id,
+      newName: newName,
+    );
+
+    _currentUser = AuthUser(
+      id: _currentUser!.id,
+      email: _currentUser!.email,
+      name: newName,
+    );
+  } catch (e) {
+    throw Exception('Erro ao atualizar nome: $e');
+  }
+}
+
+
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../ui/theme/app_color.dart';
 import '../ui/components/default_navbar.dart';
+import '../viewmodels/profile_view_model.dart';
+import '../services/auth_service.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -27,7 +30,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         children: [
           _buildHomeScreen(),
           _buildExploreScreen(),
-          _buildProfileContent(),
+          _buildProfileContent(), // Tela de perfil integrada
         ],
       ),
       bottomNavigationBar: CustomNavBar(
@@ -111,188 +114,193 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  // Conteúdo da tela de Perfil (sem navbar, pois já está no Scaffold principal)
+  // Tela de Perfil (usando ProfileViewModel)
   Widget _buildProfileContent() {
-    return SafeArea(
-      child: Column(
-        children: [
-          // Header com logo
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Image.asset(
-                'assets/images/logo_color.png',
-                width: 120,
-                height: 50,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 120,
-                    height: 50,
-                    color: AppColors.green,
-                    child: Center(
-                      child: Text(
-                        'Logo',
-                        style: TextStyle(color: AppColors.white),
-                      ),
+    return ChangeNotifierProvider(
+      create: (_) {
+        final authService = Provider.of<AuthService>(context, listen: false);
+        final viewModel = ProfileViewModel(authService);
+        viewModel.loadUserData();
+        return viewModel;
+      },
+      child: Consumer<ProfileViewModel>(
+        builder: (context, viewModel, _) {
+          final user = viewModel.user;
+          final userName = user?.name ?? 'Usuário';
+          final userEmail = user?.email ?? 'email@exemplo.com';
+
+          return SafeArea(
+            child: Column(
+              children: [
+                // Header com logo
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/logo_color.png',
+                      width: 120,
+                      height: 50,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 120,
+                          height: 50,
+                          color: AppColors.green,
+                          child: Center(
+                            child: Text(
+                              'Logo',
+                              style: TextStyle(color: AppColors.white),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
+                  ),
+                ),
 
-          // Conteúdo principal
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-
-                    // Card de perfil
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadow,
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
+                // Conteúdo principal
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
                         children: [
-                          // Avatar/Ícone de perfil
+                          const SizedBox(height: 20),
+
+                          // Card de perfil
                           Container(
-                            width: 70,
-                            height: 70,
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: AppColors.green,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              size: 40,
                               color: AppColors.white,
-                            ),
-                          ),
-
-                          const SizedBox(width: 16),
-
-                          // Nome, email e botão editar
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Nome com ícone de editar
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        'João Silva',
-                                        style: TextStyle(
-                                          color: AppColors.primaryDark,
-                                          fontSize: 20,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        // Navegar para edição de perfil
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.orange,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.edit,
-                                          size: 18,
-                                          color: AppColors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.shadow,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-
-                                const SizedBox(height: 8),
-
-                                // Email
-                                Text(
-                                  'joao.silva@email.com',
-                                  style: TextStyle(
-                                    color: AppColors.secondaryDark,
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                // Avatar/Ícone
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.green,
+                                    shape: BoxShape.circle,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              userName,
+                                              style: TextStyle(
+                                                color: AppColors.primaryDark,
+                                                fontSize: 20,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              // TODO: tela de edição de perfil
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.orange,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.edit,
+                                                size: 18,
+                                                color: AppColors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        userEmail,
+                                        style: TextStyle(
+                                          color: AppColors.secondaryDark,
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
+
+                          const SizedBox(height: 30),
+
+                          // Menu items
+                          _buildMenuItem(
+                            icon: Icons.help_outline,
+                            title: 'Ajuda',
+                            onTap: () {
+                              Navigator.pushNamed(context, '/help');
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildMenuItem(
+                            icon: Icons.info_outline,
+                            title: 'Sobre',
+                            onTap: () {
+                              Navigator.pushNamed(context, '/about');
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildMenuItem(
+                            icon: Icons.logout,
+                            title: 'Sair',
+                            onTap: () {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                '/login',
+                                (route) => false,
+                              );
+                            },
+                            iconColor: AppColors.red,
+                            showChevron: false,
+                          ),
+
+                          const SizedBox(height: 100),
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 30),
-
-                    // Menu items
-                    _buildMenuItem(
-                      icon: Icons.help_outline,
-                      title: 'Ajuda',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/help');
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildMenuItem(
-                      icon: Icons.info_outline,
-                      title: 'Sobre',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/about');
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildMenuItem(
-                      icon: Icons.logout,
-                      title: 'Sair',
-                      onTap: () {
-                        // Logout - volta para login
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/login',
-                          (route) => false,
-                        );
-                      },
-                      iconColor: AppColors.red,
-                      showChevron: false,
-                    ),
-
-                    const SizedBox(height: 100), // Espaço para o navbar
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
+  // Widget genérico de menu
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
@@ -320,7 +328,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
         child: Row(
           children: [
-            // Ícone
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -333,10 +340,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 size: 24,
               ),
             ),
-
             const SizedBox(width: 16),
-
-            // Título
             Expanded(
               child: Text(
                 title,
@@ -348,8 +352,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               ),
             ),
-
-            // Chevron para direita (condicional)
             if (showChevron)
               Icon(
                 Icons.chevron_right,

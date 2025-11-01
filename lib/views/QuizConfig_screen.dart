@@ -44,7 +44,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
       debugPrint('Navegação para a tela do Quiz a ser implementada aqui.');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Simulado para ${widget.course['title']} (${_selectedQuantity} questões) iniciado! (Navegação pendente)'),
+          content: Text('Simulado para ${widget.course['title']} ($_selectedQuantity questões) iniciado! (Navegação pendente)'),
           duration: const Duration(seconds: 2),
         ),
       );

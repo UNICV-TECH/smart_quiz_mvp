@@ -24,4 +24,10 @@ class DisabledAuthRepository implements AuthRepository {
       'Login temporariamente indisponível. Verifique a configuração do Supabase.',
     );
   }
+  
+  @override
+  Future<AuthRepositoryUser> updateUserName({required String userId, required String newName}) {
+    // TODO: implement updateUserName
+    throw UnimplementedError();
+  }
 }
