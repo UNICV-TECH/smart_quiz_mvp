@@ -24,6 +24,7 @@ import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
 import 'viewmodels/exam_view_model.dart';
 import 'views/exam_screen.dart';
+import 'views/exam_result_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -167,6 +168,18 @@ class MyApp extends StatelessWidget {
                 questionCount: args['questionCount'] as int,
               ),
             );
+          },
+          '/exam/result': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?;
+            if (args == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Missing result data'),
+                ),
+              );
+            }
+            return ExamResultScreen(results: args);
           },
         },
       ),

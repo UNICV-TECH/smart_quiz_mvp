@@ -14,8 +14,7 @@ class ExamViewModel extends ChangeNotifier {
           supabase != null || dataSource != null,
           'Provide either a SupabaseClient or an ExamRemoteDataSource',
         ),
-        _dataSource =
-            dataSource ?? SupabaseExamDataSource(supabase!);
+        _dataSource = dataSource ?? SupabaseExamDataSource(supabase!);
 
   final ExamRemoteDataSource _dataSource;
   final String userId;
@@ -120,6 +119,7 @@ class ExamViewModel extends ChangeNotifier {
     _setLoading(true);
     try {
       final responses = <Map<String, dynamic>>[];
+      final questionsBreakdown = <Map<String, dynamic>>[];
       int correctCount = 0;
       double totalScore = 0.0;
 
@@ -132,6 +132,13 @@ class ExamViewModel extends ChangeNotifier {
                 .where((ac) => ac.choiceKey == selectedChoiceKey)
                 .firstOrNull
             : null;
+
+        final correctChoice = examQuestion.answerChoices.firstWhere(
+          (ac) => ac.isCorrect,
+          orElse: () => examQuestion.answerChoices.isNotEmpty
+              ? examQuestion.answerChoices.first
+              : throw Exception('Question $questionId has no answer choices'),
+        );
 
         final isCorrect = selectedChoice?.isCorrect ?? false;
         final pointsEarned = isCorrect ? examQuestion.question.points : 0.0;
@@ -150,7 +157,16 @@ class ExamViewModel extends ChangeNotifier {
           'answered_at': DateTime.now().toIso8601String(),
         });
 
-
+        questionsBreakdown.add({
+          'questionId': questionId,
+          'enunciation': examQuestion.question.enunciation,
+          'selectedChoiceKey': selectedChoiceKey,
+          'selectedChoiceText': selectedChoice?.choiceText,
+          'correctChoiceKey': correctChoice.choiceKey,
+          'correctChoiceText': correctChoice.choiceText,
+          'isCorrect': isCorrect,
+          'isAnswered': selectedChoiceKey != null,
+        });
       }
 
       await _dataSource.insertResponses(responses);
@@ -158,14 +174,15 @@ class ExamViewModel extends ChangeNotifier {
       final percentageScore = (_examQuestions.isNotEmpty
           ? (correctCount / _examQuestions.length) * 100
           : 0.0);
+      final completedAt = DateTime.now();
       final durationSeconds = _startedAt != null
-          ? DateTime.now().difference(_startedAt!).inSeconds
+          ? completedAt.difference(_startedAt!).inSeconds
           : 0;
 
       await _dataSource.updateAttempt(
         _attemptId!,
         {
-          'completed_at': DateTime.now().toIso8601String(),
+          'completed_at': completedAt.toIso8601String(),
           'duration_seconds': durationSeconds,
           'total_score': totalScore,
           'percentage_score': percentageScore,
@@ -175,10 +192,15 @@ class ExamViewModel extends ChangeNotifier {
 
       _error = null;
       return {
+        'attemptId': _attemptId,
         'totalQuestions': _examQuestions.length,
         'correctCount': correctCount,
         'totalScore': totalScore,
         'percentageScore': percentageScore,
+        'durationSeconds': durationSeconds,
+        'startedAt': _startedAt?.toIso8601String(),
+        'completedAt': completedAt.toIso8601String(),
+        'questionsBreakdown': questionsBreakdown,
       };
     } catch (err, stack) {
       _error = err.toString();
@@ -257,7 +279,6 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     return response['id'] as String;
   }
 
-
   @override
   Future<List<Map<String, dynamic>>> fetchQuestions({
     required String examId,
@@ -267,7 +288,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     try {
       response = await _client
           .from('question')
-          .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
+          .select(
+              'id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
           .eq('id_course', courseId)
           .eq('is_active', true)
           .order('created_at');
@@ -277,7 +299,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
       }
       response = await _client
           .from('question')
-          .select('id, enunciation, difficulty_level, points, is_active, created_at, update_at')
+          .select(
+              'id, enunciation, difficulty_level, points, is_active, created_at, update_at')
           .eq('id_course', courseId)
           .eq('is_active', true)
           .order('created_at');
@@ -304,7 +327,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
 
     final List<dynamic> response = await _client
         .from('answerchoice')
-        .select('id, idquestion, letter, content, correctanswer, created_at, upload_at')
+        .select(
+            'id, idquestion, letter, content, correctanswer, created_at, upload_at')
         .inFilter('idquestion', questionIds);
 
     final mapped = <Map<String, dynamic>>[];
@@ -338,7 +362,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     try {
       response = await _client
           .from('supportingtext')
-          .select('id, id_question, content_type, content, display_order, created_at')
+          .select(
+              'id, id_question, content_type, content, display_order, created_at')
           .inFilter('id_question', questionIds)
           .order('display_order');
     } on PostgrestException catch (error) {
@@ -347,7 +372,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
       }
       response = await _client
           .from('supportingtext')
-          .select('id, idquestion, content_type, content, display_order, created_at')
+          .select(
+              'id, idquestion, content_type, content, display_order, created_at')
           .inFilter('idquestion', questionIds)
           .order('display_order');
     }
@@ -386,11 +412,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
   }
 
   Future<void> _ensureUserRecord(String userId) async {
-    final existing = await _client
-        .from('user')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
+    final existing =
+        await _client.from('user').select('id').eq('id', userId).maybeSingle();
 
     if (existing != null) {
       return;
@@ -419,4 +442,3 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     });
   }
 }
-

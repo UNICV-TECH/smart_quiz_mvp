@@ -463,17 +463,11 @@ class _ExamScreenState extends State<ExamScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Simulado finalizado! Você acertou ${results['correctCount']} de ${results['totalQuestions']} questões.',
-          ),
-          backgroundColor: AppColors.green,
-          duration: const Duration(seconds: 3),
-        ),
+      await Navigator.pushReplacementNamed(
+        context,
+        '/exam/result',
+        arguments: results,
       );
-
-      Navigator.pop(context, results);
     } catch (e) {
       if (!mounted) return;
 
