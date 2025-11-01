@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unicv_tech_mvp/constants/supabase_options.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
 import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
@@ -31,25 +33,80 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     });
   }
 
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _startQuiz() async {
-    if (_selectedQuantity == null) return;
+    if (_selectedQuantity == null || _isLoading) return;
 
-    setState(() { _isLoading = true; });
-    debugPrint('Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (mounted) {
-      setState(() { _isLoading = false; });
-      
+    try {
+      if (!SupabaseOptions.isConfigured) {
+        _showMessage('Supabase não está configurado nesta build.');
+        return;
+      }
+
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
+      if (user == null) {
+        _showMessage('Faça login para iniciar o simulado.');
+        return;
+      }
+
+      final courseId = (widget.course['courseId'] ?? widget.course['id']) as String?;
+      if (courseId == null || courseId.isEmpty) {
+        _showMessage('Não foi possível identificar o curso selecionado.');
+        return;
+      }
+
+      debugPrint('Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
+
+      final examRecord = await client
+          .from('exam')
+          .select('id')
+          .eq('id_course', courseId)
+          .order('created_at')
+          .limit(1)
+          .maybeSingle();
+
+      if (examRecord == null || examRecord['id'] == null) {
+        _showMessage('Nenhum simulado configurado para este curso.');
+        return;
+      }
+
+      final examId = examRecord['id'] as String;
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
       await Navigator.pushNamed(
         context,
         '/exam',
         arguments: {
-          'userId': 'REPLACE_WITH_ACTUAL_USER_ID',
-          'examId': widget.course['examId'] ?? 'REPLACE_WITH_EXAM_ID',
-          'courseId': widget.course['courseId'] ?? widget.course['id'],
+          'userId': user.id,
+          'examId': examId,
+          'courseId': courseId,
           'questionCount': int.parse(_selectedQuantity!),
         },
       );
+    } catch (error, stackTrace) {
+      debugPrint('Falha ao iniciar quiz: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _showMessage('Erro ao iniciar o simulado. Tente novamente.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

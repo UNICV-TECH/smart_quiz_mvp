@@ -64,7 +64,7 @@ class ExamViewModel extends ChangeNotifier {
 
   Future<void> _loadQuestions() async {
     final List<Map<String, dynamic>> allQuestionsData =
-        await _dataSource.fetchQuestions(examId);
+        await _dataSource.fetchQuestions(examId: examId, courseId: courseId);
 
     // Only shuffle when we actually need to sample a subset; otherwise keep the
     // original order so deterministic tests don't become flaky.
@@ -202,7 +202,10 @@ abstract class ExamRemoteDataSource {
     required DateTime startedAt,
   });
 
-  Future<List<Map<String, dynamic>>> fetchQuestions(String examId);
+  Future<List<Map<String, dynamic>>> fetchQuestions({
+    required String examId,
+    required String courseId,
+  });
 
   Future<List<Map<String, dynamic>>> fetchAnswerChoices(
     List<String> questionIds,
@@ -250,52 +253,86 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchQuestions(String examId) async {
-    final response = await _client
-        .from('questions')
-        .select('id, enunciation, difficulty_level, points')
-        .eq('exam_id', examId)
-        .eq('is_active', true);
+  Future<List<Map<String, dynamic>>> fetchQuestions({
+    required String examId,
+    required String courseId,
+  }) async {
+    final List<dynamic> response = await _client
+        .from('question')
+        .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
+        .eq('id_course', courseId)
+        .eq('is_active', true)
+        .order('created_at');
 
-    final data = response as List<dynamic>;
-    return data
-        .cast<Map<String, dynamic>>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+    final mapped = <Map<String, dynamic>>[];
+    for (var i = 0; i < response.length; i++) {
+      final item = response[i] as Map<String, dynamic>;
+      final normalized = Map<String, dynamic>.from(item);
+      normalized['exam_id'] = examId;
+      normalized['question_order'] ??= i;
+      mapped.add(normalized);
+    }
+    return mapped;
   }
 
   @override
   Future<List<Map<String, dynamic>>> fetchAnswerChoices(
     List<String> questionIds,
   ) async {
-    final response = await _client
-        .from('answer_choices')
-        .select('*')
-        .inFilter('question_id', questionIds)
-        .order('choice_order');
+    if (questionIds.isEmpty) return const [];
 
-    final data = response as List<dynamic>;
-    return data
-        .cast<Map<String, dynamic>>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+    final List<dynamic> response = await _client
+        .from('answerchoice')
+        .select('id, idquestion, letter, content, correctanswer, created_at, upload_at')
+        .inFilter('idquestion', questionIds);
+
+    final mapped = <Map<String, dynamic>>[];
+    for (final item in response) {
+      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
+      final letterRaw = (map['letter'] as String?)?.trim() ?? '';
+      final letter = letterRaw.toUpperCase();
+      final normalized = <String, dynamic>{
+        'id': map['id'],
+        'question_id': map['idquestion'],
+        'choice_key': letter.isNotEmpty ? letter : letterRaw,
+        'choice_text': map['content'],
+        'is_correct': map['correctanswer'] ?? false,
+        'choice_order': letter.isNotEmpty ? letter.codeUnitAt(0) - 64 : 0,
+        'created_at': map['created_at'] ?? map['upload_at'],
+      };
+      mapped.add(normalized);
+    }
+
+    mapped.sort((a, b) => a['choice_order'].compareTo(b['choice_order']));
+    return mapped;
   }
 
   @override
   Future<List<Map<String, dynamic>>> fetchSupportingTexts(
     List<String> questionIds,
   ) async {
-    final response = await _client
-        .from('supporting_texts')
-        .select('*')
-        .inFilter('question_id', questionIds)
+    if (questionIds.isEmpty) return const [];
+
+    final List<dynamic> response = await _client
+        .from('supportingtext')
+        .select('id, id_question, idquestion, content_type, content, display_order, created_at')
+        .inFilter('id_question', questionIds)
         .order('display_order');
 
-    final data = response as List<dynamic>;
-    return data
-        .cast<Map<String, dynamic>>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+    final mapped = <Map<String, dynamic>>[];
+    for (final item in response) {
+      final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
+      mapped.add({
+        'id': map['id'],
+        'question_id': map['id_question'] ?? map['idquestion'],
+        'content_type': map['content_type'],
+        'content': map['content'],
+        'display_order': map['display_order'] ?? 0,
+        'created_at': map['created_at'],
+      });
+    }
+
+    return mapped;
   }
 
   @override
