@@ -291,7 +291,7 @@ class _SummaryCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -299,8 +299,8 @@ class _SummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 78,
-                height: 78,
+                width: 56,
+                height: 56,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -312,7 +312,7 @@ class _SummaryCard extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   '${percentageScore.toStringAsFixed(0)}%',
-                  style: theme.textTheme.headlineMedium?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -325,12 +325,12 @@ class _SummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       'Você acertou $correctCount de $totalQuestions questões',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         color: AppColors.primaryDark,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       'Tempo total: $durationLabel',
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -342,7 +342,7 @@ class _SummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -353,6 +353,10 @@ class _SummaryCard extends StatelessWidget {
                   iconColor: const Color(0xFF3F8B3A),
                   scoreColor: const Color(0xFF3F8B3A),
                   backgroundColor: const Color(0xFFE5F4E3),
+                  height: 60,
+                  iconSize: 24,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
               ),
               Expanded(
@@ -362,6 +366,10 @@ class _SummaryCard extends StatelessWidget {
                   iconColor: const Color(0xFFD9503F),
                   scoreColor: const Color(0xFFD9503F),
                   backgroundColor: const Color(0xFFF9E5E3),
+                  height: 60,
+                  iconSize: 24,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
               ),
               Expanded(
@@ -371,6 +379,10 @@ class _SummaryCard extends StatelessWidget {
                   iconColor: AppColors.secondaryDark,
                   scoreColor: AppColors.secondaryDark,
                   backgroundColor: const Color(0xFFF1F3F0),
+                  height: 60,
+                  iconSize: 24,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
               ),
             ],
