@@ -331,18 +331,31 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
   ) async {
     if (questionIds.isEmpty) return const [];
 
-    final List<dynamic> response = await _client
-        .from('supportingtext')
-        .select('id, id_question, idquestion, content_type, content, display_order, created_at')
-        .inFilter('id_question', questionIds)
-        .order('display_order');
+    List<dynamic> response;
+    try {
+      response = await _client
+          .from('supportingtext')
+          .select('id, id_question, content_type, content, display_order, created_at')
+          .inFilter('id_question', questionIds)
+          .order('display_order');
+    } on PostgrestException catch (error) {
+      if (error.code != '42703') {
+        rethrow;
+      }
+      response = await _client
+          .from('supportingtext')
+          .select('id, idquestion, content_type, content, display_order, created_at')
+          .inFilter('idquestion', questionIds)
+          .order('display_order');
+    }
 
     final mapped = <Map<String, dynamic>>[];
     for (final item in response) {
       final map = Map<String, dynamic>.from(item as Map<String, dynamic>);
+      final questionId = map['id_question'] ?? map['idquestion'];
       mapped.add({
         'id': map['id'],
-        'question_id': map['id_question'] ?? map['idquestion'],
+        'question_id': questionId,
         'content_type': map['content_type'],
         'content': map['content'],
         'display_order': map['display_order'] ?? 0,
