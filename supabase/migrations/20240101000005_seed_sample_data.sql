@@ -1,34 +1,255 @@
 -- Sample data seed for testing
 
--- Insert sample courses
--- Check if columns exist before inserting
+-- Insert sample courses with adaptive column support
 DO $$
+DECLARE
+  v_has_description boolean;
+  v_has_is_active boolean;
+  v_has_course_key boolean;
+  v_has_title boolean;
+  v_has_icon_key boolean;
+  v_has_created_at boolean;
+  v_has_updated_at boolean;
+  v_has_update_at boolean;
+  v_insert_columns text;
+  v_values text;
 BEGIN
-  IF EXISTS (
+  SELECT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' 
-    AND table_name = 'course' 
-    AND column_name = 'description'
-  ) THEN
-    -- Insert with new columns
-    INSERT INTO public.course (name, icon, description, is_active) 
-    VALUES
-      ('Psicologia', 'psychology', 'Curso de Psicologia', TRUE),
-      ('Direito', 'law', 'Curso de Direito', TRUE),
-      ('Medicina', 'medical', 'Curso de Medicina', TRUE),
-      ('Engenharia', 'engineering', 'Curso de Engenharia', TRUE),
-      ('Administração', 'business', 'Curso de Administração', TRUE)
-    ON CONFLICT (name) DO NOTHING;
+      AND table_name = 'course' 
+      AND column_name = 'description'
+  ) INTO v_has_description;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'is_active'
+  ) INTO v_has_is_active;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'course_key'
+  ) INTO v_has_course_key;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'title'
+  ) INTO v_has_title;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'icon_key'
+  ) INTO v_has_icon_key;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'created_at'
+  ) INTO v_has_created_at;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'updated_at'
+  ) INTO v_has_updated_at;
+
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'course' 
+      AND column_name = 'update_at'
+  ) INTO v_has_update_at;
+
+  IF v_has_course_key AND v_has_title AND v_has_icon_key THEN
+    EXECUTE $sql$
+      INSERT INTO public.course (
+        course_key,
+        title,
+        name,
+        icon_key,
+        icon,
+        description,
+        is_active,
+        created_at,
+        updated_at
+      )
+      VALUES
+        ('psicologia', 'Psicologia', 'Psicologia', 'psychology_outlined', 'psychology', 'Curso de Psicologia', TRUE, NOW(), NOW()),
+        ('direito', 'Direito', 'Direito', 'gavel_outlined', 'law', 'Curso de Direito', TRUE, NOW(), NOW()),
+        ('medicina', 'Medicina', 'Medicina', 'medical_services_outlined', 'medical', 'Curso de Medicina', TRUE, NOW(), NOW()),
+        ('engenharia', 'Engenharia', 'Engenharia', 'engineering_outlined', 'engineering', 'Curso de Engenharia', TRUE, NOW(), NOW()),
+        ('administracao', 'Administração', 'Administração', 'business_center_outlined', 'business', 'Curso de Administração', TRUE, NOW(), NOW())
+      ON CONFLICT (name) DO UPDATE
+      SET
+        title = EXCLUDED.title,
+        course_key = EXCLUDED.course_key,
+        icon_key = EXCLUDED.icon_key,
+        icon = EXCLUDED.icon,
+        description = EXCLUDED.description,
+        is_active = EXCLUDED.is_active,
+        updated_at = NOW();
+    $sql$;
+  ELSIF v_has_description AND v_has_is_active THEN
+    v_insert_columns := 'name, icon, description, is_active';
+    v_values := '        (''Psicologia'', ''psychology'', ''Curso de Psicologia'', TRUE';
+
+    IF v_has_created_at THEN
+      v_insert_columns := v_insert_columns || ', created_at';
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at THEN
+      v_insert_columns := v_insert_columns || ', updated_at';
+      v_values := v_values || ', NOW()';
+    ELSIF v_has_update_at THEN
+      v_insert_columns := v_insert_columns || ', update_at';
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Direito'', ''law'', ''Curso de Direito'', TRUE';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Medicina'', ''medical'', ''Curso de Medicina'', TRUE';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Engenharia'', ''engineering'', ''Curso de Engenharia'', TRUE';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Administração'', ''business'', ''Curso de Administração'', TRUE';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || ')';
+
+    EXECUTE format(
+      'INSERT INTO public.course (%s) VALUES %s ON CONFLICT (name) DO NOTHING',
+      v_insert_columns,
+      v_values
+    );
   ELSE
-    -- Insert with original columns only
-    INSERT INTO public.course (name, icon) 
-    VALUES
-      ('Psicologia', 'psychology'),
-      ('Direito', 'law'),
-      ('Medicina', 'medical'),
-      ('Engenharia', 'engineering'),
-      ('Administração', 'business')
-    ON CONFLICT (name) DO NOTHING;
+    v_insert_columns := 'name, icon';
+    v_values := '        (''Psicologia'', ''psychology''';
+
+    IF v_has_created_at THEN
+      v_insert_columns := v_insert_columns || ', created_at';
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at THEN
+      v_insert_columns := v_insert_columns || ', updated_at';
+      v_values := v_values || ', NOW()';
+    ELSIF v_has_update_at THEN
+      v_insert_columns := v_insert_columns || ', update_at';
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Direito'', ''law''';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Medicina'', ''medical''';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Engenharia'', ''engineering''';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || '),
+        (''Administração'', ''business''';
+
+    IF v_has_created_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    IF v_has_updated_at OR v_has_update_at THEN
+      v_values := v_values || ', NOW()';
+    END IF;
+
+    v_values := v_values || ')';
+
+    EXECUTE format(
+      'INSERT INTO public.course (%s) VALUES %s ON CONFLICT (name) DO NOTHING',
+      v_insert_columns,
+      v_values
+    );
+  END IF;
+
+  IF v_has_created_at THEN
+    UPDATE public.course
+    SET created_at = COALESCE(created_at, NOW());
+  END IF;
+
+  IF v_has_updated_at THEN
+    UPDATE public.course
+    SET updated_at = COALESCE(updated_at, NOW());
+  END IF;
+
+  IF v_has_update_at THEN
+    UPDATE public.course
+    SET update_at = COALESCE(update_at, NOW());
   END IF;
 END $$;
 

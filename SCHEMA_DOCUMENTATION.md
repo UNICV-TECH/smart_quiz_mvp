@@ -45,10 +45,15 @@ Represents academic courses available for quiz preparation.
 ```sql
 CREATE TABLE public.course (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  created_at timestamp without time zone NOT NULL,
-  update_at timestamp without time zone NOT NULL,
+  created_at timestamp without time zone NOT NULL DEFAULT NOW(),
+  updated_at timestamp without time zone NOT NULL DEFAULT NOW(),
   name text NOT NULL UNIQUE,
+  title text,
+  course_key text UNIQUE,
+  description text,
   icon text NOT NULL,
+  icon_key text,
+  is_active boolean NOT NULL DEFAULT TRUE,
   CONSTRAINT course_pkey PRIMARY KEY (id)
 );
 ```
@@ -58,9 +63,14 @@ CREATE TABLE public.course (
 **Columns**:
 - `id`: UUID primary key with default random generation
 - `created_at`: Creation timestamp (without time zone)
-- `update_at`: Last update timestamp (without time zone)
-- `name`: Course name (unique)
-- `icon`: Icon identifier for UI
+- `updated_at`: Last update timestamp (without time zone)
+- `name`: Legacy course name kept for backward compatibility (unique)
+- `title`: Display name shown in the app
+- `course_key`: Normalized identifier used across the app (unique)
+- `description`: Short course summary for UI copy
+- `icon`: Legacy icon identifier stored previously
+- `icon_key`: Material icon identifier used by the Flutter UI
+- `is_active`: Visibility flag for course selection
 
 **Constraints**:
 - Primary key on `id`

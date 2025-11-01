@@ -22,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     'psychology_outlined': Icons.psychology_outlined,
     'groups_outlined': Icons.groups_outlined,
     'business_center_outlined': Icons.business_center_outlined,
+    'medical_services_outlined': Icons.medical_services_outlined,
+    'engineering_outlined': Icons.engineering_outlined,
     'monetization_on_outlined': Icons.monetization_on_outlined,
     'school_outlined': Icons.school_outlined,
     'palette_outlined': Icons.palette_outlined,
