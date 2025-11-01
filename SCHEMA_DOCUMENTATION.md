@@ -227,30 +227,45 @@ Records exam sessions taken by users.
 ```sql
 CREATE TABLE public.exam (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  created_at timestamp without time zone NOT NULL,
-  update_at timestamp without time zone NOT NULL,
-  date_start timestamp without time zone NOT NULL,
-  date_end timestamp without time zone NOT NULL,
+  created_at timestamp without time zone NOT NULL DEFAULT NOW(),
+  updated_at timestamp without time zone NOT NULL DEFAULT NOW(),
+  title text,
+  description text,
+  total_available_questions integer DEFAULT 0,
+  question_count integer,
+  time_limit_minutes integer,
+  passing_score_percentage decimal(5,2) DEFAULT 70.0,
+  is_active boolean DEFAULT TRUE,
+  date_start timestamp without time zone NOT NULL DEFAULT NOW(),
+  date_end timestamp without time zone NOT NULL DEFAULT (NOW() + INTERVAL '30 days'),
   is_completed boolean NOT NULL DEFAULT false,
-  id_user uuid NOT NULL DEFAULT gen_random_uuid(),
-  id_course uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_user uuid,
+  id_course uuid NOT NULL,
+  total_score decimal(5,2),
+  percentage_score decimal(5,2),
   CONSTRAINT exam_pkey PRIMARY KEY (id),
   CONSTRAINT exam_id_course_fkey FOREIGN KEY (id_course) REFERENCES public.course(id),
   CONSTRAINT exam_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.user(id)
 );
 ```
 
-**Purpose**: Tracks individual exam attempts including timing and completion status.
+**Purpose**: Stores the canonical quiz definition exposed to learners, including metadata consumed by the Flutter app.
 
 **Columns**:
 - `id`: UUID primary key with default random generation
-- `created_at`: Creation timestamp (without time zone)
-- `update_at`: Last update timestamp (without time zone)
-- `date_start`: Exam start timestamp
-- `date_end`: Exam end timestamp
-- `is_completed`: Boolean completion status (default false)
-- `id_user`: Foreign key to user
-- `id_course`: Foreign key to course
+- `created_at` / `updated_at`: Lifecycle timestamps maintained automatically
+- `title`: Optional display name for the quiz
+- `description`: Optional blurb describing the quiz
+- `total_available_questions`: Cached count of active questions for the linked course
+- `question_count`: Legacy aggregate retained for backwards compatibility
+- `time_limit_minutes`: Optional time limit for attempts (minutes)
+- `passing_score_percentage`: Passing threshold (defaults to 70%)
+- `is_active`: Visibility flag used by the app when listing available quizzes
+- `date_start` / `date_end`: Legacy scheduling window kept for compatibility
+- `is_completed`: Legacy completion marker
+- `id_user`: Optional owner; nullable in the current architecture
+- `id_course`: Foreign key to the associated course
+- `total_score`, `percentage_score`: Legacy aggregate metrics retained for reporting
 
 **Constraints**:
 - Primary key on `id`
@@ -258,9 +273,9 @@ CREATE TABLE public.exam (
 - Foreign key `id_course` references `course(id)`
 
 **Relationships**:
-- Many exams belong to one user
 - Many exams belong to one course
-- One exam can have many questions (via junction table)
+- Attempts (`user_exam_attempts`) reference exams by `exam_id`
+- Questions are associated via the course relationship or the legacy `examquestion` bridge
 
 ---
 

@@ -51,13 +51,14 @@ class FakeExamDataSource implements ExamRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchQuestions(String examId) async {
+  Future<List<Map<String, dynamic>>> fetchQuestions({
+    required String examId,
+    required String courseId,
+  }) async {
     if (throwOnFetchQuestions) {
       throw Exception('Query failed');
     }
-    return questions
-        .map((q) => Map<String, dynamic>.from(q))
-        .toList();
+    return questions.map((q) => Map<String, dynamic>.from(q)).toList();
   }
 
   @override

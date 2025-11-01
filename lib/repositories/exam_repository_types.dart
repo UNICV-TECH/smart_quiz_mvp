@@ -14,6 +14,8 @@ class Exam {
     required this.timeLimitMinutes,
     required this.passingScorePercentage,
     required this.isActive,
+    this.createdAt,
+    this.updatedAt,
   });
 
   final String id;
@@ -24,4 +26,7 @@ class Exam {
   final int? timeLimitMinutes;
   final double passingScorePercentage;
   final bool isActive;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 }
+
