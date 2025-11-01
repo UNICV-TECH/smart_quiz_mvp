@@ -193,6 +193,10 @@ class ExamViewModel extends ChangeNotifier {
       _error = null;
       return {
         'attemptId': _attemptId,
+        'userId': userId,
+        'examId': examId,
+        'courseId': courseId,
+        'questionCount': questionCount,
         'totalQuestions': _examQuestions.length,
         'correctCount': correctCount,
         'totalScore': totalScore,

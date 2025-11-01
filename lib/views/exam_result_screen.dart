@@ -60,6 +60,53 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  bool _canRetake() {
+    final userId = widget.results['userId'];
+    final examId = widget.results['examId'];
+    final courseId = widget.results['courseId'];
+    final questionCount = widget.results['questionCount'];
+
+    return userId is String &&
+        userId.isNotEmpty &&
+        examId is String &&
+        examId.isNotEmpty &&
+        courseId is String &&
+        courseId.isNotEmpty &&
+        questionCount is int &&
+        questionCount > 0;
+  }
+
+  void _handleRetake(BuildContext context) {
+    final userId = widget.results['userId'];
+    final examId = widget.results['examId'];
+    final courseId = widget.results['courseId'];
+    final questionCount = widget.results['questionCount'];
+
+    if (userId is! String ||
+        examId is! String ||
+        courseId is! String ||
+        questionCount is! int) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível iniciar o simulado novamente.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushReplacementNamed(
+      context,
+      '/exam',
+      arguments: {
+        'userId': userId,
+        'examId': examId,
+        'courseId': courseId,
+        'questionCount': questionCount,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,6 +244,17 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    DefaultButtonOrange(
+                      texto: 'Refazer prova',
+                      onPressed:
+                          _canRetake() ? () => _handleRetake(context) : null,
+                      largura: double.infinity,
+                      altura: 54,
+                      tipo: _canRetake()
+                          ? BotaoTipo.primario
+                          : BotaoTipo.desabilitado,
+                    ),
+                    const SizedBox(height: 12),
                     DefaultButtonOrange(
                       texto: 'Voltar ao início',
                       onPressed: () {
