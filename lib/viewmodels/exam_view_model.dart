@@ -142,7 +142,6 @@ class ExamViewModel extends ChangeNotifier {
         responses.add({
           'attempt_id': _attemptId,
           'exam_id': examId,
-          'course_id': courseId,
           'question_id': questionId,
           'answer_choice_id': selectedChoice?.id,
           'selected_choice_key': selectedChoiceKey,
@@ -150,6 +149,7 @@ class ExamViewModel extends ChangeNotifier {
           'points_earned': pointsEarned,
           'answered_at': DateTime.now().toIso8601String(),
         });
+
 
       }
 
