@@ -6,7 +6,6 @@ import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_subject_card.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
-import 'package:unicv_tech_mvp/views/QuizConfig_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final String _logoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoUrl =
+      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 
   final Map<String, IconData> _iconMap = {
     'psychology_outlined': Icons.psychology_outlined,
@@ -46,22 +46,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onCourseSelected(Course course, CourseSelectionViewModel viewModel) {
     viewModel.selectCourse(course.id);
-    
-    Navigator.push(
+
+    Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider.value(
-          value: viewModel,
-          child: QuizConfigScreen(
-            course: {
-              'id': course.id,
-              'course_key': course.courseKey,
-              'title': course.title,
-              'icon': _getIconData(course.iconKey),
-            },
-          ),
-        ),
-      ),
+      '/quiz/config',
+      arguments: {
+        'course': {
+          'id': course.id,
+          'course_key': course.courseKey,
+          'title': course.title,
+          'icon': _getIconData(course.iconKey),
+        },
+      },
     );
   }
 
@@ -72,7 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset('assets/images/FundoWhiteHome.png', fit: BoxFit.cover),
+            child: Image.asset('assets/images/FundoWhiteHome.png',
+                fit: BoxFit.cover),
           ),
           SafeArea(
             child: Column(
@@ -126,7 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Center(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
+                                  padding: const EdgeInsets.only(
+                                      top: 12.0, bottom: 20.0),
                                   child: AppLogoWidget.network(
                                     size: AppLogoSize.small,
                                     logoPath: _logoUrl,
@@ -134,18 +132,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ),
-                              const AppText('Para qual prova', style: AppTextStyle.titleSmall, color: AppColors.primaryDark),
+                              const AppText('Para qual prova',
+                                  style: AppTextStyle.titleSmall,
+                                  color: AppColors.primaryDark),
                               const SizedBox(height: 1),
                               AppText(
                                 'gostaria de se preparar?',
                                 style: AppTextStyle.subtitleMedium,
-                                color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+                                color: AppColors.secondaryDark
+                                    .withAlpha((0.8 * 255).round()),
                               ),
                               const SizedBox(height: 35),
                               Column(
                                 children: viewModel.courses.map((course) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 12.0),
+                                    padding:
+                                        const EdgeInsets.only(bottom: 12.0),
                                     child: SubjectCard(
                                       icon: Icon(
                                         _getIconData(course.iconKey),
@@ -153,8 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         size: 30,
                                       ),
                                       title: course.title,
-                                      isSelected: viewModel.selectedCourseId == course.id,
-                                      onTap: () => _onCourseSelected(course, viewModel),
+                                      isSelected: viewModel.selectedCourseId ==
+                                          course.id,
+                                      onTap: () =>
+                                          _onCourseSelected(course, viewModel),
                                     ),
                                   );
                                 }).toList(),

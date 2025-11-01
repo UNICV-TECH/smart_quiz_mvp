@@ -9,7 +9,6 @@ import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
 
-
 class QuizConfigScreen extends StatefulWidget {
   final Map<String, dynamic> course;
 
@@ -25,7 +24,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   int _navBarIndex = 0;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
-  final String _logoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoUrl =
+      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 
   void _onQuantitySelected(String quantity) {
     setState(() {
@@ -59,13 +59,15 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
         return;
       }
 
-      final courseId = (widget.course['courseId'] ?? widget.course['id']) as String?;
+      final courseId =
+          (widget.course['courseId'] ?? widget.course['id']) as String?;
       if (courseId == null || courseId.isEmpty) {
         _showMessage('Não foi possível identificar o curso selecionado.');
         return;
       }
 
-      debugPrint('Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
+      debugPrint(
+          'Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
 
       final examRecord = await client
           .from('exam')
@@ -135,7 +137,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
+                          padding:
+                              const EdgeInsets.only(top: 15.0, bottom: 5.0),
                           child: Center(
                             child: AppLogoWidget.network(
                               size: AppLogoSize.small,
@@ -151,7 +154,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                             child: DefaultButtonArrowBack(
                               onPressed: () => Navigator.of(context).pop(),
                             ),
-                          ),  
+                          ),
                         ),
                         const Spacer(flex: 1),
                         const AppText(
@@ -163,7 +166,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                         AppText(
                           'Alinhe ao seu tempo disponível!',
                           style: AppTextStyle.subtitleMedium,
-                          color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+                          color: AppColors.secondaryDark
+                              .withAlpha((0.8 * 255).round()),
                         ),
                         const SizedBox(height: 30),
                         SelectionBox(
@@ -172,12 +176,16 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                           onOptionSelected: _onQuantitySelected,
                         ),
                         const Spacer(flex: 2),
-                         _isLoading
-                            ? const Center(child: CircularProgressIndicator(color: AppColors.orange))
+                        _isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                    color: AppColors.orange))
                             : DefaultButtonOrange(
                                 texto: 'Iniciar',
                                 onPressed: isButtonEnabled ? _startQuiz : null,
-                                tipo: isButtonEnabled ? BotaoTipo.primario : BotaoTipo.desabilitado,
+                                tipo: isButtonEnabled
+                                    ? BotaoTipo.primario
+                                    : BotaoTipo.desabilitado,
                               ),
                         const SizedBox(height: 35),
                       ],
@@ -187,9 +195,15 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                 CustomNavBar(
                   selectedIndex: _navBarIndex,
                   onItemTapped: (index) {
-                    setState(() { _navBarIndex = index; });
+                    setState(() {
+                      _navBarIndex = index;
+                    });
                     if (index == 0) {
-                       Navigator.popUntil(context, ModalRoute.withName('/home'));
+                      Navigator.popUntil(
+                        context,
+                        (route) =>
+                            route.settings.name == '/main' || route.isFirst,
+                      );
                     } else {
                       debugPrint("NavBar Tapped: $index");
                     }

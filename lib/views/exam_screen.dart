@@ -258,8 +258,36 @@ class _ExamScreenState extends State<ExamScreen> {
         child: Row(
           children: [
             DefaultButtonArrowBack(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                final shouldExit = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) {
+                    return AlertDialog(
+                      title: const Text('Sair do simulado?'),
+                      content: const Text(
+                        'Ao sair agora, sua tentativa não será salva.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogContext, false),
+                          child: const Text('Continuar'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(dialogContext, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.green,
+                            foregroundColor: AppColors.white,
+                          ),
+                          child: const Text('Sair'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (shouldExit == true && mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
             Expanded(
@@ -463,7 +491,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
       if (!mounted) return;
 
-      await Navigator.pushReplacementNamed(
+      await Navigator.popAndPushNamed(
         context,
         '/exam/result',
         arguments: results,

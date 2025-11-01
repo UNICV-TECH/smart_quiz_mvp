@@ -235,6 +235,20 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                           : BotaoTipo.desabilitado,
                     ),
                     const SizedBox(height: 12),
+                    DefaultButtonOrange(
+                      texto: 'Voltar ao início',
+                      onPressed: () {
+                        Navigator.popUntil(
+                          context,
+                          (route) =>
+                              route.settings.name == '/main' || route.isFirst,
+                        );
+                      },
+                      largura: double.infinity,
+                      altura: 54,
+                      tipo: BotaoTipo.secundario,
+                    ),
+                    const SizedBox(height: 12),
                     TextButton(
                       onPressed: () => Navigator.pop(context, widget.results),
                       child: const Text(
