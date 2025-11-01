@@ -17,9 +17,15 @@ import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
 import 'repositories/auth/disabled_auth_repository.dart';
 import 'repositories/auth/supabase_auth_repository.dart';
+import 'repositories/course_repository.dart';
+import 'repositories/supabase_course_repository.dart';
 import 'services/auth_service.dart';
 import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
+import 'viewmodels/exam_view_model.dart';
+import 'views/exam_screen.dart';
+import 'views/exam_result_screen.dart';
+import 'views/quiz_config_screen_wrapper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,6 +103,14 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<AuthRepository>.value(value: authRepository),
         Provider<AuthService>.value(value: authService),
+        Provider<CourseRepository?>(
+          create: (_) {
+            if (!SupabaseOptions.isConfigured) {
+              return null;
+            }
+            return SupabaseCourseRepository(client: Supabase.instance.client);
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'UniCV Tech',
@@ -130,6 +144,57 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
           '/help': (context) => const HelpScreen(),
           '/about': (context) => const AboutScreen(),
+          '/exam': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?;
+            if (args == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Missing exam arguments'),
+                ),
+              );
+            }
+            return ChangeNotifierProvider(
+              create: (context) => ExamViewModel(
+                supabase: Supabase.instance.client,
+                userId: args['userId'] as String,
+                examId: args['examId'] as String,
+                courseId: args['courseId'] as String,
+                questionCount: args['questionCount'] as int,
+              ),
+              child: ExamScreen(
+                userId: args['userId'] as String,
+                examId: args['examId'] as String,
+                courseId: args['courseId'] as String,
+                questionCount: args['questionCount'] as int,
+              ),
+            );
+          },
+          '/quiz/config': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?;
+            final course = args?['course'] as Map<String, dynamic>?;
+            if (course == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Missing course data'),
+                ),
+              );
+            }
+            return QuizConfigScreenWrapper(course: course);
+          },
+          '/exam/result': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?;
+            if (args == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Missing result data'),
+                ),
+              );
+            }
+            return ExamResultScreen(results: args);
+          },
         },
       ),
     );

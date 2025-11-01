@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unicv_tech_mvp/constants/supabase_options.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
+import 'package:unicv_tech_mvp/ui/components/default_inline_message.dart';
 import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
+import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
-
 
 class QuizConfigScreen extends StatefulWidget {
   final Map<String, dynamic> course;
@@ -21,34 +24,119 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   String? _selectedQuantity;
   bool _isLoading = false;
   int _navBarIndex = 0;
+  String? _feedbackMessage;
+  FeedbackSeverity? _feedbackSeverity;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
-  final String _logoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoUrl =
+      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 
   void _onQuantitySelected(String quantity) {
     setState(() {
       _selectedQuantity = quantity;
+      _feedbackMessage = null;
+      _feedbackSeverity = null;
+    });
+  }
+
+  void _setFeedback(String message, FeedbackSeverity severity) {
+    if (!mounted) return;
+    setState(() {
+      _feedbackMessage = message;
+      _feedbackSeverity = severity;
+    });
+  }
+
+  void _clearFeedback() {
+    if (!mounted) return;
+    if (_feedbackMessage == null && _feedbackSeverity == null) {
+      return;
+    }
+    setState(() {
+      _feedbackMessage = null;
+      _feedbackSeverity = null;
     });
   }
 
   void _startQuiz() async {
-    if (_selectedQuantity == null) return;
+    if (_selectedQuantity == null || _isLoading) return;
 
-    setState(() { _isLoading = true; });
-    debugPrint('Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
+    _clearFeedback();
 
-    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      _isLoading = true;
+    });
 
-    if (mounted) {
-      setState(() { _isLoading = false; });
-      debugPrint('Navegação para a tela do Quiz a ser implementada aqui.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Simulado para ${widget.course['title']} (${_selectedQuantity} questões) iniciado! (Navegação pendente)'),
-          duration: const Duration(seconds: 2),
-        ),
+    try {
+      if (!SupabaseOptions.isConfigured) {
+        _setFeedback(
+          'Supabase não está configurado nesta build.',
+          FeedbackSeverity.error,
+        );
+        return;
+      }
+
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
+      if (user == null) {
+        _setFeedback('Faça login para iniciar o simulado.',
+            FeedbackSeverity.error);
+        return;
+      }
+
+      final courseId =
+          (widget.course['courseId'] ?? widget.course['id']) as String?;
+      if (courseId == null || courseId.isEmpty) {
+        _setFeedback('Não foi possível identificar o curso selecionado.',
+            FeedbackSeverity.error);
+        return;
+      }
+
+      debugPrint(
+          'Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
+
+      final examRecord = await client
+          .from('exam')
+          .select('id')
+          .eq('id_course', courseId)
+          .order('created_at')
+          .limit(1)
+          .maybeSingle();
+
+      if (examRecord == null || examRecord['id'] == null) {
+        _setFeedback('Nenhum simulado configurado para este curso.',
+            FeedbackSeverity.warning);
+        return;
+      }
+
+      final examId = examRecord['id'] as String;
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
+      await Navigator.pushNamed(
+        context,
+        '/exam',
+        arguments: {
+          'userId': user.id,
+          'examId': examId,
+          'courseId': courseId,
+          'questionCount': int.parse(_selectedQuantity!),
+        },
       );
-   
+    } catch (error, stackTrace) {
+      debugPrint('Falha ao iniciar quiz: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setFeedback('Erro ao iniciar o simulado. Tente novamente.',
+          FeedbackSeverity.error);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -58,6 +146,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      extendBody: true,
       body: Stack(
         children: [
           Positioned.fill(
@@ -77,7 +166,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
+                          padding:
+                              const EdgeInsets.only(top: 15.0, bottom: 5.0),
                           child: Center(
                             child: AppLogoWidget.network(
                               size: AppLogoSize.small,
@@ -93,7 +183,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                             child: DefaultButtonArrowBack(
                               onPressed: () => Navigator.of(context).pop(),
                             ),
-                          ),  
+                          ),
                         ),
                         const Spacer(flex: 1),
                         const AppText(
@@ -105,7 +195,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                         AppText(
                           'Alinhe ao seu tempo disponível!',
                           style: AppTextStyle.subtitleMedium,
-                          color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+                          color: AppColors.secondaryDark
+                              .withAlpha((0.8 * 255).round()),
                         ),
                         const SizedBox(height: 30),
                         SelectionBox(
@@ -113,13 +204,26 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                           initialOption: _selectedQuantity,
                           onOptionSelected: _onQuantitySelected,
                         ),
+                        if (_feedbackMessage != null &&
+                            _feedbackSeverity != null) ...[
+                          const SizedBox(height: 20),
+                          DefaultInlineMessage(
+                            message: _feedbackMessage!,
+                            severity: _feedbackSeverity!,
+                            onDismissed: _clearFeedback,
+                          ),
+                        ],
                         const Spacer(flex: 2),
-                         _isLoading
-                            ? const Center(child: CircularProgressIndicator(color: AppColors.orange))
+                        _isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                    color: AppColors.orange))
                             : DefaultButtonOrange(
                                 texto: 'Iniciar',
                                 onPressed: isButtonEnabled ? _startQuiz : null,
-                                tipo: isButtonEnabled ? BotaoTipo.primario : BotaoTipo.desabilitado,
+                                tipo: isButtonEnabled
+                                    ? BotaoTipo.primario
+                                    : BotaoTipo.desabilitado,
                               ),
                         const SizedBox(height: 35),
                       ],
@@ -127,12 +231,17 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                   ),
                 ),
                 CustomNavBar(
-                  selectedIndex: _navBarIndex, // Informa qual item está ativo
-                  onItemTapped: (index) {      // Define o que acontece ao tocar
-                    setState(() { _navBarIndex = index; }); // Atualiza o item ativo
+                  selectedIndex: _navBarIndex,
+                  onItemTapped: (index) {
+                    setState(() {
+                      _navBarIndex = index;
+                    });
                     if (index == 0) {
-                      // Se clicar em Início, volta para a HomeScreen
-                       Navigator.popUntil(context, ModalRoute.withName('/home'));
+                      Navigator.popUntil(
+                        context,
+                        (route) =>
+                            route.settings.name == '/main' || route.isFirst,
+                      );
                     } else {
                       debugPrint("NavBar Tapped: $index");
                     }
@@ -146,4 +255,3 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     );
   }
 }
-

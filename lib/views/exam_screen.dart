@@ -1,309 +1,295 @@
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/services/repositorie/question_repository.dart';
+import 'package:provider/provider.dart';
+import 'package:unicv_tech_mvp/models/exam_history.dart';
 import 'package:unicv_tech_mvp/ui/components/default_radio_group.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 import 'package:unicv_tech_mvp/ui/components/default_question_navigation.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
+import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
+import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
 
 class ExamScreen extends StatefulWidget {
-  const ExamScreen({super.key});
+  final String userId;
+  final String examId;
+  final String courseId;
+  final int questionCount;
+
+  const ExamScreen({
+    super.key,
+    required this.userId,
+    required this.examId,
+    required this.courseId,
+    required this.questionCount,
+  });
 
   @override
   State<ExamScreen> createState() => _ExamScreenState();
 }
 
 class _ExamScreenState extends State<ExamScreen> {
-  // Estado para armazenar respostas selecionadas: questionId -> option (A, B, C, etc)
-  Map<int, String> selectedAnswers = {};
-  
-  // Estado da questão atual
   int currentQuestionIndex = 0;
-  
-  // ScrollController para controlar a rolagem da barra de questões
   final ScrollController _questionScrollController = ScrollController();
 
-  // Questões do simulado
-  final Exam exam = Exam(
-    questions: [
-      Question(
-        id: 1,
-        enunciation: 
-            'Uma empresa de e-commerce notou que seus usuários estão abandonando o '
-            'carrinho de compras no checkout, especialmente quando a página exige '
-            'muitos campos de preenchimento. O time de design foi chamado para propor '
-            'melhorias de UX. Qual das seguintes ações seria a mais eficaz para resolver '
-            'esse problema?',
-        alternatives: [
-          'Aumentar a quantidade de campos obrigatórios para coleta de mais dados.',
-          'Implementar um indicador de progresso da página e reduzir a quantidade de campos obrigatórios ao mínimo.',
-          'Substituir o formulário por um texto explicativo sobre a importância de completar o cadastro.',
-          'Incluir pop-ups adicionais para orientar o usuário sobre o preenchimento.',
-          'Exigir que o usuário crie uma conta antes de visualizar qualquer produto no site.',
-        ],
-        correctAnswer: 'B',
-      ),
-      Question(
-        id: 2,
-        enunciation: 
-            'Em uma interface mobile, qual princípio de design é mais importante para '
-            'garantir uma boa experiência do usuário?',
-        alternatives: [
-          'Usar a maior quantidade possível de cores para tornar a interface mais atrativa.',
-          'Deixar textos pequenos para caber mais informações na tela.',
-          'Garantir que botões e áreas clicáveis tenham tamanho mínimo de 44x44 pixels.',
-          'Eliminar todos os espaços em branco para maximizar o conteúdo.',
-          'Utilizar fonte serifada para melhorar a legibilidade em telas pequenas.',
-        ],
-      ),
-      Question(
-        id: 3,
-        enunciation: 
-            'Uma aplicação web está com problemas de performance. O usuário reclama '
-            'que as páginas demoram muito para carregar. Qual é a primeira ação que deve '
-            'ser tomada?',
-        alternatives: [
-          'Adicionar mais imagens e animações para tornar a página mais atraente.',
-          'Otimizar o código, minimizar recursos e usar técnicas de carregamento assíncrono.',
-          'Aumentar o tamanho dos arquivos para garantir melhor qualidade.',
-          'Adicionar mais plugins e widgets à página.',
-          'Reduzir a quantidade de conteúdo visível na primeira visualização.',
-        ],
-      ),
-      Question(
-        id: 4,
-        enunciation: 
-            'No contexto de acessibilidade web, o que significa o termo "contraste de cores"?',
-        alternatives: [
-          'A diferença de cores entre elementos para criar uma aparência mais bonita.',
-          'A diferença de luminosidade entre texto e fundo, necessária para legibilidade.',
-          'O uso de cores complementares no círculo cromático.',
-          'A variação de tons de uma mesma cor.',
-          'O número de cores diferentes usadas em uma interface.',
-        ],
-      ),
-      Question(
-        id: 5,
-        enunciation: 
-            'Qual é o objetivo principal de realizar testes de usabilidade?',
-        alternatives: [
-          'Verificar se o código está sem bugs e funcionando perfeitamente.',
-          'Testar a velocidade de carregamento das páginas.',
-          'Identificar problemas de navegação e experiência do usuário antes do lançamento.',
-          'Garantir que todos os recursos estão implementados.',
-          'Verificar se a paleta de cores está harmoniosa.',
-        ],
-      ),
-      Question(
-        id: 6,
-        enunciation: 
-            'Em desenvolvimento web, o que significa o termo "responsividade"?',
-        alternatives: [
-          'Garantir que a aplicação funciona apenas em dispositivos móveis.',
-          'Adaptar o layout e funcionalidades para diferentes tamanhos de tela.',
-          'Criar versões separadas para cada dispositivo.',
-          'Usar apenas fontes grandes para garantir legibilidade.',
-          'Limitar o conteúdo para caber em qualquer tela.',
-        ],
-      ),
-      Question(
-        id: 7,
-        enunciation: 
-            'Qual é a função principal de um wireframe em design?',
-        alternatives: [
-          'Mostrar a paleta de cores final da interface.',
-          'Definir a estrutura e layout básico sem detalhes visuais.',
-          'Criar animações e transições.',
-          'Implementar a versão final da aplicação.',
-          'Testar o desempenho da página.',
-        ],
-      ),
-      Question(
-        id: 8,
-        enunciation: 
-            'O que é feedback visual em interfaces?',
-        alternatives: [
-          'Mensagens de erro apenas.',
-          'Informações fornecidas ao usuário sobre ações e estados do sistema.',
-          'Alertas sonoros quando há erro.',
-          'Notificações via email.',
-          'Logs de sistema para desenvolvedores.',
-        ],
-      ),
-      Question(
-        id: 9,
-        enunciation: 
-            'Qual técnica é mais eficaz para reduzir a taxa de rejeição em páginas web?',
-        alternatives: [
-          'Aumentar o tempo de carregamento com mais imagens.',
-          'Melhorar o tempo de carregamento e oferecer conteúdo relevante rapidamente.',
-          'Reduzir a quantidade de conteúdo.',
-          'Remover todas as animações.',
-          'Usar pop-ups para prender atenção.',
-        ],
-      ),
-      Question(
-        id: 10,
-        enunciation: 
-            'No design de formulários, qual é a melhor prática para campos obrigatórios?',
-        alternatives: [
-          'Não sinalizar, deixar o usuário descobrir ao tentar enviar.',
-          'Marcar com asterisco (*) e manter consistência em todo formulário.',
-          'Usar cores muito chamativas que distraem.',
-          'Colocar todos os campos obrigatórios no topo.',
-          'Ocultar campos não obrigatórios completamente.',
-        ],
-      ),
-      Question(
-        id: 11,
-        enunciation: 
-            'O que significa "progressive disclosure" em UX?',
-        alternatives: [
-          'Mostrar todas as informações de uma vez.',
-          'Apresentar informações gradualmente conforme o usuário precisa.',
-          'Ocultar funcionalidades avançadas permanentemente.',
-          'Sobrecarregar o usuário com opções.',
-          'Nunca revelar funcionalidades extras.',
-        ],
-      ),
-      Question(
-        id: 12,
-        enunciation: 
-            'Qual é o tamanho recomendado para áreas clicáveis em interfaces mobile?',
-        alternatives: [
-          'Menor que 20x20 pixels.',
-          'Mínimo de 44x44 pixels para facilitar o toque.',
-          'Qualquer tamanho, desde que seja bonito.',
-          'Apenas texto clicável.',
-          'Conforme o tamanho da tela.',
-        ],
-      ),
-      Question(
-        id: 13,
-        enunciation: 
-            'O que é "above the fold" em design web?',
-        alternatives: [
-          'A parte da página que requer scroll para ser vista.',
-          'A área visível sem rolar a página, considerada mais importante.',
-          'O rodapé do site.',
-          'A versão mobile apenas.',
-          'O menu de navegação.',
-        ],
-      ),
-      Question(
-        id: 14,
-        enunciation: 
-            'Qual é o objetivo das hierarquias visuais em design?',
-        alternatives: [
-          'Criar confusão visual.',
-          'Guiar o olho do usuário e priorizar informações importantes.',
-          'Usar apenas uma cor.',
-          'Remover todo o destaque.',
-          'Deixar tudo do mesmo tamanho.',
-        ],
-      ),
-      Question(
-        id: 15,
-        enunciation: 
-            'O que significa "affordance" em design de interfaces?',
-        alternatives: [
-          'Criar elementos que sugerem sua função através da aparência.',
-          'Adicionar instruções textuais para tudo.',
-          'Usar apenas ícones sem texto.',
-          'Fazer elementos parecerem clicáveis quando não são.',
-          'Ocultar funcionalidades para parecer moderno.',
-        ],
-      ),
-    ],
-  );
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = context.read<ExamViewModel>();
+      viewModel.initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final currentQuestion = exam.questions[currentQuestionIndex];
-    final currentAnswer = selectedAnswers[currentQuestion.id];
-    final isFirstQuestion = currentQuestionIndex == 0;
-    final isLastQuestion = currentQuestionIndex == exam.questions.length - 1;
+    return Consumer<ExamViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.loading && viewModel.examQuestions.isEmpty) {
+          return Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                  ],
+                ),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.green,
+                ),
+              ),
+            ),
+          );
+        }
 
-    // Margem horizontal padrão para toda a tela
-    const horizontalPadding = 24.0;
-    
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE8F5ED), // Verde claro pastel uniforme
-              Color(0xFFE8F5ED),
-              Color(0xFFE8F5ED),
-            ],
-          ),
-        ),
-        child: Column(
-          children: [
-            _buildAppBar(horizontalPadding),
-            
-            // Indicador de progresso de questões
-            _buildProgressIndicator(horizontalPadding),
-            
-            // Conteúdo da questão
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
+        if (viewModel.error != null && viewModel.examQuestions.isEmpty) {
+          return Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                  ],
+                ),
+              ),
+              child: Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Título da questão
-                    _buildQuestionTitle(currentQuestionIndex + 1),
-                    
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.primaryDark,
+                    ),
                     const SizedBox(height: 16),
-                    
-                    // Enunciado com justificação de texto
-                    _buildEnunciation(currentQuestion.enunciation),
-                    
+                    Text(
+                      'Erro ao carregar o exame',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        viewModel.error!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.primaryDark,
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
-                    
-                    // Alternativas (Radio Group)
-                    AlternativeSelectorVertical(
-                      labels: currentQuestion.alternatives,
-                      selectedOption: currentAnswer,
-                      onChanged: (option) {
-                        setState(() {
-                          selectedAnswers[currentQuestion.id] = option;
-                        });
-                      },
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        foregroundColor: AppColors.white,
+                      ),
+                      child: const Text('Voltar'),
                     ),
                   ],
                 ),
               ),
             ),
-            
-            // Botões de navegação
-            _buildNavigationButtons(
-              isFirstQuestion: isFirstQuestion,
-              isLastQuestion: isLastQuestion,
-              horizontalPadding: horizontalPadding,
+          );
+        }
+
+        if (viewModel.examQuestions.isEmpty) {
+          return Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.quiz_outlined,
+                      size: 64,
+                      color: AppColors.primaryDark,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Nenhuma questão disponível',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green,
+                        foregroundColor: AppColors.white,
+                      ),
+                      child: const Text('Voltar'),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        final currentExamQuestion =
+            viewModel.examQuestions[currentQuestionIndex];
+        final currentAnswer =
+            viewModel.selectedAnswers[currentExamQuestion.question.id];
+        final isFirstQuestion = currentQuestionIndex == 0;
+        final isLastQuestion =
+            currentQuestionIndex == viewModel.examQuestions.length - 1;
+
+        const horizontalPadding = 24.0;
+
+        return Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFE8F5ED),
+                  Color(0xFFE8F5ED),
+                  Color(0xFFE8F5ED),
+                ],
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildAppBar(horizontalPadding),
+                _buildProgressIndicator(horizontalPadding,
+                    viewModel.examQuestions.length, viewModel),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: horizontalPadding, vertical: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildQuestionTitle(currentQuestionIndex + 1),
+                        const SizedBox(height: 16),
+                        _buildEnunciation(
+                            currentExamQuestion.question.enunciation),
+                        if (currentExamQuestion.supportingTexts.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          ...currentExamQuestion.supportingTexts
+                              .map((st) => _buildSupportingText(st)),
+                        ],
+                        const SizedBox(height: 24),
+                        AlternativeSelectorVertical(
+                          labels: currentExamQuestion.answerChoices
+                              .map((ac) => ac.choiceText)
+                              .toList(),
+                          selectedOption: currentAnswer,
+                          onChanged: (option) {
+                            viewModel.selectAnswer(
+                                currentExamQuestion.question.id, option);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildNavigationButtons(
+                  isFirstQuestion: isFirstQuestion,
+                  isLastQuestion: isLastQuestion,
+                  horizontalPadding: horizontalPadding,
+                  viewModel: viewModel,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  // AppBar com logo e botão voltar
   Widget _buildAppBar(double horizontalPadding) {
     return SafeArea(
       bottom: false,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
+        padding:
+            EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
         child: Row(
           children: [
             DefaultButtonArrowBack(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                final shouldExit = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) {
+                    return AlertDialog(
+                      title: const Text('Sair do simulado?'),
+                      content: const Text(
+                        'Ao sair agora, sua tentativa não será salva.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogContext, false),
+                          child: const Text('Continuar'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(dialogContext, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.green,
+                            foregroundColor: AppColors.white,
+                          ),
+                          child: const Text('Sair'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (shouldExit == true && mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
             Expanded(
@@ -314,7 +300,6 @@ class _ExamScreenState extends State<ExamScreen> {
                 ),
               ),
             ),
-            // Espaço balanceado para o leading
             const SizedBox(width: 40),
           ],
         ),
@@ -322,44 +307,94 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  // Indicador de progresso de questões
-  Widget _buildProgressIndicator(double horizontalPadding) {
+  Widget _buildProgressIndicator(
+      double horizontalPadding, int totalQuestions, ExamViewModel viewModel) {
+    final answeredQuestions = viewModel.selectedAnswers.keys
+        .map((qId) {
+          final index =
+              viewModel.examQuestions.indexWhere((eq) => eq.question.id == qId);
+          return index + 1;
+        })
+        .where((index) => index > 0)
+        .toSet();
+
+    final answeredCount = answeredQuestions.length;
+    final double progress = totalQuestions == 0
+        ? 0
+        : answeredCount.clamp(0, totalQuestions) / totalQuestions;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
-          child: SingleChildScrollView(
-            controller: _questionScrollController,
-            scrollDirection: Axis.horizontal,
-            child: QuestionNavigation(
-              totalQuestions: exam.questions.length,
-              currentQuestion: currentQuestionIndex + 1,
-              onQuestionSelected: (questionNumber) {
-                setState(() {
-                  currentQuestionIndex = questionNumber - 1;
-                  // Scroll automático após mudança de questão
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToQuestion();
-                  });
-                });
-              },
-              answeredQuestions: selectedAnswers.keys.toSet(),
-            ),
+          padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Questões',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                  Text(
+                    '$answeredCount de $totalQuestions respondidas',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.greyText,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                controller: _questionScrollController,
+                scrollDirection: Axis.horizontal,
+                child: QuestionNavigation(
+                  totalQuestions: totalQuestions,
+                  currentQuestion: currentQuestionIndex + 1,
+                  onQuestionSelected: (questionNumber) {
+                    setState(() {
+                      currentQuestionIndex = questionNumber - 1;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollToQuestion(
+                          totalQuestions: totalQuestions,
+                          horizontalPadding: horizontalPadding,
+                        );
+                      });
+                    });
+                  },
+                  answeredQuestions: answeredQuestions,
+                ),
+              ),
+            ],
           ),
         ),
-        // Divider com margem
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Container(
-            height: 1.0,
-            color: AppColors.green,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6.0,
+              backgroundColor: AppColors.green.withValues(alpha: 0.15),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.green),
+              semanticsLabel: 'Progresso de respostas',
+              semanticsValue:
+                  '$answeredCount de $totalQuestions questões respondidas',
+            ),
           ),
         ),
       ],
     );
   }
 
-  // Título da questão
   Widget _buildQuestionTitle(int questionNumber) {
     return Text(
       'Questão $questionNumber',
@@ -371,7 +406,6 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  // Enunciado com justificação de texto
   Widget _buildEnunciation(String enunciation) {
     return Text(
       enunciation,
@@ -384,19 +418,43 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  // Botões de navegação
+  Widget _buildSupportingText(SupportingText supportingText) {
+    if (supportingText.contentType == 'text') {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: AppColors.white.withAlpha((0.5 * 255).round()),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Text(
+            supportingText.content,
+            style: const TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: AppColors.primaryDark,
+            ),
+          ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
   Widget _buildNavigationButtons({
     required bool isFirstQuestion,
     required bool isLastQuestion,
     required double horizontalPadding,
+    required ExamViewModel viewModel,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
+      padding:
+          EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
       child: SafeArea(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Botão Anterior
             if (!isFirstQuestion)
               DefaultButtonBack(
                 text: 'Anterior',
@@ -406,33 +464,34 @@ class _ExamScreenState extends State<ExamScreen> {
                     setState(() {
                       currentQuestionIndex--;
                     });
-                    // Scroll automático após mudança de questão
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToQuestion();
+                      _scrollToQuestion(
+                        totalQuestions: viewModel.examQuestions.length,
+                        horizontalPadding: horizontalPadding,
+                      );
                     });
                   }
                 },
               )
             else
-              const SizedBox(width: 90), // Espaço vazio para manter layout
-
-            // Botão Próxima
+              const SizedBox(width: 90),
             DefaultButtonForward(
               text: isLastQuestion ? 'Finalizar' : 'Próxima',
               icon: Icons.arrow_forward_ios,
               onPressed: () {
                 if (isLastQuestion) {
-                  // Finalizar simulado
-                  _showFinishDialog();
+                  _showFinishDialog(viewModel);
                 } else {
-                  // Próxima questão com scroll automático
-                  if (currentQuestionIndex < exam.questions.length - 1) {
+                  if (currentQuestionIndex <
+                      viewModel.examQuestions.length - 1) {
                     setState(() {
                       currentQuestionIndex++;
                     });
-                    // Scroll automático após mudança de questão
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToQuestion();
+                      _scrollToQuestion(
+                        totalQuestions: viewModel.examQuestions.length,
+                        horizontalPadding: horizontalPadding,
+                      );
                     });
                   }
                 }
@@ -444,17 +503,17 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  // Dialog de finalização
-  void _showFinishDialog() {
-    final answeredCount = selectedAnswers.length;
-    
+  void _showFinishDialog(ExamViewModel viewModel) {
+    final answeredCount = viewModel.selectedAnswers.length;
+    final totalQuestions = viewModel.examQuestions.length;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Finalizar Simulado'),
           content: Text(
-            'Você respondeu $answeredCount de ${exam.questions.length} questões. '
+            'Você respondeu $answeredCount de $totalQuestions questões. '
             'Deseja finalizar o simulado?',
           ),
           actions: [
@@ -465,8 +524,7 @@ class _ExamScreenState extends State<ExamScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                // Enviar as respostas ao backend
-                _submitExam();
+                _submitExam(viewModel);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.green,
@@ -480,30 +538,92 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  // Enviar respostas (mock)
-  void _submitExam() {
-    // Apenas navegar de volta
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Simulado finalizado com sucesso!'),
-        backgroundColor: AppColors.green,
-      ),
-    );
-    Navigator.pop(context);
+  Future<void> _submitExam(ExamViewModel viewModel) async {
+    try {
+      final results = await viewModel.finalize();
+
+      if (!mounted) return;
+
+      await Navigator.popAndPushNamed(
+        context,
+        '/exam/result',
+        arguments: results,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      final message = viewModel.error ??
+          'Erro ao finalizar o simulado. Tente novamente.';
+      final action = await _showSubmissionErrorDialog(message);
+
+      if (!mounted) return;
+
+      switch (action) {
+        case _SubmissionAction.retry:
+          _submitExam(viewModel);
+          break;
+        case _SubmissionAction.exit:
+          Navigator.of(context).pop();
+          break;
+        default:
+          break;
+      }
+    }
   }
 
-  // Método para rolar até a questão atual
-  void _scrollToQuestion() {
-    if (_questionScrollController.hasClients) {
-      // Calcula a posição baseada na questão atual
-      // Cada questão tem 40px (largura) + 6px (margem 3px de cada lado) = 46px
-      final double targetPosition = (currentQuestionIndex * 46.0) - 100.0;
-      _questionScrollController.animateTo(
-        targetPosition.clamp(0.0, _questionScrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+  Future<_SubmissionAction?> _showSubmissionErrorDialog(String message) {
+    return showDialog<_SubmissionAction>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return DefaultFeedbackDialog(
+          title: 'Erro ao finalizar simulado',
+          message: message,
+          severity: FeedbackSeverity.error,
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(_SubmissionAction.exit),
+              child: const Text('Sair'),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(_SubmissionAction.retry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.green,
+                foregroundColor: AppColors.white,
+              ),
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _scrollToQuestion({
+    required int totalQuestions,
+    required double horizontalPadding,
+  }) {
+    if (!_questionScrollController.hasClients) {
+      return;
     }
+
+    final double indicatorExtent =
+        QuestionNavigation.itemExtentForCount(totalQuestions);
+    final double availableWidth =
+        MediaQuery.of(context).size.width - (horizontalPadding * 2);
+    final double targetCenter =
+        currentQuestionIndex * indicatorExtent + (indicatorExtent / 2);
+    final double targetOffset =
+        targetCenter - (availableWidth / 2).clamp(0.0, double.infinity);
+
+    _questionScrollController.animateTo(
+      targetOffset.clamp(
+          0.0, _questionScrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -512,4 +632,6 @@ class _ExamScreenState extends State<ExamScreen> {
     super.dispose();
   }
 }
+
+enum _SubmissionAction { retry, exit }
 
