@@ -239,19 +239,24 @@ BEGIN
 
   IF v_has_created_at THEN
     UPDATE public.course
-    SET created_at = COALESCE(created_at, NOW());
+    SET created_at = COALESCE(created_at, NOW())
+    WHERE created_at IS NULL;
   END IF;
 
   IF v_has_updated_at THEN
     UPDATE public.course
-    SET updated_at = COALESCE(updated_at, NOW());
+    SET updated_at = COALESCE(updated_at, NOW())
+    WHERE updated_at IS NULL;
   END IF;
 
   IF v_has_update_at THEN
     UPDATE public.course
-    SET update_at = COALESCE(update_at, NOW());
+    SET update_at = COALESCE(update_at, NOW())
+    WHERE update_at IS NULL;
   END IF;
 END $$;
+
+
 
 -- Insert sample questions for Psicologia
 DO $$
@@ -261,12 +266,19 @@ DECLARE
   v_has_difficulty boolean;
   v_has_points boolean;
   v_has_is_active boolean;
+  v_question_has_created_at boolean;
+  v_question_has_updated_at boolean;
+  v_question_has_update_at boolean;
+  v_answerchoice_has_created_at boolean;
+  v_answerchoice_has_upload_at boolean;
   v_question_text_column text;
   v_question_course_column text;
   v_answerchoice_question_column text;
   v_question_columns text;
   v_question_values text;
   v_insert_question_sql text;
+  v_answerchoice_columns text;
+  v_answerchoice_values text;
 BEGIN
   -- Get psicologia course id
   SELECT id INTO v_course_id FROM public.course WHERE name = 'Psicologia';
@@ -292,6 +304,27 @@ BEGIN
       AND table_name = 'question' 
       AND column_name = 'is_active'
   ) INTO v_has_is_active;
+  
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'question' 
+      AND column_name = 'created_at'
+  ) INTO v_question_has_created_at;
+  
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'question' 
+      AND column_name = 'updated_at'
+  ) INTO v_question_has_updated_at;
+  
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'question' 
+      AND column_name = 'update_at'
+  ) INTO v_question_has_update_at;
   
   SELECT column_name
   INTO v_question_text_column
@@ -332,6 +365,20 @@ BEGIN
            END
   LIMIT 1;
   
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'answerchoice'
+      AND column_name = 'created_at'
+  ) INTO v_answerchoice_has_created_at;
+  
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'answerchoice'
+      AND column_name = 'upload_at'
+  ) INTO v_answerchoice_has_upload_at;
+  
   IF v_question_text_column IS NULL OR v_question_course_column IS NULL THEN
     RAISE NOTICE 'Skipping question seed: required question columns not found.';
     RETURN;
@@ -362,6 +409,19 @@ BEGIN
       v_question_values := v_question_values || format(', %L', TRUE);
     END IF;
     
+    IF v_question_has_created_at THEN
+      v_question_columns := v_question_columns || ', created_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
+    IF v_question_has_updated_at THEN
+      v_question_columns := v_question_columns || ', updated_at';
+      v_question_values := v_question_values || ', NOW()';
+    ELSIF v_question_has_update_at THEN
+      v_question_columns := v_question_columns || ', update_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
     v_insert_question_sql := format(
       'INSERT INTO public.question (%s) VALUES (%s) RETURNING id',
       v_question_columns,
@@ -370,19 +430,107 @@ BEGIN
     
     EXECUTE v_insert_question_sql INTO v_question_id;
     
+    v_answerchoice_columns := format('letter, content, correctanswer, %I', v_answerchoice_question_column);
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', created_at';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', upload_at';
+    END IF;
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'A',
+      'O comportamento humano e os processos mentais',
+      'TRUE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
     EXECUTE format(
-      'INSERT INTO public.answerchoice (letter, content, correctanswer, %I) VALUES
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L)',
-      v_answerchoice_question_column,
-      'A', 'O comportamento humano e os processos mentais', TRUE, v_question_id,
-      'B', 'Apenas os transtornos mentais', FALSE, v_question_id,
-      'C', 'Somente o cérebro humano', FALSE, v_question_id,
-      'D', 'A sociedade e suas instituições', FALSE, v_question_id,
-      'E', 'Os aspectos biológicos do corpo', FALSE, v_question_id
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'B',
+      'Apenas os transtornos mentais',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'C',
+      'Somente o cérebro humano',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'D',
+      'A sociedade e suas instituições',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'E',
+      'Os aspectos biológicos do corpo',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
     );
     
     -- Question 2
@@ -404,6 +552,19 @@ BEGIN
       v_question_values := v_question_values || format(', %L', TRUE);
     END IF;
     
+    IF v_question_has_created_at THEN
+      v_question_columns := v_question_columns || ', created_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
+    IF v_question_has_updated_at THEN
+      v_question_columns := v_question_columns || ', updated_at';
+      v_question_values := v_question_values || ', NOW()';
+    ELSIF v_question_has_update_at THEN
+      v_question_columns := v_question_columns || ', update_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
     v_insert_question_sql := format(
       'INSERT INTO public.question (%s) VALUES (%s) RETURNING id',
       v_question_columns,
@@ -412,19 +573,107 @@ BEGIN
     
     EXECUTE v_insert_question_sql INTO v_question_id;
     
+    v_answerchoice_columns := format('letter, content, correctanswer, %I', v_answerchoice_question_column);
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', created_at';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', upload_at';
+    END IF;
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'A',
+      'Carl Jung',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
     EXECUTE format(
-      'INSERT INTO public.answerchoice (letter, content, correctanswer, %I) VALUES
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L)',
-      v_answerchoice_question_column,
-      'A', 'Carl Jung', FALSE, v_question_id,
-      'B', 'Sigmund Freud', TRUE, v_question_id,
-      'C', 'B.F. Skinner', FALSE, v_question_id,
-      'D', 'Jean Piaget', FALSE, v_question_id,
-      'E', 'Wilhelm Wundt', FALSE, v_question_id
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'B',
+      'Sigmund Freud',
+      'TRUE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'C',
+      'B.F. Skinner',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'D',
+      'Jean Piaget',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'E',
+      'Wilhelm Wundt',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
     );
     
     -- Question 3
@@ -446,6 +695,19 @@ BEGIN
       v_question_values := v_question_values || format(', %L', TRUE);
     END IF;
     
+    IF v_question_has_created_at THEN
+      v_question_columns := v_question_columns || ', created_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
+    IF v_question_has_updated_at THEN
+      v_question_columns := v_question_columns || ', updated_at';
+      v_question_values := v_question_values || ', NOW()';
+    ELSIF v_question_has_update_at THEN
+      v_question_columns := v_question_columns || ', update_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
     v_insert_question_sql := format(
       'INSERT INTO public.question (%s) VALUES (%s) RETURNING id',
       v_question_columns,
@@ -454,19 +716,107 @@ BEGIN
     
     EXECUTE v_insert_question_sql INTO v_question_id;
     
+    v_answerchoice_columns := format('letter, content, correctanswer, %I', v_answerchoice_question_column);
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', created_at';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', upload_at';
+    END IF;
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'A',
+      'John Watson',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
     EXECUTE format(
-      'INSERT INTO public.answerchoice (letter, content, correctanswer, %I) VALUES
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L)',
-      v_answerchoice_question_column,
-      'A', 'John Watson', FALSE, v_question_id,
-      'B', 'Ivan Pavlov', TRUE, v_question_id,
-      'C', 'Edward Thorndike', FALSE, v_question_id,
-      'D', 'Albert Bandura', FALSE, v_question_id,
-      'E', 'Carl Rogers', FALSE, v_question_id
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'B',
+      'Ivan Pavlov',
+      'TRUE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'C',
+      'Edward Thorndike',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'D',
+      'Albert Bandura',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'E',
+      'Carl Rogers',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
     );
     
     -- Question 4
@@ -488,6 +838,19 @@ BEGIN
       v_question_values := v_question_values || format(', %L', TRUE);
     END IF;
     
+    IF v_question_has_created_at THEN
+      v_question_columns := v_question_columns || ', created_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
+    IF v_question_has_updated_at THEN
+      v_question_columns := v_question_columns || ', updated_at';
+      v_question_values := v_question_values || ', NOW()';
+    ELSIF v_question_has_update_at THEN
+      v_question_columns := v_question_columns || ', update_at';
+      v_question_values := v_question_values || ', NOW()';
+    END IF;
+    
     v_insert_question_sql := format(
       'INSERT INTO public.question (%s) VALUES (%s) RETURNING id',
       v_question_columns,
@@ -496,19 +859,107 @@ BEGIN
     
     EXECUTE v_insert_question_sql INTO v_question_id;
     
+    v_answerchoice_columns := format('letter, content, correctanswer, %I', v_answerchoice_question_column);
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', created_at';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_columns := v_answerchoice_columns || ', upload_at';
+    END IF;
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'A',
+      'Aumentar A Quantidade De Campos Obrigatórios No Formulário, Garantindo Que Todos Os Dados Do Cliente Sejam Coletados.',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
     EXECUTE format(
-      'INSERT INTO public.answerchoice (letter, content, correctanswer, %I) VALUES
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L),
-      (%L, %L, %L, %L)',
-      v_answerchoice_question_column,
-      'A', 'Aumentar A Quantidade De Campos Obrigatórios No Formulário, Garantindo Que Todos Os Dados Do Cliente Sejam Coletados.', FALSE, v_question_id,
-      'B', 'Implementar Uma Barra De Progresso No Checkout E Reduzir Os Campos Obrigatórios Apenas Ao Essencial Para A Compra.', TRUE, v_question_id,
-      'C', 'Substituir O Formulário Por Um Texto Explicativo Detalhado Sobre Os Termos De Uso E Política De Privacidade.', FALSE, v_question_id,
-      'D', 'Incluir Pop-Ups Durante O Checkout Com Promoções De Outros Produtos, Para Estimular Novas Compras.', FALSE, v_question_id,
-      'E', 'Exigir Que O Usuário Crie Uma Conta Completa Antes De Acessar O Carrinho De Compras.', FALSE, v_question_id
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'B',
+      'Implementar Uma Barra De Progresso No Checkout E Reduzir Os Campos Obrigatórios Apenas Ao Essencial Para A Compra.',
+      'TRUE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'C',
+      'Substituir O Formulário Por Um Texto Explicativo Detalhado Sobre Os Termos De Uso E Política De Privacidade.',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'D',
+      'Incluir Pop-Ups Durante O Checkout Com Promoções De Outros Produtos, Para Estimular Novas Compras.',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
+    );
+
+    v_answerchoice_values := format(
+      '%L, %L, %s, %L',
+      'E',
+      'Exigir Que O Usuário Crie Uma Conta Completa Antes De Acessar O Carrinho De Compras.',
+      'FALSE',
+      v_question_id
+    );
+    IF v_answerchoice_has_created_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    IF v_answerchoice_has_upload_at THEN
+      v_answerchoice_values := v_answerchoice_values || ', NOW()';
+    END IF;
+    EXECUTE format(
+      'INSERT INTO public.answerchoice (%s) VALUES (%s)',
+      v_answerchoice_columns,
+      v_answerchoice_values
     );
   END IF;
 END $$;
