@@ -236,6 +236,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     required int questionCount,
     required DateTime startedAt,
   }) async {
+    await _ensureUserRecord(userId);
+
     final response = await _client
         .from('user_exam_attempts')
         .insert({
@@ -252,6 +254,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     return response['id'] as String;
   }
 
+
   @override
   Future<List<Map<String, dynamic>>> fetchQuestions({
     required String examId,
@@ -259,7 +262,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
   }) async {
     final List<dynamic> response = await _client
         .from('question')
-        .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
+        .select('id, enunciation, difficulty_level, points, is_active, created_at, updated_at, update_at')
         .eq('id_course', courseId)
         .eq('is_active', true)
         .order('created_at');
@@ -268,6 +271,8 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     for (var i = 0; i < response.length; i++) {
       final item = response[i] as Map<String, dynamic>;
       final normalized = Map<String, dynamic>.from(item);
+      normalized['updated_at'] ??= normalized['update_at'];
+      normalized.remove('update_at');
       normalized['exam_id'] = examId;
       normalized['question_order'] ??= i;
       mapped.add(normalized);
@@ -350,4 +355,39 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
         .update(updates)
         .eq('id', attemptId);
   }
+
+  Future<void> _ensureUserRecord(String userId) async {
+    final existing = await _client
+        .from('user')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (existing != null) {
+      return;
+    }
+
+    final authUser = _client.auth.currentUser;
+    final email = authUser?.email;
+
+    if (email == null) {
+      throw Exception(
+        'Impossível registrar tentativa: usuário autenticado sem e-mail disponível.',
+      );
+    }
+
+    final firstName = authUser?.userMetadata?['full_name'] as String? ??
+        authUser?.userMetadata?['first_name'] as String?;
+    final surname = authUser?.userMetadata?['last_name'] as String?;
+
+    await _client.from('user').upsert({
+      'id': userId,
+      'email': email,
+      'first_name': firstName,
+      'surename': surname,
+      'created_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
+  }
 }
+
