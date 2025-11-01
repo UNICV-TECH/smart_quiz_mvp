@@ -19,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whiteBg,
+      extendBody: true,
       body: SafeArea(
         child: Column(
           children: [

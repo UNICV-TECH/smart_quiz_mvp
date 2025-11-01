@@ -118,6 +118,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      extendBody: true,
       body: Stack(
         children: [
           Positioned.fill(
