@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
+import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_scoreCard.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
+import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/components/result_question_tile.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
@@ -76,7 +78,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         questionCount > 0;
   }
 
-  void _handleRetake(BuildContext context) {
+  Future<void> _handleRetake(BuildContext context) async {
     final userId = widget.results['userId'];
     final examId = widget.results['examId'];
     final courseId = widget.results['courseId'];
@@ -86,16 +88,18 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         examId is! String ||
         courseId is! String ||
         questionCount is! int) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível iniciar o simulado novamente.'),
-          backgroundColor: Colors.red,
-        ),
+      await DefaultFeedbackDialog.show<void>(
+        context,
+        title: 'Não foi possível refazer',
+        message: 'Não foi possível iniciar o simulado novamente.',
+        severity: FeedbackSeverity.error,
       );
       return;
     }
 
-    Navigator.pushReplacementNamed(
+    if (!mounted) return;
+
+    await Navigator.pushReplacementNamed(
       context,
       '/exam',
       arguments: {

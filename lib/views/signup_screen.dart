@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/signup_view_model.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
+import '../ui/components/default_inline_message.dart';
 import '../ui/components/default_input.dart';
 import '../ui/components/default_password_input_47.dart';
 import '../ui/components/default_button_orange.dart';
+import '../ui/components/feedback_severity.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -41,8 +43,6 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
-
     final result = await viewModel.submitSignup(
       name: _nameController.text,
       email: _emailController.text,
@@ -55,18 +55,8 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    if (result.success) {
-      final message = viewModel.successMessage ??
-          'Conta criada com sucesso! Verifique seu e-mail.';
-      messenger.showSnackBar(SnackBar(content: Text(message)));
-
-      if (!result.needsEmailConfirmation) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    } else if (viewModel.errorMessage != null) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(viewModel.errorMessage!)),
-      );
+    if (result.success && !result.needsEmailConfirmation) {
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -325,25 +315,19 @@ class _SignupScreenState extends State<SignupScreen> {
 
                                 if (viewModel.errorMessage != null) ...[
                                   const SizedBox(height: 16),
-                                  Text(
-                                    viewModel.errorMessage!,
-                                    style: const TextStyle(
-                                      color: AppColors.error,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  DefaultInlineMessage(
+                                    message: viewModel.errorMessage!,
+                                    severity: FeedbackSeverity.error,
+                                    onDismissed: viewModel.clearFeedback,
                                   ),
                                 ],
 
                                 if (viewModel.successMessage != null) ...[
                                   const SizedBox(height: 16),
-                                  Text(
-                                    viewModel.successMessage!,
-                                    style: const TextStyle(
-                                      color: AppColors.green,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  DefaultInlineMessage(
+                                    message: viewModel.successMessage!,
+                                    severity: FeedbackSeverity.success,
+                                    onDismissed: viewModel.clearFeedback,
                                   ),
                                 ],
 

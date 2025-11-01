@@ -5,7 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/constants/supabase_options.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
+import 'package:unicv_tech_mvp/ui/components/default_inline_message.dart';
 import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
+import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
 
@@ -22,6 +24,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   String? _selectedQuantity;
   bool _isLoading = false;
   int _navBarIndex = 0;
+  String? _feedbackMessage;
+  FeedbackSeverity? _feedbackSeverity;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
   final String _logoUrl =
@@ -30,17 +34,34 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   void _onQuantitySelected(String quantity) {
     setState(() {
       _selectedQuantity = quantity;
+      _feedbackMessage = null;
+      _feedbackSeverity = null;
     });
   }
 
-  void _showMessage(String message) {
+  void _setFeedback(String message, FeedbackSeverity severity) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    setState(() {
+      _feedbackMessage = message;
+      _feedbackSeverity = severity;
+    });
+  }
+
+  void _clearFeedback() {
+    if (!mounted) return;
+    if (_feedbackMessage == null && _feedbackSeverity == null) {
+      return;
+    }
+    setState(() {
+      _feedbackMessage = null;
+      _feedbackSeverity = null;
+    });
   }
 
   void _startQuiz() async {
     if (_selectedQuantity == null || _isLoading) return;
+
+    _clearFeedback();
 
     setState(() {
       _isLoading = true;
@@ -48,21 +69,26 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
 
     try {
       if (!SupabaseOptions.isConfigured) {
-        _showMessage('Supabase não está configurado nesta build.');
+        _setFeedback(
+          'Supabase não está configurado nesta build.',
+          FeedbackSeverity.error,
+        );
         return;
       }
 
       final client = Supabase.instance.client;
       final user = client.auth.currentUser;
       if (user == null) {
-        _showMessage('Faça login para iniciar o simulado.');
+        _setFeedback('Faça login para iniciar o simulado.',
+            FeedbackSeverity.error);
         return;
       }
 
       final courseId =
           (widget.course['courseId'] ?? widget.course['id']) as String?;
       if (courseId == null || courseId.isEmpty) {
-        _showMessage('Não foi possível identificar o curso selecionado.');
+        _setFeedback('Não foi possível identificar o curso selecionado.',
+            FeedbackSeverity.error);
         return;
       }
 
@@ -78,7 +104,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
           .maybeSingle();
 
       if (examRecord == null || examRecord['id'] == null) {
-        _showMessage('Nenhum simulado configurado para este curso.');
+        _setFeedback('Nenhum simulado configurado para este curso.',
+            FeedbackSeverity.warning);
         return;
       }
 
@@ -102,7 +129,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     } catch (error, stackTrace) {
       debugPrint('Falha ao iniciar quiz: $error');
       debugPrintStack(stackTrace: stackTrace);
-      _showMessage('Erro ao iniciar o simulado. Tente novamente.');
+      _setFeedback('Erro ao iniciar o simulado. Tente novamente.',
+          FeedbackSeverity.error);
     } finally {
       if (mounted) {
         setState(() {
@@ -176,6 +204,15 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                           initialOption: _selectedQuantity,
                           onOptionSelected: _onQuantitySelected,
                         ),
+                        if (_feedbackMessage != null &&
+                            _feedbackSeverity != null) ...[
+                          const SizedBox(height: 20),
+                          DefaultInlineMessage(
+                            message: _feedbackMessage!,
+                            severity: _feedbackSeverity!,
+                            onDismissed: _clearFeedback,
+                          ),
+                        ],
                         const Spacer(flex: 2),
                         _isLoading
                             ? const Center(

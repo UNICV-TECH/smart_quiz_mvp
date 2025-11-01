@@ -7,6 +7,8 @@ import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 import 'package:unicv_tech_mvp/ui/components/default_question_navigation.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
+import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
 
@@ -547,16 +549,56 @@ class _ExamScreenState extends State<ExamScreen> {
         '/exam/result',
         arguments: results,
       );
-    } catch (e) {
+    } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao finalizar simulado: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      final message = viewModel.error ??
+          'Erro ao finalizar o simulado. Tente novamente.';
+      final action = await _showSubmissionErrorDialog(message);
+
+      if (!mounted) return;
+
+      switch (action) {
+        case _SubmissionAction.retry:
+          _submitExam(viewModel);
+          break;
+        case _SubmissionAction.exit:
+          Navigator.of(context).pop();
+          break;
+        default:
+          break;
+      }
     }
+  }
+
+  Future<_SubmissionAction?> _showSubmissionErrorDialog(String message) {
+    return showDialog<_SubmissionAction>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return DefaultFeedbackDialog(
+          title: 'Erro ao finalizar simulado',
+          message: message,
+          severity: FeedbackSeverity.error,
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(_SubmissionAction.exit),
+              child: const Text('Sair'),
+            ),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(_SubmissionAction.retry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.green,
+                foregroundColor: AppColors.white,
+              ),
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _scrollToQuestion({
@@ -590,3 +632,6 @@ class _ExamScreenState extends State<ExamScreen> {
     super.dispose();
   }
 }
+
+enum _SubmissionAction { retry, exit }
+
