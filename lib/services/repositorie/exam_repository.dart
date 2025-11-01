@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:unicv_tech_mvp/models/exam.dart' as models;
+import 'package:unicv_tech_mvp/models/question.dart' as models;
 
 /// Repository for exam-related operations
 abstract class ExamRepository {
@@ -101,11 +101,13 @@ class SupabaseExamRepository implements ExamRepository {
     try {
       final response = await _client
           .from('questions')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('exam_id', examId)
-          .eq('is_active', true);
-      
-      return response.count ?? 0;
+          .eq('is_active', true)
+          .count(CountOption.exact);
+
+      final int? count = response.count as int?;
+      return count ?? 0;
     } catch (e) {
       throw Exception('Failed to fetch question count: $e');
     }
@@ -151,11 +153,15 @@ class SupabaseExamRepository implements ExamRepository {
           .eq('is_active', true)
           .limit(questionCount);
       
+      final List<dynamic> rawQuestions =
+          questionsResponse as List<dynamic>;
       final List<models.Question> questions = [];
       final List<String> questionIds = [];
-      
-      for (final questionData in questionsResponse) {
-        final question = models.Question.fromJson(questionData);
+
+      for (final dynamic questionData in rawQuestions) {
+        final question = models.Question.fromJson(
+          questionData as Map<String, dynamic>,
+        );
         questions.add(question);
         questionIds.add(question.id);
       }
@@ -171,11 +177,17 @@ class SupabaseExamRepository implements ExamRepository {
           .inFilter('question_id', questionIds)
           .order('choice_order');
       
+      final List<dynamic> rawChoices =
+          choicesResponse as List<dynamic>;
       final Map<String, List<models.AnswerChoice>> choicesByQuestion = {};
-      for (final choiceData in choicesResponse) {
-        final choice = models.AnswerChoice.fromJson(choiceData);
-        choicesByQuestion.putIfAbsent(choiceData['question_id'], () => []);
-        choicesByQuestion[choiceData['question_id']]!.add(choice);
+      for (final dynamic choiceData in rawChoices) {
+        final choiceJson = choiceData as Map<String, dynamic>;
+        final choice = models.AnswerChoice.fromJson(choiceJson);
+        choicesByQuestion.putIfAbsent(
+          choiceJson['question_id'] as String,
+          () => <models.AnswerChoice>[],
+        );
+        choicesByQuestion[choiceJson['question_id'] as String]!.add(choice);
       }
       
       // Fetch supporting texts
@@ -185,11 +197,17 @@ class SupabaseExamRepository implements ExamRepository {
           .inFilter('question_id', questionIds)
           .order('display_order');
       
+      final List<dynamic> rawTexts =
+          textsResponse as List<dynamic>;
       final Map<String, List<models.SupportingText>> textsByQuestion = {};
-      for (final textData in textsResponse) {
-        final text = models.SupportingText.fromJson(textData);
-        textsByQuestion.putIfAbsent(textData['question_id'], () => []);
-        textsByQuestion[textData['question_id']]!.add(text);
+      for (final dynamic textData in rawTexts) {
+        final textJson = textData as Map<String, dynamic>;
+        final text = models.SupportingText.fromJson(textJson);
+        textsByQuestion.putIfAbsent(
+          textJson['question_id'] as String,
+          () => <models.SupportingText>[],
+        );
+        textsByQuestion[textJson['question_id'] as String]!.add(text);
       }
       
       // Combine questions with their choices and texts

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
 import 'package:unicv_tech_mvp/ui/components/default_radio_group.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_back.dart';
@@ -177,7 +176,8 @@ class _ExamScreenState extends State<ExamScreen> {
           );
         }
 
-        final currentExamQuestion = viewModel.examQuestions[currentQuestionIndex];
+        final currentExamQuestion =
+            viewModel.examQuestions[currentQuestionIndex];
         final currentAnswer =
             viewModel.selectedAnswers[currentExamQuestion.question.id];
         final isFirstQuestion = currentQuestionIndex == 0;
@@ -202,8 +202,8 @@ class _ExamScreenState extends State<ExamScreen> {
             child: Column(
               children: [
                 _buildAppBar(horizontalPadding),
-                _buildProgressIndicator(
-                    horizontalPadding, viewModel.examQuestions.length, viewModel),
+                _buildProgressIndicator(horizontalPadding,
+                    viewModel.examQuestions.length, viewModel),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -253,7 +253,8 @@ class _ExamScreenState extends State<ExamScreen> {
     return SafeArea(
       bottom: false,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
+        padding:
+            EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
         child: Row(
           children: [
             DefaultButtonArrowBack(
@@ -281,8 +282,8 @@ class _ExamScreenState extends State<ExamScreen> {
     return Column(
       children: [
         Padding(
-          padding:
-              EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
+          padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding, vertical: 16.0),
           child: SingleChildScrollView(
             controller: _questionScrollController,
             scrollDirection: Axis.horizontal,
@@ -349,7 +350,7 @@ class _ExamScreenState extends State<ExamScreen> {
         child: Container(
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: AppColors.white.withOpacity(0.5),
+            color: AppColors.white.withAlpha((0.5 * 255).round()),
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
@@ -373,8 +374,8 @@ class _ExamScreenState extends State<ExamScreen> {
     required ExamViewModel viewModel,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding, vertical: 16.0),
+      padding:
+          EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 16.0),
       child: SafeArea(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -403,7 +404,8 @@ class _ExamScreenState extends State<ExamScreen> {
                 if (isLastQuestion) {
                   _showFinishDialog(viewModel);
                 } else {
-                  if (currentQuestionIndex < viewModel.examQuestions.length - 1) {
+                  if (currentQuestionIndex <
+                      viewModel.examQuestions.length - 1) {
                     setState(() {
                       currentQuestionIndex++;
                     });
@@ -458,7 +460,7 @@ class _ExamScreenState extends State<ExamScreen> {
   Future<void> _submitExam(ExamViewModel viewModel) async {
     try {
       final results = await viewModel.finalize();
-      
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(

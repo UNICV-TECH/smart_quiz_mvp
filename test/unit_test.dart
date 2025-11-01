@@ -6,7 +6,7 @@ import 'package:unicv_tech_mvp/models/course.dart';
 void main() {
   group('CourseSelectionViewModel Tests', () {
     test('should load courses successfully', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
 
       expect(viewModel.isLoading, false);
       expect(viewModel.courses, isEmpty);
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('should select course and maintain selection state', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
       await viewModel.loadCourses();
 
       final course = viewModel.courses.first;
@@ -33,7 +33,7 @@ void main() {
     });
 
     test('should handle course selection state changes correctly', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
       await viewModel.loadCourses();
 
       final course1 = viewModel.courses[0];
@@ -51,7 +51,9 @@ void main() {
     });
 
     test('should handle loading state correctly', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(
+        loadDelay: const Duration(milliseconds: 1),
+      );
       
       expect(viewModel.isLoading, false);
       
@@ -63,7 +65,7 @@ void main() {
     });
 
     test('should clear error message when selecting course', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
       await viewModel.loadCourses();
 
       viewModel.setError('Test error');
@@ -74,7 +76,7 @@ void main() {
     });
 
     test('should handle error state', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
       
       viewModel.setError('Network error');
       
@@ -86,7 +88,7 @@ void main() {
     });
 
     test('should notify listeners on state changes', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
       var notificationCount = 0;
       
       viewModel.addListener(() {
@@ -116,7 +118,11 @@ void main() {
     });
 
     test('should load exam metadata successfully', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       expect(viewModel.isLoading, false);
       expect(viewModel.exam, isNull);
@@ -130,7 +136,11 @@ void main() {
     });
 
     test('should handle question quantity selection', () {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       expect(viewModel.selectedQuantity, isNull);
       expect(viewModel.canStartQuiz, false);
@@ -147,7 +157,11 @@ void main() {
     });
 
     test('should enable quiz start only when exam loaded and quantity selected', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       expect(viewModel.canStartQuiz, false);
 
@@ -159,7 +173,11 @@ void main() {
     });
 
     test('should start quiz with correct parameters', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       await viewModel.loadExamMetadata();
       viewModel.selectQuantity('15');
@@ -174,7 +192,11 @@ void main() {
     });
 
     test('should handle loading state during exam metadata fetch', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: const Duration(milliseconds: 1),
+        startDelay: Duration.zero,
+      );
 
       expect(viewModel.isLoading, false);
       
@@ -186,7 +208,11 @@ void main() {
     });
 
     test('should clear feedback when selecting quantity', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       await viewModel.loadExamMetadata();
       viewModel.selectQuantity('10');
@@ -199,7 +225,11 @@ void main() {
     });
 
     test('should handle exam metadata load error', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       viewModel.setError('Failed to load exam');
       
@@ -208,7 +238,11 @@ void main() {
     });
 
     test('should notify listeners on state changes', () async {
-      final viewModel = QuizConfigViewModel(course: testCourse);
+      final viewModel = QuizConfigViewModel(
+        course: testCourse,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
       var notificationCount = 0;
       
       viewModel.addListener(() {
@@ -226,7 +260,8 @@ void main() {
 
   group('Data Flow Validation Tests', () {
     test('should pass course data from HomeScreen to QuizConfig', () async {
-      final viewModel = CourseSelectionViewModel();
+      final viewModel =
+          CourseSelectionViewModel(loadDelay: Duration.zero);
       await viewModel.loadCourses();
       
       final selectedCourse = viewModel.courses.first;
@@ -245,7 +280,11 @@ void main() {
         iconKey: 'school_outlined',
         createdAt: DateTime.now(),
       );
-      final quizConfigVM = QuizConfigViewModel(course: course);
+      final quizConfigVM = QuizConfigViewModel(
+        course: course,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
       
       await quizConfigVM.loadExamMetadata();
       quizConfigVM.selectQuantity('15');

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:unicv_tech_mvp/constants/supabase_options.dart';
-import 'package:unicv_tech_mvp/services/repositorie/exam_repository.dart';
-import 'package:unicv_tech_mvp/services/repositorie/mock_exam_repository.dart';
+import 'package:unicv_tech_mvp/models/course.dart';
 import 'package:unicv_tech_mvp/viewmodels/quiz_config_view_model.dart';
 import 'package:unicv_tech_mvp/views/QuizConfig_screen.dart';
 
@@ -18,13 +15,28 @@ class QuizConfigScreenWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine which repository to use
-    final ExamRepository examRepository = SupabaseOptions.isConfigured
-        ? SupabaseExamRepository(client: Supabase.instance.client)
-        : MockExamRepository();
+    DateTime createdAt = DateTime.now();
+    final dynamic createdAtValue = course['created_at'];
+    if (createdAtValue is DateTime) {
+      createdAt = createdAtValue;
+    } else if (createdAtValue is String) {
+      createdAt = DateTime.tryParse(createdAtValue) ?? DateTime.now();
+    }
+
+    final courseModel = Course(
+      id: course['id'] as String,
+      courseKey:
+          course['course_key'] as String? ?? course['courseId'] as String? ?? '',
+      title: course['title'] as String? ?? 'Curso',
+      description: course['description'] as String?,
+      iconKey: course['icon_key'] as String?,
+      iconData: course['icon'] as IconData?,
+      isActive: course['is_active'] as bool? ?? true,
+      createdAt: createdAt,
+    );
 
     return ChangeNotifierProvider(
-      create: (_) => QuizConfigViewModel(examRepository: examRepository),
+      create: (_) => QuizConfigViewModel(course: courseModel),
       child: QuizConfigScreen(course: course),
     );
   }

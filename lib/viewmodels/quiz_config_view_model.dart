@@ -5,13 +5,20 @@ import '../models/exam.dart';
 class QuizConfigViewModel extends ChangeNotifier {
   final Course course;
 
-  QuizConfigViewModel({required this.course});
+  QuizConfigViewModel({
+    required this.course,
+    Duration metadataDelay = const Duration(milliseconds: 500),
+    Duration startDelay = const Duration(milliseconds: 500),
+  })  : _metadataDelay = metadataDelay,
+        _startDelay = startDelay;
 
   Exam? _exam;
   String? _selectedQuantity;
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
+  final Duration _metadataDelay;
+  final Duration _startDelay;
 
   Exam? get exam => _exam;
   String? get selectedQuantity => _selectedQuantity;
@@ -31,7 +38,9 @@ class QuizConfigViewModel extends ChangeNotifier {
     _clearFeedback();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (_metadataDelay > Duration.zero) {
+        await Future.delayed(_metadataDelay);
+      }
       
       _exam = Exam(
         id: 'exam_${course.courseKey}',
@@ -76,7 +85,9 @@ class QuizConfigViewModel extends ChangeNotifier {
     _clearFeedback();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (_startDelay > Duration.zero) {
+        await Future.delayed(_startDelay);
+      }
       
       final int questionCount = int.parse(_selectedQuantity!);
       

@@ -7,8 +7,12 @@ import 'package:unicv_tech_mvp/models/course.dart';
 
 void main() {
   group('Widget Integration Tests', () {
-    testWidgets('CourseSelectionViewModel UI state updates correctly during loading', (WidgetTester tester) async {
-      final viewModel = CourseSelectionViewModel();
+    testWidgets(
+        'CourseSelectionViewModel UI state updates correctly during loading',
+        (WidgetTester tester) async {
+      final viewModel = CourseSelectionViewModel(
+        loadDelay: const Duration(milliseconds: 1),
+      );
 
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
@@ -27,7 +31,7 @@ void main() {
                     itemCount: vm.courses.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        key: Key('course_${index}'),
+                        key: Key('course_$index'),
                         title: Text(vm.courses[index].title),
                       );
                     },
@@ -57,8 +61,11 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('CourseSelectionViewModel error state displays correctly', (WidgetTester tester) async {
-      final viewModel = CourseSelectionViewModel();
+    testWidgets('CourseSelectionViewModel error state displays correctly',
+        (WidgetTester tester) async {
+      final viewModel = CourseSelectionViewModel(
+        loadDelay: const Duration(milliseconds: 1),
+      );
 
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
@@ -114,7 +121,9 @@ void main() {
       expect(find.text('Error: Network error occurred'), findsNothing);
     });
 
-    testWidgets('QuizConfigViewModel updates UI correctly on quantity selection', (WidgetTester tester) async {
+    testWidgets(
+        'QuizConfigViewModel updates UI correctly on quantity selection',
+        (WidgetTester tester) async {
       final course = Course(
         id: 'test-course',
         courseKey: 'test',
@@ -122,7 +131,11 @@ void main() {
         iconKey: 'school_outlined',
         createdAt: DateTime.now(),
       );
-      final viewModel = QuizConfigViewModel(course: course);
+      final viewModel = QuizConfigViewModel(
+        course: course,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
@@ -157,7 +170,7 @@ void main() {
 
       // Initially no selection
       expect(find.text('Selected: None'), findsOneWidget);
-      
+
       final startButton = tester.widget<ElevatedButton>(
         find.widgetWithText(ElevatedButton, 'Start Quiz'),
       );
@@ -176,7 +189,8 @@ void main() {
       expect(find.text('Selected: 15'), findsOneWidget);
     });
 
-    testWidgets('QuizConfigViewModel enables start button only when ready', (WidgetTester tester) async {
+    testWidgets('QuizConfigViewModel enables start button only when ready',
+        (WidgetTester tester) async {
       final course = Course(
         id: 'test-course',
         courseKey: 'test',
@@ -184,7 +198,11 @@ void main() {
         iconKey: 'school_outlined',
         createdAt: DateTime.now(),
       );
-      final viewModel = QuizConfigViewModel(course: course);
+      final viewModel = QuizConfigViewModel(
+        course: course,
+        metadataDelay: Duration.zero,
+        startDelay: Duration.zero,
+      );
 
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
@@ -239,8 +257,10 @@ void main() {
       expect(startButton.onPressed, isNotNull);
     });
 
-    testWidgets('Navigation data flow: course selection to quiz config', (WidgetTester tester) async {
-      final viewModel = CourseSelectionViewModel();
+    testWidgets('Navigation data flow: course selection to quiz config',
+        (WidgetTester tester) async {
+      final viewModel =
+          CourseSelectionViewModel(loadDelay: Duration.zero);
       await viewModel.loadCourses();
 
       String? navigatedCourseId;
@@ -258,7 +278,7 @@ void main() {
                     itemBuilder: (context, index) {
                       final course = vm.courses[index];
                       return ListTile(
-                        key: Key('course_${index}'),
+                        key: Key('course_$index'),
                         title: Text(course.title),
                         onTap: () {
                           vm.selectCourse(course.id);

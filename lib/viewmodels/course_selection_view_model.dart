@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import '../models/course.dart';
 
 class CourseSelectionViewModel extends ChangeNotifier {
+  CourseSelectionViewModel({
+    Duration loadDelay = const Duration(milliseconds: 500),
+  }) : _loadDelay = loadDelay;
+
   String? _selectedCourseId;
   List<Course> _courses = [];
   bool _isLoading = false;
   String? _errorMessage;
+  final Duration _loadDelay;
 
   String? get selectedCourseId => _selectedCourseId;
   List<Course> get courses => List.unmodifiable(_courses);
@@ -28,7 +33,9 @@ class CourseSelectionViewModel extends ChangeNotifier {
     _clearError();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (_loadDelay > Duration.zero) {
+        await Future.delayed(_loadDelay);
+      }
       
       _courses = _getMockCourses();
       _setLoading(false);

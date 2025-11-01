@@ -19,6 +19,7 @@ Apply in this order:
 3. **20240101000003_create_new_tables.sql** - Creates `userresponse` and `supportingtext` tables
 4. **20240101000004_create_indexes.sql** - Adds performance indexes
 5. **20240101000005_seed_sample_data.sql** - Sample courses and questions
+6. **20240101000006_create_user_exam_attempts.sql** - Adds `user_exam_attempts` table and aligns `user_responses`
 
 ## What Gets Modified
 

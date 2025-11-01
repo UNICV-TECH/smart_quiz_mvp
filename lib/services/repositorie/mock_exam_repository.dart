@@ -1,5 +1,5 @@
+import 'package:unicv_tech_mvp/models/question.dart' as models;
 import 'package:unicv_tech_mvp/services/repositorie/exam_repository.dart';
-import 'package:unicv_tech_mvp/models/exam.dart' as models;
 
 /// Mock implementation of ExamRepository for development/testing
 class MockExamRepository implements ExamRepository {

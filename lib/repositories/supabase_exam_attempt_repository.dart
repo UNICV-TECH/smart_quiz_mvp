@@ -81,7 +81,7 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
         'total_score': totalScore,
         'percentage_score': percentageScore,
         'status': 'completed',
-      }).eq('id', attemptId);
+      }).match({'id': attemptId});
     } catch (error) {
       throw ExamAttemptRepositoryException(
         'Não foi possível atualizar o status da prova: ${error.toString()}',
@@ -95,7 +95,7 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
     String? courseId,
   }) async {
     try {
-      var query = _client
+      dynamic query = _client
           .from('user_exam_attempts')
           .select()
           .eq('user_id', userId)

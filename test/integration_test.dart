@@ -1,32 +1,114 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/viewmodels/course_selection_view_model.dart';
 import 'package:unicv_tech_mvp/viewmodels/quiz_config_view_model.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
 import 'package:unicv_tech_mvp/models/course.dart';
-import 'package:unicv_tech_mvp/models/exam.dart';
-import 'package:unicv_tech_mvp/models/exam_history.dart';
 
-@GenerateMocks([SupabaseClient, SupabaseQueryBuilder, PostgrestFilterBuilder])
-import 'integration_test.mocks.dart';
+class FakeExamDataSource implements ExamRemoteDataSource {
+  FakeExamDataSource({
+    required this.attemptId,
+    List<Map<String, dynamic>>? questions,
+    List<Map<String, dynamic>>? answerChoices,
+    List<Map<String, dynamic>>? supportingTexts,
+  })  : questions = questions ?? <Map<String, dynamic>>[],
+        answerChoices = answerChoices ?? <Map<String, dynamic>>[],
+        supportingTexts = supportingTexts ?? <Map<String, dynamic>>[];
+
+  final String attemptId;
+  List<Map<String, dynamic>> questions;
+  List<Map<String, dynamic>> answerChoices;
+  List<Map<String, dynamic>> supportingTexts;
+
+  bool throwOnCreate = false;
+  bool throwOnFetchQuestions = false;
+  bool throwOnInsert = false;
+  bool throwOnUpdate = false;
+
+  Map<String, dynamic>? lastCreatePayload;
+  List<Map<String, dynamic>> insertedResponses = [];
+  Map<String, dynamic>? lastUpdatePayload;
+
+  @override
+  Future<String> createAttempt({
+    required String userId,
+    required String examId,
+    required String courseId,
+    required int questionCount,
+    required DateTime startedAt,
+  }) async {
+    if (throwOnCreate) {
+      throw Exception('Database error');
+    }
+
+    lastCreatePayload = {
+      'user_id': userId,
+      'exam_id': examId,
+      'course_id': courseId,
+      'question_count': questionCount,
+      'started_at': startedAt,
+    };
+    return attemptId;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestions(String examId) async {
+    if (throwOnFetchQuestions) {
+      throw Exception('Query failed');
+    }
+    return questions
+        .map((q) => Map<String, dynamic>.from(q))
+        .toList();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchAnswerChoices(
+    List<String> questionIds,
+  ) async {
+    return answerChoices
+        .where((choice) => questionIds.contains(choice['question_id']))
+        .map((choice) => Map<String, dynamic>.from(choice))
+        .toList();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchSupportingTexts(
+    List<String> questionIds,
+  ) async {
+    return supportingTexts
+        .where((text) => questionIds.contains(text['question_id']))
+        .map((text) => Map<String, dynamic>.from(text))
+        .toList();
+  }
+
+  @override
+  Future<void> insertResponses(List<Map<String, dynamic>> responses) async {
+    if (throwOnInsert) {
+      throw Exception('Insert failed');
+    }
+    insertedResponses =
+        responses.map((r) => Map<String, dynamic>.from(r)).toList();
+  }
+
+  @override
+  Future<void> updateAttempt(
+    String attemptId,
+    Map<String, dynamic> updates,
+  ) async {
+    if (throwOnUpdate) {
+      throw Exception('Update failed');
+    }
+    lastUpdatePayload = Map<String, dynamic>.from(updates);
+  }
+}
 
 void main() {
   group('Complete Flow Integration Tests', () {
-    late MockSupabaseClient mockSupabase;
-    late MockSupabaseQueryBuilder mockQueryBuilder;
-    late MockPostgrestFilterBuilder mockFilterBuilder;
-
-    setUp(() {
-      mockSupabase = MockSupabaseClient();
-      mockQueryBuilder = MockSupabaseQueryBuilder();
-      mockFilterBuilder = MockPostgrestFilterBuilder();
-    });
-
     group('Course Selection Flow', () {
+      CourseSelectionViewModel createViewModel() =>
+          CourseSelectionViewModel(loadDelay: Duration.zero);
+
       test('should load courses successfully', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel = createViewModel();
 
         expect(viewModel.isLoading, false);
         expect(viewModel.courses, isEmpty);
@@ -40,7 +122,7 @@ void main() {
       });
 
       test('should select course and maintain selection state', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel = createViewModel();
         await viewModel.loadCourses();
 
         final course = viewModel.courses.first;
@@ -53,7 +135,7 @@ void main() {
       });
 
       test('should handle course selection state changes correctly', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel = createViewModel();
         await viewModel.loadCourses();
 
         final course1 = viewModel.courses[0];
@@ -71,19 +153,21 @@ void main() {
       });
 
       test('should handle loading state correctly', () async {
-        final viewModel = CourseSelectionViewModel();
-        
+        final viewModel = CourseSelectionViewModel(
+          loadDelay: const Duration(milliseconds: 1),
+        );
+
         expect(viewModel.isLoading, false);
-        
+
         final loadFuture = viewModel.loadCourses();
         expect(viewModel.isLoading, true);
-        
+
         await loadFuture;
         expect(viewModel.isLoading, false);
       });
 
       test('should clear error message when selecting course', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel = createViewModel();
         await viewModel.loadCourses();
 
         viewModel.setError('Test error');
@@ -106,7 +190,11 @@ void main() {
           iconKey: 'school_outlined',
           createdAt: DateTime.now(),
         );
-        viewModel = QuizConfigViewModel(course: testCourse);
+        viewModel = QuizConfigViewModel(
+          course: testCourse,
+          metadataDelay: Duration.zero,
+          startDelay: Duration.zero,
+        );
       });
 
       test('should load exam metadata successfully', () async {
@@ -127,7 +215,7 @@ void main() {
 
         viewModel.selectQuantity('10');
         expect(viewModel.selectedQuantity, '10');
-        expect(viewModel.canStartQuiz, false); // Still false because exam not loaded
+        expect(viewModel.canStartQuiz, false);
 
         viewModel.selectQuantity('15');
         expect(viewModel.selectedQuantity, '15');
@@ -140,10 +228,10 @@ void main() {
         expect(viewModel.canStartQuiz, false);
 
         viewModel.selectQuantity('10');
-        expect(viewModel.canStartQuiz, false); // No exam loaded
+        expect(viewModel.canStartQuiz, false);
 
         await viewModel.loadExamMetadata();
-        expect(viewModel.canStartQuiz, true); // Both conditions met
+        expect(viewModel.canStartQuiz, true);
       });
 
       test('should start quiz with correct parameters', () async {
@@ -160,19 +248,25 @@ void main() {
       });
 
       test('should handle loading state during exam metadata fetch', () async {
-        expect(viewModel.isLoading, false);
+        final delayedViewModel = QuizConfigViewModel(
+          course: testCourse,
+          metadataDelay: const Duration(milliseconds: 1),
+          startDelay: Duration.zero,
+        );
+
+        expect(delayedViewModel.isLoading, false);
         
-        final loadFuture = viewModel.loadExamMetadata();
-        expect(viewModel.isLoading, true);
+        final loadFuture = delayedViewModel.loadExamMetadata();
+        expect(delayedViewModel.isLoading, true);
         
         await loadFuture;
-        expect(viewModel.isLoading, false);
+        expect(delayedViewModel.isLoading, false);
       });
 
       test('should clear feedback when selecting quantity', () async {
         await viewModel.loadExamMetadata();
         viewModel.selectQuantity('10');
-        
+
         viewModel.setError('Test error');
         expect(viewModel.errorMessage, isNotNull);
 
@@ -182,140 +276,96 @@ void main() {
     });
 
     group('Exam Screen Flow - Supabase Operations', () {
-      late ExamViewModel examViewModel;
       const testUserId = 'test-user-123';
       const testExamId = 'test-exam-456';
       const testCourseId = 'test-course-789';
       const testQuestionCount = 5;
 
-      setUp(() {
-        mockSupabase = MockSupabaseClient();
-        mockQueryBuilder = MockSupabaseQueryBuilder();
-        mockFilterBuilder = MockPostgrestFilterBuilder();
-
-        examViewModel = ExamViewModel(
-          supabase: mockSupabase,
+      ExamViewModel buildViewModel(
+        FakeExamDataSource dataSource, {
+        int questionCount = testQuestionCount,
+      }) {
+        return ExamViewModel(
           userId: testUserId,
           examId: testExamId,
           courseId: testCourseId,
-          questionCount: testQuestionCount,
+          questionCount: questionCount,
+          dataSource: dataSource,
         );
-      });
+      }
 
       test('should create user_exam_attempts with correct data', () async {
-        final attemptId = 'attempt-123';
-        final attemptResponse = {
-          'id': attemptId,
-          'user_id': testUserId,
-          'exam_id': testExamId,
-          'course_id': testCourseId,
-          'question_count': testQuestionCount,
-          'status': 'in_progress',
-        };
-
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => attemptResponse);
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.execute()).thenAnswer((_) async => []);
-
-        when(mockSupabase.from('answer_choices')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order(any)).thenReturn(mockQueryBuilder);
-
-        when(mockSupabase.from('supporting_texts')).thenReturn(mockQueryBuilder);
+        const attemptId = 'attempt-123';
+        final dataSource = FakeExamDataSource(attemptId: attemptId);
+        final examViewModel = buildViewModel(dataSource);
 
         await examViewModel.initialize();
 
         expect(examViewModel.attemptId, attemptId);
-        verify(mockSupabase.from('user_exam_attempts')).called(1);
-        verify(mockQueryBuilder.insert(argThat(allOf([
-          containsPair('user_id', testUserId),
-          containsPair('exam_id', testExamId),
-          containsPair('course_id', testCourseId),
-          containsPair('question_count', testQuestionCount),
-          containsPair('status', 'in_progress'),
-          contains('started_at'),
-        ])))).called(1);
+        final payload = dataSource.lastCreatePayload;
+        expect(payload, isNotNull);
+        expect(payload!['user_id'], testUserId);
+        expect(payload['exam_id'], testExamId);
+        expect(payload['course_id'], testCourseId);
+        expect(payload['question_count'], testQuestionCount);
+        expect(payload['started_at'], isA<DateTime>());
       });
 
       test('should load questions with answer choices and supporting texts', () async {
-        final attemptId = 'attempt-123';
-        final questionsData = [
-          {
-            'id': 'q1',
-            'enunciation': 'Question 1?',
-            'difficulty_level': 'medium',
-            'points': 1.0,
-          },
-          {
-            'id': 'q2',
-            'enunciation': 'Question 2?',
-            'difficulty_level': 'hard',
-            'points': 2.0,
-          },
-        ];
+        final dataSource = FakeExamDataSource(
+          attemptId: 'attempt-123',
+          questions: [
+            {
+              'id': 'q1',
+              'enunciation': 'Question 1?',
+              'difficulty_level': 'medium',
+              'points': 1.0,
+            },
+            {
+              'id': 'q2',
+              'enunciation': 'Question 2?',
+              'difficulty_level': 'hard',
+              'points': 2.0,
+            },
+          ],
+          answerChoices: [
+            {
+              'id': 'ac1',
+              'question_id': 'q1',
+              'choice_key': 'A',
+              'choice_text': 'Answer A',
+              'is_correct': true,
+              'choice_order': 1,
+            },
+            {
+              'id': 'ac2',
+              'question_id': 'q1',
+              'choice_key': 'B',
+              'choice_text': 'Answer B',
+              'is_correct': false,
+              'choice_order': 2,
+            },
+            {
+              'id': 'ac3',
+              'question_id': 'q2',
+              'choice_key': 'A',
+              'choice_text': 'Answer A for Q2',
+              'is_correct': false,
+              'choice_order': 1,
+            },
+          ],
+          supportingTexts: [
+            {
+              'id': 'st1',
+              'question_id': 'q1',
+              'content': 'Supporting text for Q1',
+              'content_type': 'text',
+              'display_order': 1,
+            },
+          ],
+        );
 
-        final answerChoicesData = [
-          {
-            'id': 'ac1',
-            'question_id': 'q1',
-            'choice_key': 'A',
-            'choice_text': 'Answer A',
-            'is_correct': true,
-            'choice_order': 1,
-          },
-          {
-            'id': 'ac2',
-            'question_id': 'q1',
-            'choice_key': 'B',
-            'choice_text': 'Answer B',
-            'is_correct': false,
-            'choice_order': 2,
-          },
-          {
-            'id': 'ac3',
-            'question_id': 'q2',
-            'choice_key': 'A',
-            'choice_text': 'Answer A for Q2',
-            'is_correct': false,
-            'choice_order': 1,
-          },
-        ];
-
-        final supportingTextsData = [
-          {
-            'id': 'st1',
-            'question_id': 'q1',
-            'content': 'Supporting text for Q1',
-            'content_type': 'text',
-            'display_order': 1,
-          },
-        ];
-
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => {'id': attemptId});
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('exam_id', testExamId)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('is_active', true)).thenAnswer((_) async => questionsData);
-
-        when(mockSupabase.from('answer_choices')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter('question_id', any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order('choice_order')).thenAnswer((_) async => answerChoicesData);
-
-        when(mockSupabase.from('supporting_texts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter('question_id', any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order('display_order')).thenAnswer((_) async => supportingTextsData);
+        final examViewModel = buildViewModel(dataSource, questionCount: 2);
 
         await examViewModel.initialize();
 
@@ -327,35 +377,18 @@ void main() {
       });
 
       test('should handle answer selection correctly', () async {
-        final attemptId = 'attempt-123';
-        final questionsData = [
-          {
-            'id': 'q1',
-            'enunciation': 'Question 1?',
-            'difficulty_level': 'medium',
-            'points': 1.0,
-          },
-        ];
-
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => {'id': attemptId});
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('exam_id', testExamId)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('is_active', true)).thenAnswer((_) async => questionsData);
-
-        when(mockSupabase.from('answer_choices')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order(any)).thenAnswer((_) async => []);
-
-        when(mockSupabase.from('supporting_texts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order(any)).thenAnswer((_) async => []);
+        final dataSource = FakeExamDataSource(
+          attemptId: 'attempt-123',
+          questions: [
+            {
+              'id': 'q1',
+              'enunciation': 'Question 1?',
+              'difficulty_level': 'medium',
+              'points': 1.0,
+            },
+          ],
+        );
+        final examViewModel = buildViewModel(dataSource, questionCount: 1);
 
         await examViewModel.initialize();
 
@@ -369,72 +402,42 @@ void main() {
       });
 
       test('should submit user_responses in batch and calculate score', () async {
-        final attemptId = 'attempt-123';
-        final questionsData = [
-          {
-            'id': 'q1',
-            'enunciation': 'Question 1?',
-            'difficulty_level': 'medium',
-            'points': 1.0,
-          },
-          {
-            'id': 'q2',
-            'enunciation': 'Question 2?',
-            'difficulty_level': 'hard',
-            'points': 2.0,
-          },
-        ];
-
-        final answerChoicesData = [
-          {
-            'id': 'ac1',
-            'question_id': 'q1',
-            'choice_key': 'A',
-            'choice_text': 'Answer A',
-            'is_correct': true,
-            'choice_order': 1,
-          },
-          {
-            'id': 'ac2',
-            'question_id': 'q1',
-            'choice_key': 'B',
-            'choice_text': 'Answer B',
-            'is_correct': false,
-            'choice_order': 2,
-          },
-          {
-            'id': 'ac3',
-            'question_id': 'q2',
-            'choice_key': 'A',
-            'choice_text': 'Answer A for Q2',
-            'is_correct': true,
-            'choice_order': 1,
-          },
-        ];
-
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => {'id': attemptId});
-        when(mockQueryBuilder.update(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq(any, any)).thenReturn(mockQueryBuilder);
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('exam_id', testExamId)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('is_active', true)).thenAnswer((_) async => questionsData);
-
-        when(mockSupabase.from('answer_choices')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter('question_id', any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order('choice_order')).thenAnswer((_) async => answerChoicesData);
-
-        when(mockSupabase.from('supporting_texts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter('question_id', any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order('display_order')).thenAnswer((_) async => []);
-
-        when(mockSupabase.from('user_responses')).thenReturn(mockQueryBuilder);
+        final dataSource = FakeExamDataSource(
+          attemptId: 'attempt-123',
+          questions: [
+            {
+              'id': 'q1',
+              'enunciation': 'Question 1?',
+              'difficulty_level': 'medium',
+              'points': 1.0,
+            },
+            {
+              'id': 'q2',
+              'enunciation': 'Question 2?',
+              'difficulty_level': 'hard',
+              'points': 2.0,
+            },
+          ],
+          answerChoices: [
+            {
+              'id': 'ac1',
+              'question_id': 'q1',
+              'choice_key': 'A',
+              'choice_text': 'Answer A',
+              'is_correct': true,
+              'choice_order': 1,
+            },
+            {
+              'id': 'ac2',
+              'question_id': 'q2',
+              'choice_key': 'A',
+              'choice_text': 'Answer A for Q2',
+              'is_correct': true,
+              'choice_order': 1,
+            },
+          ],
+        );
+        final examViewModel = buildViewModel(dataSource, questionCount: 2);
 
         await examViewModel.initialize();
 
@@ -448,63 +451,42 @@ void main() {
         expect(results['totalScore'], 3.0);
         expect(results['percentageScore'], 100.0);
 
-        verify(mockSupabase.from('user_responses')).called(1);
-        verify(mockQueryBuilder.insert(argThat(isA<List>()))).called(1);
-        
-        verify(mockQueryBuilder.update(argThat(allOf([
-          containsPair('status', 'completed'),
-          contains('completed_at'),
-          contains('duration_seconds'),
-          containsPair('total_score', 3.0),
-          containsPair('percentage_score', 100.0),
-        ])))).called(1);
+        expect(dataSource.insertedResponses.length, 2);
+        final submittedIds = dataSource.insertedResponses
+            .map((response) => response['question_id'])
+            .toSet();
+        expect(submittedIds, {'q1', 'q2'});
+
+        final update = dataSource.lastUpdatePayload;
+        expect(update, isNotNull);
+        expect(update!['status'], 'completed');
+        expect(update['total_score'], 3.0);
+        expect(update['percentage_score'], 100.0);
       });
 
       test('should update user_exam_attempts with timestamps and score on completion', () async {
-        final attemptId = 'attempt-123';
-        final questionsData = [
-          {
-            'id': 'q1',
-            'enunciation': 'Question 1?',
-            'difficulty_level': 'medium',
-            'points': 1.0,
-          },
-        ];
-
-        final answerChoicesData = [
-          {
-            'id': 'ac1',
-            'question_id': 'q1',
-            'choice_key': 'A',
-            'choice_text': 'Answer A',
-            'is_correct': false,
-            'choice_order': 1,
-          },
-        ];
-
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => {'id': attemptId});
-        when(mockQueryBuilder.update(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq(any, any)).thenReturn(mockQueryBuilder);
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('exam_id', testExamId)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq('is_active', true)).thenAnswer((_) async => questionsData);
-
-        when(mockSupabase.from('answer_choices')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order(any)).thenAnswer((_) async => answerChoicesData);
-
-        when(mockSupabase.from('supporting_texts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.inFilter(any, any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.order(any)).thenAnswer((_) async => []);
-
-        when(mockSupabase.from('user_responses')).thenReturn(mockQueryBuilder);
+        final dataSource = FakeExamDataSource(
+          attemptId: 'attempt-123',
+          questions: [
+            {
+              'id': 'q1',
+              'enunciation': 'Question 1?',
+              'difficulty_level': 'medium',
+              'points': 1.0,
+            },
+          ],
+          answerChoices: [
+            {
+              'id': 'ac1',
+              'question_id': 'q1',
+              'choice_key': 'A',
+              'choice_text': 'Answer A',
+              'is_correct': false,
+              'choice_order': 1,
+            },
+          ],
+        );
+        final examViewModel = buildViewModel(dataSource, questionCount: 1);
 
         await examViewModel.initialize();
         examViewModel.selectAnswer('q1', 'A');
@@ -514,24 +496,26 @@ void main() {
         expect(results['correctCount'], 0);
         expect(results['totalScore'], 0.0);
 
-        final capturedUpdate = verify(mockQueryBuilder.update(captureAny)).captured[0];
-        expect(capturedUpdate['completed_at'], isNotNull);
-        expect(capturedUpdate['duration_seconds'], isA<int>());
-        expect(capturedUpdate['total_score'], 0.0);
-        expect(capturedUpdate['percentage_score'], 0.0);
-        expect(capturedUpdate['status'], 'completed');
+        final update = dataSource.lastUpdatePayload;
+        expect(update, isNotNull);
+        expect(update!['completed_at'], isNotNull);
+        expect(update['duration_seconds'], isA<int>());
+        expect(update['total_score'], 0.0);
+        expect(update['percentage_score'], 0.0);
+        expect(update['status'], 'completed');
       });
     });
 
     group('Error Handling Tests', () {
       test('CourseSelectionViewModel - should handle error state', () async {
-        final viewModel = CourseSelectionViewModel();
-        
+        final viewModel =
+            CourseSelectionViewModel(loadDelay: Duration.zero);
+
         viewModel.setError('Network error');
-        
+
         expect(viewModel.errorMessage, 'Network error');
         expect(viewModel.isLoading, false);
-        
+
         viewModel.clearError();
         expect(viewModel.errorMessage, isNull);
       });
@@ -544,24 +528,27 @@ void main() {
           iconKey: 'school_outlined',
           createdAt: DateTime.now(),
         );
-        final viewModel = QuizConfigViewModel(course: course);
+        final viewModel = QuizConfigViewModel(
+          course: course,
+          metadataDelay: Duration.zero,
+          startDelay: Duration.zero,
+        );
 
         viewModel.setError('Failed to load exam');
-        
+
         expect(viewModel.errorMessage, isNotNull);
         expect(viewModel.canStartQuiz, false);
       });
 
       test('ExamViewModel - should handle initialization error', () async {
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenThrow(Exception('Database error'));
-
+        final dataSource = FakeExamDataSource(attemptId: 'attempt-123')
+          ..throwOnCreate = true;
         final examViewModel = ExamViewModel(
-          supabase: mockSupabase,
           userId: 'test-user',
           examId: 'test-exam',
           courseId: 'test-course',
           questionCount: 5,
+          dataSource: dataSource,
         );
 
         await examViewModel.initialize();
@@ -572,21 +559,14 @@ void main() {
       });
 
       test('ExamViewModel - should handle question loading error', () async {
-        when(mockSupabase.from('user_exam_attempts')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.insert(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.single()).thenAnswer((_) async => {'id': 'attempt-123'});
-
-        when(mockSupabase.from('questions')).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.select(any)).thenReturn(mockQueryBuilder);
-        when(mockQueryBuilder.eq(any, any)).thenThrow(Exception('Query failed'));
-
+        final dataSource = FakeExamDataSource(attemptId: 'attempt-123')
+          ..throwOnFetchQuestions = true;
         final examViewModel = ExamViewModel(
-          supabase: mockSupabase,
           userId: 'test-user',
           examId: 'test-exam',
           courseId: 'test-course',
           questionCount: 5,
+          dataSource: dataSource,
         );
 
         await examViewModel.initialize();
@@ -597,11 +577,11 @@ void main() {
 
       test('ExamViewModel - should handle finalization error when no attempt ID', () async {
         final examViewModel = ExamViewModel(
-          supabase: mockSupabase,
           userId: 'test-user',
           examId: 'test-exam',
           courseId: 'test-course',
           questionCount: 5,
+          dataSource: FakeExamDataSource(attemptId: 'attempt-123'),
         );
 
         expect(() => examViewModel.finalize(), throwsException);
@@ -610,9 +590,10 @@ void main() {
 
     group('State Management Tests', () {
       test('CourseSelectionViewModel - notifies listeners on state changes', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel =
+            CourseSelectionViewModel(loadDelay: Duration.zero);
         var notificationCount = 0;
-        
+
         viewModel.addListener(() {
           notificationCount++;
         });
@@ -633,9 +614,13 @@ void main() {
           iconKey: 'school_outlined',
           createdAt: DateTime.now(),
         );
-        final viewModel = QuizConfigViewModel(course: course);
+        final viewModel = QuizConfigViewModel(
+          course: course,
+          metadataDelay: Duration.zero,
+          startDelay: Duration.zero,
+        );
         var notificationCount = 0;
-        
+
         viewModel.addListener(() {
           notificationCount++;
         });
@@ -650,13 +635,13 @@ void main() {
 
       test('ExamViewModel - notifies listeners on answer selection', () {
         final examViewModel = ExamViewModel(
-          supabase: mockSupabase,
           userId: 'test-user',
           examId: 'test-exam',
           courseId: 'test-course',
           questionCount: 5,
+          dataSource: FakeExamDataSource(attemptId: 'attempt-123'),
         );
-        
+
         var notificationCount = 0;
         examViewModel.addListener(() {
           notificationCount++;
@@ -672,9 +657,10 @@ void main() {
 
     group('Data Flow Validation Tests', () {
       test('should pass course data from HomeScreen to QuizConfig', () async {
-        final viewModel = CourseSelectionViewModel();
+        final viewModel =
+            CourseSelectionViewModel(loadDelay: Duration.zero);
         await viewModel.loadCourses();
-        
+
         final selectedCourse = viewModel.courses.first;
         viewModel.selectCourse(selectedCourse.id);
 
@@ -691,11 +677,15 @@ void main() {
           iconKey: 'school_outlined',
           createdAt: DateTime.now(),
         );
-        final quizConfigVM = QuizConfigViewModel(course: course);
-        
+        final quizConfigVM = QuizConfigViewModel(
+          course: course,
+          metadataDelay: Duration.zero,
+          startDelay: Duration.zero,
+        );
+
         await quizConfigVM.loadExamMetadata();
         quizConfigVM.selectQuantity('15');
-        
+
         final result = await quizConfigVM.startQuiz();
 
         expect(result, isNotNull);
@@ -706,11 +696,11 @@ void main() {
 
       test('should maintain answer state throughout exam session', () {
         final examViewModel = ExamViewModel(
-          supabase: mockSupabase,
           userId: 'test-user',
           examId: 'test-exam',
           courseId: 'test-course',
           questionCount: 5,
+          dataSource: FakeExamDataSource(attemptId: 'attempt-123'),
         );
 
         examViewModel.selectAnswer('q1', 'A');

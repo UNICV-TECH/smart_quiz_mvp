@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/course.dart';
 import 'package:unicv_tech_mvp/viewmodels/course_selection_view_model.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
-import 'package:unicv_tech_mvp/ui/components/default_navbar.dart'; 
 import 'package:unicv_tech_mvp/ui/components/default_subject_card.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
@@ -17,8 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _navBarIndex = 0; 
-
   final String _logoUrl = 'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 
   final Map<String, IconData> _iconMap = {
@@ -166,14 +163,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-                ),
-                CustomNavBar(
-                  selectedIndex: _navBarIndex,
-                  onItemTapped: (index) {
-                    setState(() {
-                      _navBarIndex = index;
-                    });    
-                  },
                 ),
               ],
             ),
