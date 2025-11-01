@@ -54,32 +54,6 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
     super.dispose();
   }
 
-  void _scrollToFirstIssue() {
-    final targetIndex = _questionsBreakdown.indexWhere((q) {
-      final isCorrect = q['isCorrect'] as bool? ?? false;
-      final isAnswered = q['isAnswered'] as bool? ?? false;
-      return !isCorrect || !isAnswered;
-    });
-
-    if (targetIndex == -1) return;
-
-    final context = _tileKeys[targetIndex].currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-        alignment: 0.1,
-      );
-    } else {
-      _scrollController.animateTo(
-        (targetIndex * 120).toDouble(),
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
   String _formatDuration(int totalSeconds) {
     final minutes = totalSeconds ~/ 60;
     final seconds = totalSeconds % 60;
@@ -224,18 +198,6 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DefaultButtonOrange(
-                      texto: 'Ver questões a revisar',
-                      onPressed: (_incorrectCount + _unansweredCount) > 0
-                          ? _scrollToFirstIssue
-                          : null,
-                      largura: double.infinity,
-                      altura: 54,
-                      tipo: (_incorrectCount + _unansweredCount) > 0
-                          ? BotaoTipo.primario
-                          : BotaoTipo.desabilitado,
-                    ),
-                    const SizedBox(height: 12),
-                    DefaultButtonOrange(
                       texto: 'Voltar ao início',
                       onPressed: () {
                         Navigator.popUntil(
@@ -248,18 +210,6 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       altura: 54,
                       tipo: BotaoTipo.secundario,
                     ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, widget.results),
-                      child: const Text(
-                        'Voltar',
-                        style: TextStyle(
-                          color: AppColors.primaryDark,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
                   ],
                 ),
               ),
