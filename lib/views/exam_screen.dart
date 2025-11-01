@@ -307,41 +307,86 @@ class _ExamScreenState extends State<ExamScreen> {
 
   Widget _buildProgressIndicator(
       double horizontalPadding, int totalQuestions, ExamViewModel viewModel) {
+    final answeredQuestions = viewModel.selectedAnswers.keys
+        .map((qId) {
+          final index =
+              viewModel.examQuestions.indexWhere((eq) => eq.question.id == qId);
+          return index + 1;
+        })
+        .where((index) => index > 0)
+        .toSet();
+
+    final answeredCount = answeredQuestions.length;
+    final double progress = totalQuestions == 0
+        ? 0
+        : answeredCount.clamp(0, totalQuestions) / totalQuestions;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding, vertical: 16.0),
-          child: SingleChildScrollView(
-            controller: _questionScrollController,
-            scrollDirection: Axis.horizontal,
-            child: QuestionNavigation(
-              totalQuestions: totalQuestions,
-              currentQuestion: currentQuestionIndex + 1,
-              onQuestionSelected: (questionNumber) {
-                setState(() {
-                  currentQuestionIndex = questionNumber - 1;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToQuestion();
-                  });
-                });
-              },
-              answeredQuestions: viewModel.selectedAnswers.keys
-                  .map((qId) {
-                    final index = viewModel.examQuestions
-                        .indexWhere((eq) => eq.question.id == qId);
-                    return index + 1;
-                  })
-                  .where((index) => index > 0)
-                  .toSet(),
-            ),
+              horizontal: horizontalPadding, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Questões',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                  Text(
+                    '$answeredCount de $totalQuestions respondidas',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.greyText,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                controller: _questionScrollController,
+                scrollDirection: Axis.horizontal,
+                child: QuestionNavigation(
+                  totalQuestions: totalQuestions,
+                  currentQuestion: currentQuestionIndex + 1,
+                  onQuestionSelected: (questionNumber) {
+                    setState(() {
+                      currentQuestionIndex = questionNumber - 1;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollToQuestion(
+                          totalQuestions: totalQuestions,
+                          horizontalPadding: horizontalPadding,
+                        );
+                      });
+                    });
+                  },
+                  answeredQuestions: answeredQuestions,
+                ),
+              ),
+            ],
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Container(
-            height: 1.0,
-            color: AppColors.green,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6.0,
+              backgroundColor: AppColors.green.withValues(alpha: 0.15),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.green),
+              semanticsLabel: 'Progresso de respostas',
+              semanticsValue:
+                  '$answeredCount de $totalQuestions questões respondidas',
+            ),
           ),
         ),
       ],
@@ -418,7 +463,10 @@ class _ExamScreenState extends State<ExamScreen> {
                       currentQuestionIndex--;
                     });
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToQuestion();
+                      _scrollToQuestion(
+                        totalQuestions: viewModel.examQuestions.length,
+                        horizontalPadding: horizontalPadding,
+                      );
                     });
                   }
                 },
@@ -438,7 +486,10 @@ class _ExamScreenState extends State<ExamScreen> {
                       currentQuestionIndex++;
                     });
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToQuestion();
+                      _scrollToQuestion(
+                        totalQuestions: viewModel.examQuestions.length,
+                        horizontalPadding: horizontalPadding,
+                      );
                     });
                   }
                 }
@@ -508,16 +559,29 @@ class _ExamScreenState extends State<ExamScreen> {
     }
   }
 
-  void _scrollToQuestion() {
-    if (_questionScrollController.hasClients) {
-      final double targetPosition = (currentQuestionIndex * 46.0) - 100.0;
-      _questionScrollController.animateTo(
-        targetPosition.clamp(
-            0.0, _questionScrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+  void _scrollToQuestion({
+    required int totalQuestions,
+    required double horizontalPadding,
+  }) {
+    if (!_questionScrollController.hasClients) {
+      return;
     }
+
+    final double indicatorExtent =
+        QuestionNavigation.itemExtentForCount(totalQuestions);
+    final double availableWidth =
+        MediaQuery.of(context).size.width - (horizontalPadding * 2);
+    final double targetCenter =
+        currentQuestionIndex * indicatorExtent + (indicatorExtent / 2);
+    final double targetOffset =
+        targetCenter - (availableWidth / 2).clamp(0.0, double.infinity);
+
+    _questionScrollController.animateTo(
+      targetOffset.clamp(
+          0.0, _questionScrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
