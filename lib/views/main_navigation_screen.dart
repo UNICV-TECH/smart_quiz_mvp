@@ -4,6 +4,7 @@ import '../ui/theme/app_color.dart';
 import '../ui/components/default_navbar.dart';
 import '../viewmodels/course_selection_view_model.dart';
 import 'home.screen.dart';
+import 'package:unicv_tech_mvp/repositories/course_repository.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -29,7 +30,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         index: _selectedIndex,
         children: [
           ChangeNotifierProvider(
-            create: (_) => CourseSelectionViewModel(),
+            create: (context) => CourseSelectionViewModel(
+              courseRepository: context.read<CourseRepository?>(),
+            ),
             child: const HomeScreen(),
           ),
           _buildExploreScreen(),

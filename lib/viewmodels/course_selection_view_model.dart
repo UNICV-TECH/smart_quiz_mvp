@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
+import '../repositories/course_repository.dart' show CourseRepository;
+import '../repositories/course_repository_types.dart' as course_repo_models;
 
 class CourseSelectionViewModel extends ChangeNotifier {
   CourseSelectionViewModel({
     Duration loadDelay = const Duration(milliseconds: 500),
-  }) : _loadDelay = loadDelay;
+    CourseRepository? courseRepository,
+  })  : _loadDelay = loadDelay,
+        _courseRepository = courseRepository;
 
   String? _selectedCourseId;
   List<Course> _courses = [];
   bool _isLoading = false;
   String? _errorMessage;
   final Duration _loadDelay;
+  final CourseRepository? _courseRepository;
 
   String? get selectedCourseId => _selectedCourseId;
   List<Course> get courses => List.unmodifiable(_courses);
@@ -36,11 +41,22 @@ class CourseSelectionViewModel extends ChangeNotifier {
       if (_loadDelay > Duration.zero) {
         await Future.delayed(_loadDelay);
       }
-      
-      _courses = _getMockCourses();
-      _setLoading(false);
+
+      if (_courseRepository != null) {
+        final repositoryCourses = await _courseRepository!.fetchActiveCourses();
+        _courses = repositoryCourses
+            .map(_mapRepositoryCourseToModel)
+            .toList();
+      } else {
+        _courses = _getMockCourses();
+      }
     } catch (error) {
+      debugPrint('Failed to load courses: $error');
+      if (_courseRepository != null) {
+        _courses = _getMockCourses();
+      }
       _setError('Erro ao carregar cursos. Tente novamente.');
+    } finally {
       _setLoading(false);
     }
   }
@@ -86,6 +102,21 @@ class CourseSelectionViewModel extends ChangeNotifier {
     
     _isLoading = value;
     notifyListeners();
+  }
+
+  Course _mapRepositoryCourseToModel(
+    course_repo_models.Course repositoryCourse,
+  ) {
+    return Course(
+      id: repositoryCourse.id,
+      courseKey: repositoryCourse.courseKey,
+      title: repositoryCourse.title,
+      description: repositoryCourse.description.isNotEmpty
+          ? repositoryCourse.description
+          : null,
+      iconKey: repositoryCourse.iconKey,
+      createdAt: repositoryCourse.createdAt,
+    );
   }
 
   List<Course> _getMockCourses() {

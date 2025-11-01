@@ -17,6 +17,8 @@ import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
 import 'repositories/auth/disabled_auth_repository.dart';
 import 'repositories/auth/supabase_auth_repository.dart';
+import 'repositories/course_repository.dart';
+import 'repositories/supabase_course_repository.dart';
 import 'services/auth_service.dart';
 import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
@@ -99,6 +101,14 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<AuthRepository>.value(value: authRepository),
         Provider<AuthService>.value(value: authService),
+        Provider<CourseRepository?>(
+          create: (_) {
+            if (!SupabaseOptions.isConfigured) {
+              return null;
+            }
+            return SupabaseCourseRepository(client: Supabase.instance.client);
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'UniCV Tech',
