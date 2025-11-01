@@ -111,4 +111,44 @@ class SupabaseAuthRepository implements AuthRepository {
       );
     }
   }
+  @override
+  Future<AuthRepositoryUser> updateUserName({
+    required String userId,
+    required String newName,
+  }) async {
+    try {
+      // Atualiza o campo 'full_name' no user_metadata
+      final response = await _client.auth.updateUser(
+        UserAttributes(
+          data: {'full_name': newName},
+        ),
+      );
+
+      final user = response.user;
+      if (user == null) {
+        throw const AuthRepositoryException(
+          'Não foi possível atualizar o nome do usuário.',
+        );
+      }
+
+      final updatedName = user.userMetadata?['full_name'] as String?;
+
+      return AuthRepositoryUser(
+        id: user.id,
+        email: user.email ?? '',
+        name: updatedName,
+      );
+    } on AuthException catch (error) {
+      throw AuthRepositoryException(
+        error.message.isNotEmpty
+            ? error.message
+            : 'Erro ao atualizar nome do usuário.',
+      );
+    } catch (e) {
+      throw const AuthRepositoryException(
+        'Erro inesperado ao atualizar nome do usuário.',
+      );
+    }
+  }
+
 }

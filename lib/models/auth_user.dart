@@ -8,4 +8,16 @@ class AuthUser {
   final String id;
   final String email;
   final String? name;
+
+   AuthUser copyWith({
+    String? id,
+    String? email,
+    String? name,
+  }) {
+    return AuthUser(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+    );
+  }
 }
