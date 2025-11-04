@@ -55,12 +55,6 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
     final double barHeight = _navBarHeight - navBarTopOffset;
-    final List<double> backgroundGradientStops = [
-      0.0,
-      topTransparentStop,
-      1.0,
-    ];
-
     final double circleLeft = (itemWidth * _currentIndex) +
         (itemWidth / 2) -
         (_circleSize / 2); // Usar _currentIndex
