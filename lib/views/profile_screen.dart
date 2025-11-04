@@ -18,7 +18,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-// <<<<<<< feature/profile-improvements
       backgroundColor: Colors.transparent,
       extendBody: true,
       body: Stack(
@@ -30,116 +29,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Header com logo
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/logo_color.png',
-// =======
-//       backgroundColor: AppColors.whiteBg,
-//       extendBody: true,
-//       body: SafeArea(
-//         child: Column(
-//           children: [
-//             // Header com logo
-//             Padding(
-//               padding: const EdgeInsets.all(16.0),
-//               child: Center(
-//                 child: Image.asset(
-//                   'assets/images/logo_color.png',
-//                   width: 120,
-//                   height: 50,
-//                   fit: BoxFit.contain,
-//                   errorBuilder: (context, error, stackTrace) {
-//                     return Container(
-// >>>>>>> main
-                      width: 120,
-                      height: 50,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 120,
-                          height: 50,
-                          color: AppColors.green,
-                          child: Center(
-                            child: Text(
-                              'Logo',
-                              style: TextStyle(color: AppColors.white),
+          Positioned.fill(
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header com logo
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/logo_color.png',
+                        width: 120,
+                        height: 50,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 120,
+                            height: 50,
+                            color: AppColors.green,
+                            child: Center(
+                              child: Text(
+                                'Logo',
+                                style: TextStyle(color: AppColors.white),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                // Conteúdo principal
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-
-                          // Card de perfil com edição inline
-                          UserDataCard(
-                            userName: _userName,
-                            userEmail: _userEmail,
-                            onNameUpdate: (newName) async {
-                              setState(() {
-                                _userName = newName;
-                              });
-                              return true;
-                            },
-                            onShowFeedback: (message, {isError = false}) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(message),
-                                  backgroundColor:
-                                      isError ? AppColors.red : AppColors.green,
-                                ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 30),
-
-                          // Menu items
-                          _buildMenuItem(
-                            icon: Icons.help_outline,
-                            title: AppStrings.help,
-                            onTap: () {
-                              Navigator.pushNamed(context, '/help');
-                            },
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          _buildMenuItem(
-                            icon: Icons.info_outline,
-                            title: AppStrings.about,
-                            onTap: () {
-                              Navigator.pushNamed(context, '/about');
-                            },
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          // Botão de Sair
-                          _buildLogoutButton(),
-
-                          const SizedBox(height: 100), // Espaço para o navbar
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ),
-                ),
-              ],
+
+                  // Conteúdo principal
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 20),
+
+                            // Card de perfil com edição inline
+                            UserDataCard(
+                              userName: _userName,
+                              userEmail: _userEmail,
+                              onNameUpdate: (newName) async {
+                                setState(() {
+                                  _userName = newName;
+                                });
+                                return true;
+                              },
+                              onShowFeedback: (message, {isError = false}) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(message),
+                                    backgroundColor: isError
+                                        ? AppColors.red
+                                        : AppColors.green,
+                                  ),
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 30),
+
+                            // Menu items
+                            _buildMenuItem(
+                              icon: Icons.help_outline,
+                              title: AppStrings.help,
+                              onTap: () {
+                                Navigator.pushNamed(context, '/help');
+                              },
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            _buildMenuItem(
+                              icon: Icons.info_outline,
+                              title: AppStrings.about,
+                              onTap: () {
+                                Navigator.pushNamed(context, '/about');
+                              },
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            // Botão de Sair
+                            _buildLogoutButton(),
+
+                            const SizedBox(height: 100), // Espaço para o navbar
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
