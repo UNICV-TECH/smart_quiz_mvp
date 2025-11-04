@@ -61,9 +61,7 @@ build/flutter_assets/assets/images/logo.webp
 build/flutter_assets/fonts/MaterialIcons-Regular.otf
 build/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
 build/flutter_assets/shaders/ink_sparkle.frag
-.gitignore
 build/native_assets/macos/native_assets.json
-.gitignore
 build/unit_test_assets/AssetManifest.bin
 build/unit_test_assets/AssetManifest.json
 build/unit_test_assets/FontManifest.json
@@ -77,5 +75,4 @@ build/unit_test_assets/assets/images/logo.webp
 build/unit_test_assets/fonts/MaterialIcons-Regular.otf
 build/unit_test_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
 build/unit_test_assets/shaders/ink_sparkle.frag
-.gitignore
 build/test_cache/build/7e4aebe516b998635f34742713e086a8.cache.dill.track.dill
