@@ -55,13 +55,6 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
     final double barHeight = _navBarHeight - navBarTopOffset;
-    final double topTransparentStop =
-        (navBarTopOffset / _navBarHeight).clamp(0.0, 1.0);
-    final List<Color> backgroundGradientColors = [
-      AppColors.transparent,
-      AppColors.transparent,
-      _navBarColor,
-    ];
     final List<double> backgroundGradientStops = [
       0.0,
       topTransparentStop,
