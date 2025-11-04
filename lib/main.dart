@@ -33,6 +33,32 @@ Future<void> main() async {
   AuthRepository authRepository;
   await dotenv.load(fileName: ".env");
 
+// <<<<<<< feature/profile-improvements
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'UniCV Tech',
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green),
+//         useMaterial3: true,
+//         fontFamily: 'Poppins',
+//       ),
+//       home: const SplashScreen(),
+//       routes: {
+//         '/splash': (context) => const SplashScreen(),
+//         '/welcome': (context) => const WelcomeScreen(),
+//         '/signup': (context) => const SignupScreen(),
+//         '/login': (context) => const LoginScreen(),
+//         '/reset_password': (context) => const ResetPasswordScreen1(),
+//         '/reset_password2': (context) => const ResetPasswordScreen2(),
+//         '/main': (context) => const MainNavigationScreen(),
+//         '/profile': (context) => const ProfileScreen(),
+//         '/help': (context) => const HelpScreen(),
+//         '/about': (context) => const AboutScreen(),
+//         '/exam': (context) => const ExamScreen(),
+//       },
+// =======
 // <<<<<<< first-integration
   if (SupabaseOptions.isConfigured) {
     await Supabase.initialize(
@@ -72,6 +98,7 @@ Future<void> main() async {
 //         '/home': (context) =>
 //             const Scaffold(body: Center(child: Text('Tela Principal'))),
 //       },
+// >>>>>>> main
 // >>>>>>> main
     );
     authRepository = const DisabledAuthRepository();

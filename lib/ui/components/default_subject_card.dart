@@ -92,7 +92,7 @@ class _SubjectCardState extends State<SubjectCard> {
                       ),
                       child: Text(
                         widget.title,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
