@@ -64,8 +64,12 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double circleLeft = (itemWidth * _currentIndex) +
         (itemWidth / 2) -
         (_circleSize / 2); // Usar _currentIndex
+// <<<<<<< feature/profile-improvements
+//     final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
+// =======
     final double circleTop =
         -navBarTopOffset + (_curveDepth - _gap + 10); // Usar _currentIndex
+// >>>>>>> main
 
     return SizedBox(
       height: _navBarHeight,
@@ -201,7 +205,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   }
 }
 
-// Classe NavBarClipper (Sem alterações)
+// Classe NavBarClipper
 class NavBarClipper extends CustomClipper<Path> {
   final double circleSize;
   final double itemWidth;

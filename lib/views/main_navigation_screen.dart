@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+// <<<<<<< feature/profile-improvements
+// // import '../ui/theme/app_color.dart';
+// import '../ui/components/default_navbar.dart';
+// import 'home.screen.dart';
+// import 'explore_screen.dart';
+// import 'profile_screen.dart';
+// =======
 import 'package:provider/provider.dart';
 import '../ui/theme/app_color.dart';
 import '../ui/components/default_navbar.dart';
 import '../viewmodels/course_selection_view_model.dart';
 import 'home.screen.dart';
 import 'package:unicv_tech_mvp/repositories/course_repository.dart';
+// >>>>>>> main
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -25,6 +33,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+// <<<<<<< feature/profile-improvements
+//       backgroundColor: Colors.transparent,
+//       body: IndexedStack(
+//         index: _selectedIndex,
+//         children: const [
+//           HomeScreen(),
+//           ExploreScreen(),
+//           ProfileScreen(),
+// =======
       backgroundColor: AppColors.whiteBg,
       extendBody: true,
       body: IndexedStack(
@@ -38,6 +55,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           _buildExploreScreen(),
           _buildProfileContent(),
+// >>>>>>> main
         ],
       ),
       bottomNavigationBar: CustomNavBar(
@@ -46,6 +64,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
     );
   }
+// <<<<<<< feature/profile-improvements
+// =======
 
   // Tela de Explorar
   Widget _buildExploreScreen() {
@@ -334,4 +354,5 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
     );
   }
+// >>>>>>> main
 }
