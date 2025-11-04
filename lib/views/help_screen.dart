@@ -48,72 +48,87 @@ class _HelpScreenState extends State<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.whiteBg,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 2,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left,
-            color: AppColors.green,
-            size: 32,
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      body: Stack(
+        children: [
+          // Imagem de fundo
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/FundoWhiteHome.png',
+              fit: BoxFit.cover,
+            ),
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          AppStrings.helpTitle,
-          style: TextStyle(
-            color: AppColors.green,
-            fontSize: 24,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-
-              // Subtítulo
-              Text(
-                'Perguntas Frequentes',
-                style: TextStyle(
-                  color: AppColors.secondaryDark,
-                  fontSize: 16,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.chevron_left,
+                  color: AppColors.green,
+                  size: 32,
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Lista de FAQs (Accordions)
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _faqs.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  return DefaultAccordion(
-                    title: _faqs[index]['question']!,
-                    content: _faqs[index]['answer']!,
-                    icon: Icons.help_outline,
-                  );
+                onPressed: () {
+                  Navigator.pop(context);
                 },
               ),
+              title: Text(
+                AppStrings.helpTitle,
+                style: TextStyle(
+                  color: AppColors.green,
+                  fontSize: 24,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              centerTitle: true,
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
 
-              const SizedBox(height: 20),
-            ],
+                    // Subtítulo
+                    Text(
+                      'Perguntas Frequentes',
+                      style: TextStyle(
+                        color: AppColors.secondaryDark,
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Lista de FAQs (Accordions)
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _faqs.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        return DefaultAccordion(
+                          title: _faqs[index]['question']!,
+                          content: _faqs[index]['answer']!,
+                          icon: Icons.help_outline,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
