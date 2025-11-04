@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:unicv_tech_mvp/viewmodels/signup_view_model.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
+import '../ui/components/default_inline_message.dart';
 import '../ui/components/default_input.dart';
 import '../ui/components/default_password_input_47.dart';
 import '../ui/components/default_button_orange.dart';
+import '../ui/components/feedback_severity.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -18,6 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _acceptedTerms = false;
 
   @override
@@ -26,17 +31,38 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+
     super.dispose();
   }
 
-  void _handleSignup() {
-    // Lógica de cadastro será implementada aqui
-    // Por enquanto, apenas navega para tela de login
-    Navigator.pushReplacementNamed(context, '/login');
+  Future<void> _handleSignup() async {
+    final viewModel = context.read<SignUpViewModel>();
+    viewModel.clearFeedback();
+
+    if (!viewModel.isInputsValid(formKey: _formKey)) {
+      return;
+    }
+
+    final result = await viewModel.submitSignup(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      acceptedTerms: _acceptedTerms,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (result.success && !result.needsEmailConfirmation) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<SignUpViewModel>();
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -90,182 +116,260 @@ class _SignupScreenState extends State<SignupScreen> {
                             topRight: Radius.circular(207),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Título com ícone de voltar
-                            Stack(
-                              alignment: Alignment.center,
+                        child: Form(
+                          key: _formKey,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.chevron_left,
-                                      color: AppColors.green,
-                                      size: 40,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: BoxConstraints(),
-                                  ),
-                                ),
-                                Text(
-                                  'Cadastrar',
-                                  style: TextStyle(
-                                    color: AppColors.green,
-                                    fontSize: 40,
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            // Campo Nome
-                            ComponenteInput(
-                              controller: _nameController,
-                              labelText: AppStrings.nameLabel,
-                              keyboardType: TextInputType.name,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Campo E-mail
-                            ComponenteInput(
-                              controller: _emailController,
-                              labelText: AppStrings.emailLabel,
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Campo Senha
-                            ComponentePasswordInput(
-                              controller: _passwordController,
-                              labelText: AppStrings.passwordLabel,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Campo Confirmar Senha
-                            ComponentePasswordInput(
-                              controller: _confirmPasswordController,
-                              labelText: AppStrings.confirmPasswordLabel,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Checkbox de termos
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Transform.scale(
-                                  scale: 1.2,
-                                  child: Checkbox(
-                                    value: _acceptedTerms,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _acceptedTerms = value ?? false;
-                                      });
-                                    },
-                                    activeColor: AppColors.orange,
-                                    side: BorderSide(
-                                      color: AppColors.orange,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: 'Poppins',
-                                        color: AppColors.secondaryDark,
+                                // Título com ícone de voltar
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: IconButton(
+                                        icon: Icon(
+                                          Icons.chevron_left,
+                                          color: AppColors.green,
+                                          size: 40,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pushReplacementNamed(
+                                              context, '/login');
+                                        },
+                                        padding: EdgeInsets.zero,
+                                        constraints: BoxConstraints(),
                                       ),
-                                      children: [
-                                        TextSpan(
-                                          text:
-                                              'Ao continuar você concorda com nossos ',
-                                        ),
-                                        TextSpan(
-                                          text: 'Termos de serviço',
-                                          style: TextStyle(
-                                            color: AppColors.green,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' e ',
-                                        ),
-                                        TextSpan(
-                                          text: 'Política de privacidade',
-                                          style: TextStyle(
-                                            color: AppColors.green,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: '.',
-                                        ),
-                                      ],
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Botão Cadastrar
-                            DefaultButtonOrange(
-                              texto: AppStrings.signupButton,
-                              onPressed: _handleSignup,
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Link para Login
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    AppStrings.alreadyHaveAccount,
-                                    style: TextStyle(
-                                      color: AppColors.secondaryDark,
-                                      fontSize: 14,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
-                                    },
-                                    child: Text(
-                                      AppStrings.loginLink,
+                                    Text(
+                                      'Cadastrar',
                                       style: TextStyle(
-                                        color: AppColors.orange,
-                                        fontSize: 14,
-                                        fontFamily: 'Poppins',
+                                        color: AppColors.green,
+                                        fontSize: 40,
+                                        fontFamily: 'Open Sans',
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 30),
+
+                                // Campo Nome
+                                SizedBox(
+                                  height: 98,
+                                  child: ComponenteInput(
+                                    controller: _nameController,
+                                    labelText: AppStrings.nameLabel,
+                                    keyboardType: TextInputType.name,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Por favor, insira seu nome';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Campo E-mail
+                                SizedBox(
+                                  height: 98,
+                                  child: ComponenteInput(
+                                    controller: _emailController,
+                                    labelText: AppStrings.emailLabel,
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Por favor, insira seu email';
+                                      }
+                                      final emailRegex =
+                                          RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                      if (!emailRegex.hasMatch(value)) {
+                                        return 'Informe um e-mail válido';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Campo Senha
+                                SizedBox(
+                                  height: 98,
+                                  child: ComponentePasswordInput(
+                                    controller: _passwordController,
+                                    labelText: AppStrings.passwordLabel,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Por favor, insira sua senha';
+                                      }
+                                      if (value.length < 6) {
+                                        return 'Sua senha deve ter ao menos 6 caracteres';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Campo Confirmar Senha
+                                SizedBox(
+                                  height: 98,
+                                  child: ComponentePasswordInput(
+                                    controller: _confirmPasswordController,
+                                    labelText: AppStrings.confirmPasswordLabel,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Por favor, confirme sua senha';
+                                      }
+                                      if (value != _passwordController.text) {
+                                        return 'As senhas não conferem';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Checkbox de termos
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1.2,
+                                      child: Checkbox(
+                                        value: _acceptedTerms,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _acceptedTerms = value ?? false;
+                                          });
+                                        },
+                                        activeColor: AppColors.orange,
+                                        side: BorderSide(
+                                          color: AppColors.orange,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: RichText(
+                                        text: TextSpan(
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            color: AppColors.secondaryDark,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                                  'Ao continuar você concorda com nossos ',
+                                            ),
+                                            TextSpan(
+                                              text: 'Termos de serviço',
+                                              style: TextStyle(
+                                                color: AppColors.green,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: ' e ',
+                                            ),
+                                            TextSpan(
+                                              text: 'Política de privacidade',
+                                              style: TextStyle(
+                                                color: AppColors.green,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: '.',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Botão Cadastrar
+                                DefaultButtonOrange(
+                                  texto: viewModel.isLoading
+                                      ? 'Cadastrando...'
+                                      : AppStrings.signupButton,
+                                  tipo: viewModel.isLoading
+                                      ? BotaoTipo.desabilitado
+                                      : BotaoTipo.primario,
+                                  onPressed: viewModel.isLoading
+                                      ? null
+                                      : _handleSignup,
+                                ),
+
+                                if (viewModel.errorMessage != null) ...[
+                                  const SizedBox(height: 16),
+                                  DefaultInlineMessage(
+                                    message: viewModel.errorMessage!,
+                                    severity: FeedbackSeverity.error,
+                                    onDismissed: viewModel.clearFeedback,
                                   ),
                                 ],
-                              ),
-                            ),
 
-                            const SizedBox(height: 20),
-                          ],
+                                if (viewModel.successMessage != null) ...[
+                                  const SizedBox(height: 16),
+                                  DefaultInlineMessage(
+                                    message: viewModel.successMessage!,
+                                    severity: FeedbackSeverity.success,
+                                    onDismissed: viewModel.clearFeedback,
+                                  ),
+                                ],
+
+                                const SizedBox(height: 20),
+
+                                // Link para Login
+                                Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        AppStrings.alreadyHaveAccount,
+                                        style: TextStyle(
+                                          color: AppColors.secondaryDark,
+                                          fontSize: 14,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.pushReplacementNamed(
+                                              context, '/login');
+                                        },
+                                        child: Text(
+                                          AppStrings.loginLink,
+                                          style: TextStyle(
+                                            color: AppColors.orange,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],

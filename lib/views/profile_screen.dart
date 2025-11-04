@@ -18,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+// <<<<<<< feature/profile-improvements
       backgroundColor: Colors.transparent,
       extendBody: true,
       body: Stack(
@@ -38,6 +39,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Center(
                     child: Image.asset(
                       'assets/images/logo_color.png',
+// =======
+//       backgroundColor: AppColors.whiteBg,
+//       extendBody: true,
+//       body: SafeArea(
+//         child: Column(
+//           children: [
+//             // Header com logo
+//             Padding(
+//               padding: const EdgeInsets.all(16.0),
+//               child: Center(
+//                 child: Image.asset(
+//                   'assets/images/logo_color.png',
+//                   width: 120,
+//                   height: 50,
+//                   fit: BoxFit.contain,
+//                   errorBuilder: (context, error, stackTrace) {
+//                     return Container(
+// >>>>>>> main
                       width: 120,
                       height: 50,
                       fit: BoxFit.contain,

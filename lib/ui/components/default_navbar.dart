@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-// Classe Preview (sem alterações)
+// Classe Preview 
 class Preview extends StatelessWidget {
   final String name;
   const Preview({super.key, required this.name});
@@ -54,17 +54,47 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double w = MediaQuery.of(context).size.width;
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
+    final double barHeight = _navBarHeight - navBarTopOffset;
+    final double topTransparentStop =
+        (navBarTopOffset / _navBarHeight).clamp(0.0, 1.0);
+    final List<Color> backgroundGradientColors = [
+      AppColors.transparent,
+      AppColors.transparent,
+      _navBarColor,
+    ];
+    final List<double> backgroundGradientStops = [
+      0.0,
+      topTransparentStop,
+      1.0,
+    ];
 
     final double circleLeft = (itemWidth * _currentIndex) +
         (itemWidth / 2) -
         (_circleSize / 2); // Usar _currentIndex
-    final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
+// <<<<<<< feature/profile-improvements
+//     final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
+// =======
+    final double circleTop =
+        -navBarTopOffset + (_curveDepth - _gap + 10); // Usar _currentIndex
+// >>>>>>> main
 
     return SizedBox(
       height: _navBarHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: backgroundGradientColors,
+                  stops: backgroundGradientStops,
+                ),
+              ),
+            ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
@@ -78,7 +108,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                 shoulder: _shoulder,
               ),
               child: Container(
-                height: _navBarHeight - navBarTopOffset,
+                height: barHeight,
                 decoration: BoxDecoration(
                   color: _navBarColor,
                   boxShadow: [
@@ -133,7 +163,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
             right: 0,
             bottom: 0,
             child: SizedBox(
-              height: _navBarHeight - navBarTopOffset,
+              height: barHeight,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(_items.length, (index) {

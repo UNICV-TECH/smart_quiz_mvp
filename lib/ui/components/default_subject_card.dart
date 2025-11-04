@@ -40,6 +40,9 @@ class _SubjectCardState extends State<SubjectCard> {
         highlight ? AppColors.green : AppColors.webNeutral200;
     final Color textColor =
         widget.isSelected ? AppColors.green : AppColors.secondaryDark;
+    const double iconSize = 44;
+    const double iconGap = 16;
+    const double horizontalPadding = iconSize + iconGap;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -72,16 +75,21 @@ class _SubjectCardState extends State<SubjectCard> {
               highlightColor: AppColors.green.withValues(alpha: 0.05),
               child: Padding(
                 padding: widget.padding,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    SizedBox(
-                      height: 44,
-                      width: 44,
-                      child: Center(child: widget.icon),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        height: iconSize,
+                        width: iconSize,
+                        child: Center(child: widget.icon),
+                      ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
                       child: Text(
                         widget.title,
                         textAlign: TextAlign.left,
