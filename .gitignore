@@ -76,3 +76,4 @@ build/unit_test_assets/fonts/MaterialIcons-Regular.otf
 build/unit_test_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
 build/unit_test_assets/shaders/ink_sparkle.frag
 build/test_cache/build/7e4aebe516b998635f34742713e086a8.cache.dill.track.dill
+.vscode/dev.json
