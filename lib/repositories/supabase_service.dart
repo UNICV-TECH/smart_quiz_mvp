@@ -4,12 +4,12 @@ import '../models/user_model.dart';
 class SupabaseService {
   final SupabaseClient _client = Supabase.instance.client;
 
-  // Pega o usuário logado (dados do Auth)
+  
   Future<UserModel?> getCurrentUserProfile() async {
     final user = _client.auth.currentUser;
     if (user == null) return null;
 
-    // Como os dados estão na tabela interna auth.users, acessamos direto:
+  
     return UserModel(
       id: user.id,
       name: user.userMetadata?['full_name'] ?? 'Usuário',
@@ -17,7 +17,7 @@ class SupabaseService {
     );
   }
 
-  // Atualiza o nome do usuário diretamente no metadata do Supabase Auth
+  
   Future<bool> updateUserName(String newName) async {
     final user = _client.auth.currentUser;
     if (user == null) return false;

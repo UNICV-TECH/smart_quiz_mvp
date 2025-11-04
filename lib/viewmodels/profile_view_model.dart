@@ -13,7 +13,7 @@ class ProfileViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// Carrega o perfil atual do usuário logado
+  
   Future<void> loadUserProfile() async {
     try {
       _isLoading = true;
@@ -30,7 +30,7 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  /// Atualiza o nome do usuário no Supabase e localmente
+  
   Future<bool> updateUserName(String newName) async {
     try {
       _isLoading = true;
