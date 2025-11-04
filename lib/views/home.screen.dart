@@ -73,51 +73,54 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Image.asset('assets/images/FundoWhiteHome.png',
                 fit: BoxFit.cover),
           ),
-          SafeArea(
+          Positioned.fill(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 33.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
-                        child: AppLogoWidget.network(
-                          size: AppLogoSize.small,
-                          logoPath: _logoUrl,
-                          semanticLabel: 'Logo UniCV',
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.only(top: 12.0, bottom: 20.0),
+                          child: AppLogoWidget.network(
+                            size: AppLogoSize.small,
+                            logoPath: _logoUrl,
+                            semanticLabel: 'Logo UniCV',
+                          ),
                         ),
                       ),
-                    ),
-                    const AppText('Para qual prova',
-                        style: AppTextStyle.titleSmall,
-                        color: AppColors.primaryDark),
-                    const SizedBox(height: 1),
-                    AppText(
-                      'gostaria de se preparar?',
-                      style: AppTextStyle.subtitleMedium,
-                      color: AppColors.secondaryDark
-                          .withAlpha((0.8 * 255).round()),
-                    ),
-                    const SizedBox(height: 35),
-                    Column(
-                      children: _courses.map((course) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: SubjectCard(
-                            icon: Icon(course['icon'] as IconData,
-                                color: AppColors.green, size: 30),
-                            title: course['title'] as String,
-                            isSelected: _selectedCourseId == course['id'],
-                            onTap: () => _onCourseSelected(course),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 120), // Espaço para o navbar
-                  ],
+                      const AppText('Para qual prova',
+                          style: AppTextStyle.titleSmall,
+                          color: AppColors.primaryDark),
+                      const SizedBox(height: 1),
+                      AppText(
+                        'gostaria de se preparar?',
+                        style: AppTextStyle.subtitleMedium,
+                        color: AppColors.secondaryDark
+                            .withAlpha((0.8 * 255).round()),
+                      ),
+                      const SizedBox(height: 35),
+                      Column(
+                        children: _courses.map((course) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: SubjectCard(
+                              icon: Icon(course['icon'] as IconData,
+                                  color: AppColors.green, size: 30),
+                              title: course['title'] as String,
+                              isSelected: _selectedCourseId == course['id'],
+                              onTap: () => _onCourseSelected(course),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 120), // Espaço para o navbar
+                    ],
+                  ),
                 ),
               ),
             ),

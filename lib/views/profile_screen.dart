@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
+import '../ui/components/default_user_data_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,7 +12,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   // Dados do usuário (mockados por enquanto)
-  final String _userName = 'João Silva';
+  String _userName = 'João Silva';
   final String _userEmail = 'joao.silva@email.com';
 
   @override
@@ -66,98 +67,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const SizedBox(height: 20),
 
-                          // Card de perfil
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.shadow,
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                          // Card de perfil com edição inline
+                          UserDataCard(
+                            userName: _userName,
+                            userEmail: _userEmail,
+                            onNameUpdate: (newName) async {
+                              setState(() {
+                                _userName = newName;
+                              });
+                              return true;
+                            },
+                            onShowFeedback: (message, {isError = false}) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(message),
+                                  backgroundColor:
+                                      isError ? AppColors.red : AppColors.green,
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                // Avatar/Ícone de perfil
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.green,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: AppColors.white,
-                                  ),
-                                ),
-
-                                const SizedBox(width: 16),
-
-                                // Nome, email e botão editar
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Nome com ícone de editar
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              _userName,
-                                              style: TextStyle(
-                                                color: AppColors.primaryDark,
-                                                fontSize: 20,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              // Navegar para edição de perfil
-                                            },
-                                            child: Container(
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.orange,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.edit,
-                                                size: 18,
-                                                color: AppColors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      const SizedBox(height: 8),
-
-                                      // Email
-                                      Text(
-                                        _userEmail,
-                                        style: TextStyle(
-                                          color: AppColors.secondaryDark,
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
 
                           const SizedBox(height: 30),
