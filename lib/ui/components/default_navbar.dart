@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
-// Classe Preview 
+// Classe Preview
 class Preview extends StatelessWidget {
   final String name;
   const Preview({super.key, required this.name});
@@ -41,7 +41,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   final Color _navBarColor = AppColors.greenNavBar;
   final double _curveDepth = 24.0;
   final double _shoulder = 28.0;
-  final double _gap = 18.0; // Ajustado de volta, se necessário
+  final double _gap = 18.0;
   final Duration _anim = const Duration(milliseconds: 520);
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
@@ -55,19 +55,6 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double itemWidth = w / _items.length;
     final double navBarTopOffset = _circleSize / 2;
     final double barHeight = _navBarHeight - navBarTopOffset;
-    final double topTransparentStop =
-        (navBarTopOffset / _navBarHeight).clamp(0.0, 1.0);
-    final List<Color> backgroundGradientColors = [
-      AppColors.transparent,
-      AppColors.transparent,
-      _navBarColor,
-    ];
-    final List<double> backgroundGradientStops = [
-      0.0,
-      topTransparentStop,
-      1.0,
-    ];
-
     final double circleLeft = (itemWidth * _currentIndex) +
         (itemWidth / 2) -
         (_circleSize / 2); // Usar _currentIndex
@@ -83,18 +70,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: backgroundGradientColors,
-                  stops: backgroundGradientStops,
-                ),
-              ),
-            ),
-          ),
+          // Fundo com ClipPath 
           Positioned(
             bottom: 0,
             left: 0,
@@ -103,7 +79,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
               clipper: NavBarClipper(
                 circleSize: _circleSize,
                 itemWidth: itemWidth,
-                selectedIndex: _currentIndex, // Usar _currentIndex
+                selectedIndex: _currentIndex,
                 curveDepth: _curveDepth,
                 shoulder: _shoulder,
               ),
@@ -123,6 +99,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
               ),
             ),
           ),
+          // Círculo animado
           AnimatedPositioned(
             duration: _anim,
             curve: Curves.easeInOut,
@@ -149,7 +126,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                   transitionBuilder: (child, anim) =>
                       FadeTransition(opacity: anim, child: child),
                   child: Icon(
-                    _items[_currentIndex]['icon'], // Usar _currentIndex
+                    _items[_currentIndex]['icon'],
                     key: ValueKey(_currentIndex),
                     color: Colors.white,
                     size: 28,
@@ -158,22 +135,26 @@ class _CustomNavBarState extends State<CustomNavBar> {
               ),
             ),
           ),
+
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: 0, // Posição original
             child: SizedBox(
-              height: barHeight,
+              height: _navBarHeight - navBarTopOffset, 
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(_items.length, (index) {
-                  final bool isSelected =
-                      _currentIndex == index; // Usar _currentIndex
+                  final bool isSelected = _currentIndex == index;
+                  
                   return GestureDetector(
-                    onTap: () => _currentOnTap(index), // Usar _currentOnTap
+                    onTap: () => _currentOnTap(index),
+                    behavior: HitTestBehavior.opaque, // Captura cliques no vazio
                     child: SizedBox(
                       width: itemWidth,
+                      height: _navBarHeight - navBarTopOffset, // Ocupa a altura
                       child: Column(
+
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           AnimatedOpacity(
@@ -189,6 +170,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
                             ),
                           ),
                           Padding(
+                            // Padding original (correto)
                             padding: const EdgeInsets.only(top: 2.0),
                             child: Text(
                               _items[index]['label'],
@@ -273,7 +255,7 @@ class NavBarClipper extends CustomClipper<Path> {
   }
 }
 
-// Preview Widget (sem alterações, ele já usava estado interno antes)
+// Preview Widget 
 @Preview(name: 'Custom NavBar')
 Widget customNavBarPreview() {
   return const CustomNavBarTest();
