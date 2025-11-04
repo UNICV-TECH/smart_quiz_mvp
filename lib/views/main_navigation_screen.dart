@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../ui/theme/app_color.dart';
 import '../ui/components/default_navbar.dart';
+import '../viewmodels/course_selection_view_model.dart';
+import 'home.screen.dart';
+import 'package:unicv_tech_mvp/repositories/course_repository.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -22,10 +26,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whiteBg,
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          _buildHomeScreen(),
+          ChangeNotifierProvider(
+            create: (context) => CourseSelectionViewModel(
+              courseRepository: context.read<CourseRepository?>(),
+            ),
+            child: const HomeScreen(),
+          ),
           _buildExploreScreen(),
           _buildProfileContent(),
         ],
@@ -33,43 +43,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: CustomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
-      ),
-    );
-  }
-
-  // Tela de Início
-  Widget _buildHomeScreen() {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.home,
-              size: 80,
-              color: AppColors.green,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Tela de Início',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryDark,
-                fontFamily: 'Poppins',
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Em desenvolvimento',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.secondaryDark,
-                fontFamily: 'Poppins',
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

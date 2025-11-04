@@ -4,8 +4,10 @@ import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
 
 import '../constants/app_strings.dart';
 import '../ui/components/default_button_orange.dart';
+import '../ui/components/default_inline_message.dart';
 import '../ui/components/default_input.dart';
 import '../ui/components/default_password_input_47.dart';
+import '../ui/components/feedback_severity.dart';
 import '../ui/theme/app_color.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,8 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
-
     final result = await viewModel.submitLogin(
       email: _emailController.text,
       password: _passwordController.text,
@@ -47,14 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (result.success) {
-      final message =
-          viewModel.successMessage ?? 'Login realizado com sucesso!';
-      messenger.showSnackBar(SnackBar(content: Text(message)));
       Navigator.pushReplacementNamed(context, '/main');
-    } else if (viewModel.errorMessage != null) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(viewModel.errorMessage!)),
-      );
     }
   }
 
@@ -208,25 +201,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
                               if (viewModel.errorMessage != null) ...[
                                 const SizedBox(height: 16),
-                                Text(
-                                  viewModel.errorMessage!,
-                                  style: const TextStyle(
-                                    color: AppColors.error,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                DefaultInlineMessage(
+                                  message: viewModel.errorMessage!,
+                                  severity: FeedbackSeverity.error,
+                                  onDismissed: viewModel.clearFeedback,
                                 ),
                               ],
 
                               if (viewModel.successMessage != null) ...[
                                 const SizedBox(height: 16),
-                                Text(
-                                  viewModel.successMessage!,
-                                  style: const TextStyle(
-                                    color: AppColors.green,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                DefaultInlineMessage(
+                                  message: viewModel.successMessage!,
+                                  severity: FeedbackSeverity.success,
+                                  onDismissed: viewModel.clearFeedback,
                                 ),
                               ],
 
