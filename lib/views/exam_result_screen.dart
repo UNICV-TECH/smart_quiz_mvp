@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
@@ -30,7 +31,14 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
   int get _correctCount => widget.results['correctCount'] as int? ?? 0;
   double get _percentageScore =>
       (widget.results['percentageScore'] as num?)?.toDouble() ?? 0.0;
-  int get _durationSeconds => widget.results['durationSeconds'] as int? ?? 0;
+  int get _durationSeconds {
+    final duration = widget.results['durationSeconds'];
+    if (duration == null) return 0;
+    if (duration is int) return duration;
+    if (duration is double) return duration.round();
+    if (duration is num) return duration.toInt();
+    return 0;
+  }
 
   int get _incorrectCount => _totalQuestions - _correctCount - _unansweredCount;
 
@@ -48,6 +56,12 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
       _questionsBreakdown.length,
       (_) => GlobalKey(),
     );
+
+    // Debug: verificar se o tempo está sendo recebido
+    debugPrint('=== RESULTADO DA PROVA ===');
+    debugPrint('durationSeconds raw: ${widget.results['durationSeconds']}');
+    debugPrint('durationSeconds processed: $_durationSeconds');
+    debugPrint('duration formatted: ${_formatDuration(_durationSeconds)}');
   }
 
   @override
@@ -57,6 +71,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
   }
 
   String _formatDuration(int totalSeconds) {
+    if (totalSeconds <= 0) return '00:00';
     final minutes = totalSeconds ~/ 60;
     final seconds = totalSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
@@ -99,6 +114,19 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
 
     if (!mounted) return;
 
+    debugPrint('=== REFAZER PROVA ===');
+    debugPrint('examId: $examId');
+    debugPrint('userId: $userId');
+    debugPrint('courseId: $courseId');
+    debugPrint('questionCount: $questionCount');
+    debugPrint('isRetake: true');
+
+    // Obter os IDs das questões da prova anterior
+    final previousQuestionIds = widget.results['questionIds'] as List<dynamic>?;
+    final questionIdsList =
+        previousQuestionIds?.map((id) => id.toString()).toList();
+    debugPrint('Previous question IDs: $questionIdsList');
+
     await Navigator.pushReplacementNamed(
       context,
       '/exam',
@@ -107,6 +135,9 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         'examId': examId,
         'courseId': courseId,
         'questionCount': questionCount,
+        'isRetake': true, // Flag para indicar que é uma retomada
+        'previousQuestionIds':
+            questionIdsList, // IDs das questões da prova anterior
       },
     );
   }

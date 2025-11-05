@@ -44,14 +44,15 @@ class SupabaseQuestionRepository implements QuestionRepository {
                 ?.map((textJson) => SupportingText(
                       id: textJson['id'] as String,
                       questionId: textJson['question_id'] as String,
-                      contentType: textJson['content_type'] as String,
+                      contentType: textJson['content_type'] as String?,
                       content: textJson['content'] as String,
                       displayOrder: textJson['display_order'] as int? ?? 1,
                     ))
                 .toList() ??
             [];
 
-        supportingTexts.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+        supportingTexts
+            .sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
 
         return Question(
           id: json['id'] as String,

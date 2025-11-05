@@ -1,7 +1,7 @@
 class SupportingText {
   final String id;
   final String questionId;
-  final String contentType;
+  final String? contentType;
   final String content;
   final int displayOrder;
   final DateTime createdAt;
@@ -9,7 +9,7 @@ class SupportingText {
   const SupportingText({
     required this.id,
     required this.questionId,
-    required this.contentType,
+    this.contentType,
     required this.content,
     this.displayOrder = 1,
     required this.createdAt,
@@ -19,7 +19,7 @@ class SupportingText {
     return SupportingText(
       id: json['id'] as String,
       questionId: json['question_id'] as String,
-      contentType: json['content_type'] as String,
+      contentType: json['content_type'] as String?,
       content: json['content'] as String,
       displayOrder: json['display_order'] as int? ?? 1,
       createdAt: DateTime.parse(json['created_at'] as String),

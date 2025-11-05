@@ -58,6 +58,46 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     });
   }
 
+  Future<void> _ensureUserRecord(SupabaseClient client, User user) async {
+    try {
+      final existing = await client
+          .from('user')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (existing != null) {
+        debugPrint('Usuário já existe na tabela user: ${user.id}');
+        return;
+      }
+
+      final email = user.email;
+      if (email == null) {
+        throw Exception(
+          'Impossível criar registro: usuário autenticado sem e-mail disponível.',
+        );
+      }
+
+      final firstName = user.userMetadata?['full_name'] as String? ??
+          user.userMetadata?['first_name'] as String?;
+      final surname = user.userMetadata?['last_name'] as String?;
+
+      await client.from('user').upsert({
+        'id': user.id,
+        'email': email,
+        'first_name': firstName,
+        'surename': surname,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      debugPrint('Registro do usuário criado na tabela user: ${user.id}');
+    } catch (e) {
+      debugPrint('Erro ao garantir registro do usuário: $e');
+      rethrow;
+    }
+  }
+
   void _startQuiz() async {
     if (_selectedQuantity == null || _isLoading) return;
 
@@ -79,8 +119,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
       final client = Supabase.instance.client;
       final user = client.auth.currentUser;
       if (user == null) {
-        _setFeedback('Faça login para iniciar o simulado.',
-            FeedbackSeverity.error);
+        _setFeedback(
+            'Faça login para iniciar o simulado.', FeedbackSeverity.error);
         return;
       }
 
@@ -95,21 +135,58 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
       debugPrint(
           'Iniciando quiz para ${widget.course['title']} com $_selectedQuantity questões...');
 
-      final examRecord = await client
-          .from('exam')
+      final questionCount = int.parse(_selectedQuantity!);
+
+      // Contar total de questões disponíveis para o curso
+      final questionsResponse = await client
+          .from('question')
           .select('id')
           .eq('id_course', courseId)
-          .order('created_at')
-          .limit(1)
-          .maybeSingle();
+          .eq('is_active', true);
 
-      if (examRecord == null || examRecord['id'] == null) {
-        _setFeedback('Nenhum simulado configurado para este curso.',
+      final totalAvailableQuestions = questionsResponse.length;
+
+      if (totalAvailableQuestions == 0) {
+        _setFeedback('Nenhuma questão disponível para este curso.',
             FeedbackSeverity.warning);
         return;
       }
 
-      final examId = examRecord['id'] as String;
+      if (totalAvailableQuestions < questionCount) {
+        _setFeedback(
+            'Este curso possui apenas $totalAvailableQuestions questão(ões) disponível(is).',
+            FeedbackSeverity.warning);
+        return;
+      }
+
+      // Garantir que o usuário existe na tabela user antes de criar o exame
+      await _ensureUserRecord(client, user);
+
+      // Sempre criar novo exame com a quantidade escolhida
+      final courseTitle = widget.course['title'] as String? ?? 'Curso';
+      final newExam = await client
+          .from('exam')
+          .insert({
+            'id_course': courseId,
+            'id_user': user.id, // Adicionar ID do usuário
+            'title': 'Simulado de $courseTitle - $_selectedQuantity questões',
+            'description':
+                'Simulado de preparação para o curso de $courseTitle com $_selectedQuantity questões.',
+            'total_available_questions': totalAvailableQuestions,
+            'question_count': questionCount,
+            'time_limit_minutes': 60,
+            'passing_score_percentage': 70.0,
+            'is_active': true,
+            'date_start': DateTime.now().toIso8601String(),
+            'date_end':
+                DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+            'is_completed': false,
+          })
+          .select('id')
+          .single();
+
+      final examId = newExam['id'] as String;
+      debugPrint('Novo exame criado: $examId com $questionCount questões');
 
       if (!mounted) return;
       setState(() {

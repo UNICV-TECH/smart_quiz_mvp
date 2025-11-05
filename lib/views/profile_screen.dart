@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_user_data_card.dart';
+import '../constants/supabase_options.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,9 +13,124 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Dados do usuário (mockados por enquanto)
-  String _userName = 'João Silva';
-  final String _userEmail = 'joao.silva@email.com';
+  String _userName = 'Carregando...';
+  String _userEmail = 'Carregando...';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    if (!SupabaseOptions.isConfigured) {
+      setState(() {
+        _userName = 'Usuário';
+        _userEmail = 'Não disponível';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final client = Supabase.instance.client;
+      final authUser = client.auth.currentUser;
+
+      if (authUser == null) {
+        setState(() {
+          _userName = 'Usuário não autenticado';
+          _userEmail = 'Não disponível';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Buscar dados do usuário na tabela user
+      final userData = await client
+          .from('user')
+          .select('first_name, surename, email')
+          .eq('id', authUser.id)
+          .maybeSingle();
+
+      if (userData != null) {
+        final firstName = userData['first_name'] as String? ?? '';
+        final surname = userData['surename'] as String? ?? '';
+        final fullName =
+            [firstName, surname].where((s) => s.isNotEmpty).join(' ');
+
+        setState(() {
+          _userName = fullName.isNotEmpty
+              ? fullName
+              : authUser.userMetadata?['full_name'] as String? ??
+                  authUser.email?.split('@').first ??
+                  'Usuário';
+          _userEmail = userData['email'] as String? ??
+              authUser.email ??
+              'Não disponível';
+          _isLoading = false;
+        });
+      } else {
+        // Se não encontrar na tabela user, usar dados do auth
+        final fullName = authUser.userMetadata?['full_name'] as String?;
+        setState(() {
+          _userName = fullName ?? authUser.email?.split('@').first ?? 'Usuário';
+          _userEmail = authUser.email ?? 'Não disponível';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar dados do usuário: $e');
+      setState(() {
+        _userName = 'Erro ao carregar';
+        _userEmail = 'Não disponível';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<bool> _updateUserName(String newName) async {
+    if (!SupabaseOptions.isConfigured) {
+      return false;
+    }
+
+    try {
+      final client = Supabase.instance.client;
+      final authUser = client.auth.currentUser;
+
+      if (authUser == null) {
+        return false;
+      }
+
+      // Separar nome em primeiro nome e sobrenome
+      final nameParts = newName.trim().split(' ');
+      final firstName = nameParts.isNotEmpty ? nameParts.first : newName;
+      final surname =
+          nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+
+      // Atualizar na tabela user
+      await client.from('user').update({
+        'first_name': firstName,
+        'surename': surname,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', authUser.id);
+
+      // Atualizar também no metadata do auth (opcional)
+      await client.auth.updateUser(
+        UserAttributes(
+          data: {'full_name': newName},
+        ),
+      );
+
+      // Recarregar dados
+      await _loadUserData();
+
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao atualizar nome do usuário: $e');
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,26 +186,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 20),
 
                             // Card de perfil com edição inline
-                            UserDataCard(
-                              userName: _userName,
-                              userEmail: _userEmail,
-                              onNameUpdate: (newName) async {
-                                setState(() {
-                                  _userName = newName;
-                                });
-                                return true;
-                              },
-                              onShowFeedback: (message, {isError = false}) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(message),
-                                    backgroundColor: isError
-                                        ? AppColors.red
-                                        : AppColors.green,
+                            _isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.green,
+                                    ),
+                                  )
+                                : UserDataCard(
+                                    userName: _userName,
+                                    userEmail: _userEmail,
+                                    onNameUpdate: _updateUserName,
+                                    onShowFeedback: (message,
+                                        {isError = false}) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(message),
+                                          backgroundColor: isError
+                                              ? AppColors.red
+                                              : AppColors.green,
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
 
                             const SizedBox(height: 30),
 

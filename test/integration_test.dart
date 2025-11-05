@@ -51,6 +51,11 @@ class FakeExamDataSource implements ExamRemoteDataSource {
   }
 
   @override
+  Future<void> ensureUserRecord(String userId) async {
+    // Implementação vazia para testes
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> fetchQuestions({
     required String examId,
     required String courseId,
@@ -99,6 +104,22 @@ class FakeExamDataSource implements ExamRemoteDataSource {
       throw Exception('Update failed');
     }
     lastUpdatePayload = Map<String, dynamic>.from(updates);
+  }
+
+  @override
+  Future<List<String>> checkExamQuestions(String examId) async {
+    return [];
+  }
+
+  @override
+  Future<void> insertExamQuestions(
+      List<Map<String, dynamic>> examQuestions) async {
+    // Implementação para testes
+  }
+
+  @override
+  Future<void> updateExam(String examId, Map<String, dynamic> updates) async {
+    // Implementação para testes
   }
 }
 
@@ -225,7 +246,9 @@ void main() {
         expect(viewModel.selectedQuantity, isNull);
       });
 
-      test('should enable quiz start only when exam loaded and quantity selected', () async {
+      test(
+          'should enable quiz start only when exam loaded and quantity selected',
+          () async {
         expect(viewModel.canStartQuiz, false);
 
         viewModel.selectQuantity('10');
@@ -256,10 +279,10 @@ void main() {
         );
 
         expect(delayedViewModel.isLoading, false);
-        
+
         final loadFuture = delayedViewModel.loadExamMetadata();
         expect(delayedViewModel.isLoading, true);
-        
+
         await loadFuture;
         expect(delayedViewModel.isLoading, false);
       });
@@ -312,7 +335,8 @@ void main() {
         expect(payload['started_at'], isA<DateTime>());
       });
 
-      test('should load questions with answer choices and supporting texts', () async {
+      test('should load questions with answer choices and supporting texts',
+          () async {
         final dataSource = FakeExamDataSource(
           attemptId: 'attempt-123',
           questions: [
@@ -402,7 +426,8 @@ void main() {
         expect(examViewModel.selectedAnswers['q1'], 'B');
       });
 
-      test('should submit user_responses in batch and calculate score', () async {
+      test('should submit user_responses in batch and calculate score',
+          () async {
         final dataSource = FakeExamDataSource(
           attemptId: 'attempt-123',
           questions: [
@@ -465,7 +490,9 @@ void main() {
         expect(update['percentage_score'], 100.0);
       });
 
-      test('should update user_exam_attempts with timestamps and score on completion', () async {
+      test(
+          'should update user_exam_attempts with timestamps and score on completion',
+          () async {
         final dataSource = FakeExamDataSource(
           attemptId: 'attempt-123',
           questions: [
@@ -509,8 +536,7 @@ void main() {
 
     group('Error Handling Tests', () {
       test('CourseSelectionViewModel - should handle error state', () async {
-        final viewModel =
-            CourseSelectionViewModel(loadDelay: Duration.zero);
+        final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
 
         viewModel.setError('Network error');
 
@@ -521,7 +547,8 @@ void main() {
         expect(viewModel.errorMessage, isNull);
       });
 
-      test('QuizConfigViewModel - should handle exam metadata load error', () async {
+      test('QuizConfigViewModel - should handle exam metadata load error',
+          () async {
         final course = Course(
           id: 'test',
           courseKey: 'test',
@@ -576,7 +603,9 @@ void main() {
         expect(examViewModel.examQuestions, isEmpty);
       });
 
-      test('ExamViewModel - should handle finalization error when no attempt ID', () async {
+      test(
+          'ExamViewModel - should handle finalization error when no attempt ID',
+          () async {
         final examViewModel = ExamViewModel(
           userId: 'test-user',
           examId: 'test-exam',
@@ -590,9 +619,9 @@ void main() {
     });
 
     group('State Management Tests', () {
-      test('CourseSelectionViewModel - notifies listeners on state changes', () async {
-        final viewModel =
-            CourseSelectionViewModel(loadDelay: Duration.zero);
+      test('CourseSelectionViewModel - notifies listeners on state changes',
+          () async {
+        final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
         var notificationCount = 0;
 
         viewModel.addListener(() {
@@ -607,7 +636,8 @@ void main() {
         expect(notificationCount, greaterThan(previousCount));
       });
 
-      test('QuizConfigViewModel - notifies listeners on state changes', () async {
+      test('QuizConfigViewModel - notifies listeners on state changes',
+          () async {
         final course = Course(
           id: 'test',
           courseKey: 'test',
@@ -658,8 +688,7 @@ void main() {
 
     group('Data Flow Validation Tests', () {
       test('should pass course data from HomeScreen to QuizConfig', () async {
-        final viewModel =
-            CourseSelectionViewModel(loadDelay: Duration.zero);
+        final viewModel = CourseSelectionViewModel(loadDelay: Duration.zero);
         await viewModel.loadCourses();
 
         final selectedCourse = viewModel.courses.first;

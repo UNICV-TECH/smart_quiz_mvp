@@ -30,7 +30,8 @@ class ExamAttempt {
 
   int get totalQuestions => questions.length;
 
-  int get totalCorrect => questions.where((q) => q.outcome == QuestionOutcome.correct).length;
+  int get totalCorrect =>
+      questions.where((q) => q.outcome == QuestionOutcome.correct).length;
 }
 
 /// Aggregates the exam history for a single subject.
@@ -51,9 +52,11 @@ class SubjectExamHistory {
 
   int get totalExams => attempts.length;
 
-  int get totalQuestions => attempts.fold<int>(0, (acc, attempt) => acc + attempt.totalQuestions);
+  int get totalQuestions =>
+      attempts.fold<int>(0, (acc, attempt) => acc + attempt.totalQuestions);
 
-  int get totalCorrect => attempts.fold<int>(0, (acc, attempt) => acc + attempt.totalCorrect);
+  int get totalCorrect =>
+      attempts.fold<int>(0, (acc, attempt) => acc + attempt.totalCorrect);
 }
 
 class Question {
@@ -111,14 +114,14 @@ class AnswerChoice {
 class SupportingText {
   final String id;
   final String questionId;
-  final String contentType;
+  final String? contentType;
   final String content;
   final int displayOrder;
 
   SupportingText({
     required this.id,
     required this.questionId,
-    required this.contentType,
+    this.contentType,
     required this.content,
     required this.displayOrder,
   });
@@ -127,7 +130,7 @@ class SupportingText {
     return SupportingText(
       id: json['id'] as String,
       questionId: json['question_id'] as String,
-      contentType: json['content_type'] as String,
+      contentType: json['content_type'] as String?,
       content: json['content'] as String,
       displayOrder: json['display_order'] as int,
     );

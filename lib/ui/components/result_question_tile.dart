@@ -139,6 +139,7 @@ class _ResultQuestionTileState extends State<ResultQuestionTile> {
                                     .withAlpha((0.85 * 255).round()),
                                 height: 1.45,
                               ),
+                              textAlign: TextAlign.justify,
                             ),
                           ],
                         ),

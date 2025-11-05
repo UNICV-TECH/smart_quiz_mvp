@@ -227,10 +227,21 @@ class _ExamScreenState extends State<ExamScreen> {
                           labels: currentExamQuestion.answerChoices
                               .map((ac) => ac.choiceText)
                               .toList(),
-                          selectedOption: currentAnswer,
+                          selectedOption: _getSelectedOptionLetter(
+                              currentAnswer, currentExamQuestion.answerChoices),
                           onChanged: (option) {
-                            viewModel.selectAnswer(
-                                currentExamQuestion.question.id, option);
+                            // Mapear a letra selecionada (A, B, C, D) para o índice e então para o choiceKey real
+                            final selectedIndex =
+                                option.codeUnitAt(0) - 65; // A=0, B=1, C=2, D=3
+                            if (selectedIndex >= 0 &&
+                                selectedIndex <
+                                    currentExamQuestion.answerChoices.length) {
+                              final realChoiceKey = currentExamQuestion
+                                  .answerChoices[selectedIndex].choiceKey;
+                              viewModel.selectAnswer(
+                                  currentExamQuestion.question.id,
+                                  realChoiceKey);
+                            }
                           },
                         ),
                       ],
@@ -419,7 +430,8 @@ class _ExamScreenState extends State<ExamScreen> {
   }
 
   Widget _buildSupportingText(SupportingText supportingText) {
-    if (supportingText.contentType == 'text') {
+    if (supportingText.contentType == 'text' ||
+        supportingText.contentType == null) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
         child: Container(
@@ -435,11 +447,33 @@ class _ExamScreenState extends State<ExamScreen> {
               fontStyle: FontStyle.italic,
               color: AppColors.primaryDark,
             ),
+            textAlign: TextAlign.justify,
           ),
         ),
       );
     }
     return const SizedBox.shrink();
+  }
+
+  String? _getSelectedOptionLetter(
+      String? selectedChoiceKey, List<AnswerChoice> answerChoices) {
+    if (selectedChoiceKey == null) return null;
+
+    // Normalizar o choiceKey salvo (trim e uppercase)
+    final normalizedSavedKey = selectedChoiceKey.trim().toUpperCase();
+
+    // Encontrar o índice da alternativa que corresponde ao choiceKey salvo
+    final index = answerChoices.indexWhere((ac) {
+      final normalizedAcKey = ac.choiceKey.trim().toUpperCase();
+      return normalizedAcKey == normalizedSavedKey;
+    });
+
+    // Se encontrou, retornar a letra correspondente (A, B, C, D)
+    if (index >= 0 && index < 26) {
+      return String.fromCharCode(65 + index); // A=65, B=66, etc.
+    }
+
+    return null;
   }
 
   Widget _buildNavigationButtons({
@@ -552,8 +586,8 @@ class _ExamScreenState extends State<ExamScreen> {
     } catch (error) {
       if (!mounted) return;
 
-      final message = viewModel.error ??
-          'Erro ao finalizar o simulado. Tente novamente.';
+      final message =
+          viewModel.error ?? 'Erro ao finalizar o simulado. Tente novamente.';
       final action = await _showSubmissionErrorDialog(message);
 
       if (!mounted) return;
@@ -634,4 +668,3 @@ class _ExamScreenState extends State<ExamScreen> {
 }
 
 enum _SubmissionAction { retry, exit }
-

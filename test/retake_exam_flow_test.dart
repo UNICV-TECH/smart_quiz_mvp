@@ -26,6 +26,11 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
   }
 
   @override
+  Future<void> ensureUserRecord(String userId) async {
+    // Implementação vazia para testes
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> fetchQuestions({
     required String examId,
     required String courseId,
@@ -90,6 +95,22 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
   ) async {
     attemptUpdates[attemptId] = updates;
   }
+
+  @override
+  Future<List<String>> checkExamQuestions(String examId) async {
+    return [];
+  }
+
+  @override
+  Future<void> insertExamQuestions(
+      List<Map<String, dynamic>> examQuestions) async {
+    // Implementação para testes
+  }
+
+  @override
+  Future<void> updateExam(String examId, Map<String, dynamic> updates) async {
+    // Implementação para testes
+  }
 }
 
 class _RecordingNavigatorObserver extends NavigatorObserver {
@@ -108,7 +129,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Retake exam workflow', () {
-    test('finalize returns identifiers required for retake and new attempt is created', () async {
+    test(
+        'finalize returns identifiers required for retake and new attempt is created',
+        () async {
       final dataSource = _FakeExamDataSource();
       final viewModel = ExamViewModel(
         dataSource: dataSource,
@@ -133,7 +156,8 @@ void main() {
       expect(results['questionCount'], equals(1));
       expect(results['attemptId'], equals('attempt_1'));
       expect(dataSource.recordedResponses.single, isNotEmpty);
-      expect(dataSource.attemptUpdates['attempt_1'], containsPair('status', 'completed'));
+      expect(dataSource.attemptUpdates['attempt_1'],
+          containsPair('status', 'completed'));
 
       final secondViewModel = ExamViewModel(
         dataSource: dataSource,
@@ -149,7 +173,8 @@ void main() {
       expect(secondViewModel.attemptId, isNot(equals(viewModel.attemptId)));
     });
 
-    testWidgets('Retake button pushes /exam with validated arguments', (tester) async {
+    testWidgets('Retake button pushes /exam with validated arguments',
+        (tester) async {
       final observer = _RecordingNavigatorObserver();
       final resultsPayload = {
         'attemptId': 'attempt_1',
@@ -169,7 +194,8 @@ void main() {
         MaterialApp(
           debugShowCheckedModeBanner: false,
           routes: {
-            '/exam/result': (context) => ExamResultScreen(results: resultsPayload),
+            '/exam/result': (context) =>
+                ExamResultScreen(results: resultsPayload),
             '/exam': (context) => const SizedBox.shrink(),
           },
           initialRoute: '/exam/result',

@@ -22,6 +22,34 @@ class SupabaseAuthRepository implements AuthRepository {
         data: {'full_name': name},
       );
 
+      // Criar registro na tabela user após signup bem-sucedido
+      final user = response.user;
+      if (user != null) {
+        try {
+          // Separar nome em primeiro nome e sobrenome (se possível)
+          final nameParts = name.trim().split(' ');
+          final firstName = nameParts.isNotEmpty ? nameParts.first : name;
+          final surname =
+              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+
+          await _client.from('user').upsert({
+            'id': user.id,
+            'email': email,
+            'first_name': firstName,
+            'surename': surname,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+
+          debugPrint('Registro do usuário criado na tabela user: ${user.id}');
+        } catch (e) {
+          // Log do erro mas não falha o signup se não conseguir criar na tabela user
+          debugPrint(
+            'Erro ao criar registro na tabela user após signup: $e',
+          );
+        }
+      }
+
       return AuthRepositorySignUpResponse(
         needsEmailConfirmation: response.session == null,
       );
@@ -63,6 +91,41 @@ class SupabaseAuthRepository implements AuthRepository {
         debugPrint(
           'SupabaseAuthRepository: unexpected full_name type '
           '(${rawFullName.runtimeType}). Ignorando valor.',
+        );
+      }
+
+      // Garantir que o usuário existe na tabela user
+      try {
+        final existing = await _client
+            .from('user')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (existing == null) {
+          // Separar nome em primeiro nome e sobrenome (se possível)
+          final nameParts = (fullName ?? '').trim().split(' ');
+          final firstName = nameParts.isNotEmpty ? nameParts.first : fullName;
+          final surname =
+              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+
+          await _client.from('user').upsert({
+            'id': user.id,
+            'email': user.email ?? email,
+            'first_name': firstName,
+            'surename': surname,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+
+          debugPrint(
+            'Registro do usuário criado na tabela user durante login: ${user.id}',
+          );
+        }
+      } catch (e) {
+        // Log do erro mas não falha o login se não conseguir criar na tabela user
+        debugPrint(
+          'Erro ao garantir registro na tabela user durante login: $e',
         );
       }
 

@@ -26,14 +26,14 @@ class SupportingText {
   const SupportingText({
     required this.id,
     required this.questionId,
-    required this.contentType,
+    this.contentType,
     required this.content,
     required this.displayOrder,
   });
 
   final String id;
   final String questionId;
-  final String contentType;
+  final String? contentType;
   final String content;
   final int displayOrder;
 }

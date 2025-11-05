@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
@@ -31,7 +32,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   AuthRepository authRepository;
-  await dotenv.load(fileName: ".env");
+
+  // Tentar carregar .env apenas se não estiver na web
+  // Na web, o arquivo .env não pode ser carregado como asset
+  if (!kIsWeb) {
+    try {
+      await dotenv.load(fileName: ".env");
+    } catch (e) {
+      debugPrint('Arquivo .env não encontrado ou não pode ser carregado: $e');
+      // Continua sem o arquivo .env se não existir
+    }
+  } else {
+    debugPrint(
+        'Plataforma web detectada: arquivo .env não será carregado como asset.');
+  }
 
 // <<<<<<< feature/profile-improvements
 //   @override
@@ -181,6 +195,12 @@ class MyApp extends StatelessWidget {
                 ),
               );
             }
+            final isRetake = args['isRetake'] as bool? ?? false;
+            final previousQuestionIdsRaw =
+                args['previousQuestionIds'] as List<dynamic>?;
+            final previousQuestionIds =
+                previousQuestionIdsRaw?.map((id) => id.toString()).toList();
+
             return ChangeNotifierProvider(
               create: (context) => ExamViewModel(
                 supabase: Supabase.instance.client,
@@ -188,6 +208,8 @@ class MyApp extends StatelessWidget {
                 examId: args['examId'] as String,
                 courseId: args['courseId'] as String,
                 questionCount: args['questionCount'] as int,
+                isRetake: isRetake,
+                previousQuestionIds: previousQuestionIds,
               ),
               child: ExamScreen(
                 userId: args['userId'] as String,
