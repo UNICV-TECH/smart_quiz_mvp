@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .env
+dotenv.env
 
 build/7e4aebe516b998635f34742713e086a8.cache.dill.track.dill
 build/5d2c61a80993d0cdccffb286a9452180/_composite.stamp

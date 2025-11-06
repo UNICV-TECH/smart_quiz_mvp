@@ -4,6 +4,7 @@ import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
 import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'views/splash_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/signup_screen.dart';
@@ -27,6 +28,9 @@ import 'views/exam_screen.dart';
 import 'views/exam_result_screen.dart';
 import 'views/quiz_config_screen_wrapper.dart';
 
+// Variável estática para rastrear se o Supabase já foi inicializado
+bool _supabaseInitialized = false;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -37,53 +41,62 @@ Future<void> main() async {
   if (!kIsWeb) {
     try {
       await dotenv.load(fileName: ".env");
+      debugPrint('✓ Arquivo .env carregado com sucesso');
+      final url = dotenv.env['SUPABASE_URL'] ?? '';
+      final key = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+      debugPrint(
+          '✓ SUPABASE_URL: ${url.isNotEmpty ? "${url.substring(0, 30)}..." : "VAZIO"}');
+      debugPrint(
+          '✓ SUPABASE_ANON_KEY: ${key.isNotEmpty ? "${key.substring(0, 30)}..." : "VAZIO"}');
+      debugPrint('✓ isConfigured: ${SupabaseOptions.isConfigured}');
     } catch (e) {
-      debugPrint('Arquivo .env não encontrado ou não pode ser carregado: $e');
+      debugPrint('✗ Erro ao carregar arquivo .env: $e');
+      debugPrint('✗ Tentando carregar valores diretamente...');
       // Continua sem o arquivo .env se não existir
     }
   } else {
     debugPrint(
-        'Plataforma web detectada: arquivo .env não será carregado como asset.');
+        'Plataforma web detectada: usando valores padrão ou variáveis de ambiente.');
   }
 
-// <<<<<<< feature/profile-improvements
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'UniCV Tech',
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green),
-//         useMaterial3: true,
-//         fontFamily: 'Poppins',
-//       ),
-//       home: const SplashScreen(),
-//       routes: {
-//         '/splash': (context) => const SplashScreen(),
-//         '/welcome': (context) => const WelcomeScreen(),
-//         '/signup': (context) => const SignupScreen(),
-//         '/login': (context) => const LoginScreen(),
-//         '/reset_password': (context) => const ResetPasswordScreen1(),
-//         '/reset_password2': (context) => const ResetPasswordScreen2(),
-//         '/main': (context) => const MainNavigationScreen(),
-//         '/profile': (context) => const ProfileScreen(),
-//         '/help': (context) => const HelpScreen(),
-//         '/about': (context) => const AboutScreen(),
-//         '/exam': (context) => const ExamScreen(),
-//       },
-// =======
-// <<<<<<< first-integration
+  // Verificar configuração do Supabase
+  final supabaseUrl = SupabaseOptions.url;
+  final supabaseKey = SupabaseOptions.anonKey;
+
+  debugPrint('Verificando configuração do Supabase:');
+  debugPrint(
+      '  URL: ${supabaseUrl.isNotEmpty ? "${supabaseUrl.substring(0, 30)}..." : "VAZIO"}');
+  debugPrint(
+      '  Key: ${supabaseKey.isNotEmpty ? "${supabaseKey.substring(0, 30)}..." : "VAZIO"}');
+  debugPrint('  isConfigured: ${SupabaseOptions.isConfigured}');
+
   if (SupabaseOptions.isConfigured) {
-    await Supabase.initialize(
-      url: SupabaseOptions.url,
-      anonKey: SupabaseOptions.anonKey,
-    );
-    authRepository = SupabaseAuthRepository(
-      client: Supabase.instance.client,
-    );
+    try {
+      // Inicializar Supabase apenas se ainda não foi inicializado
+      if (!_supabaseInitialized) {
+        await Supabase.initialize(
+          url: SupabaseOptions.url,
+          anonKey: SupabaseOptions.anonKey,
+        );
+        _supabaseInitialized = true;
+        debugPrint('✓ Supabase inicializado com sucesso!');
+      } else {
+        debugPrint(
+            '✓ Supabase já estava inicializado (pulando reinicialização)');
+      }
+
+      authRepository = SupabaseAuthRepository(
+        client: Supabase.instance.client,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('✗ Erro ao inicializar Supabase: $e');
+      debugPrint('Stack trace: $stackTrace');
+      _supabaseInitialized = false; // Reset flag em caso de erro
+      authRepository = const DisabledAuthRepository();
+    }
   } else {
     debugPrint(
-      'Supabase credentials are missing. Signup features will be disabled until configured.',
+      '✗ Supabase credentials are missing. Signup features will be disabled until configured.',
     );
     authRepository = const DisabledAuthRepository();
   }
