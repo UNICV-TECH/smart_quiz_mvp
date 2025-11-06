@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
 import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
 import 'package:provider/provider.dart';
@@ -85,35 +84,6 @@ Future<void> main() async {
   } else {
     debugPrint(
       'Supabase credentials are missing. Signup features will be disabled until configured.',
-// =======
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'UniCV Tech',
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green),
-//         useMaterial3: true,
-//         fontFamily: 'Poppins',
-//       ),
-//       home: const SplashScreen(),
-//       routes: {
-//         '/splash': (context) => const SplashScreen(),
-//         '/welcome': (context) => const WelcomeScreen(),
-//         '/signup': (context) => const SignupScreen(),
-//         '/login': (context) => const LoginScreen(),
-//         '/reset_password': (context) => const ResetPasswordScreen1(),
-//         '/reset_password2': (context) => const ResetPasswordScreen2(),
-//         '/main': (context) => const MainNavigationScreen(),
-//         '/profile': (context) => const ProfileScreen(),
-//         '/help': (context) => const HelpScreen(),
-//         '/about': (context) => const AboutScreen(),
-//         '/exam': (context) => const ExamScreen(),
-//         '/home': (context) =>
-//             const Scaffold(body: Center(child: Text('Tela Principal'))),
-//       },
-// >>>>>>> main
-// >>>>>>> main
     );
     authRepository = const DisabledAuthRepository();
   }

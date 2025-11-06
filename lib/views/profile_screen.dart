@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_user_data_card.dart';
+import '../viewmodels/profile_view_model.dart';
 import '../constants/supabase_options.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => ProfileViewModel()..loadUserProfile(),
+      child: const _ProfileViewBody(),
+    );
+  }
 }
 
+class _ProfileViewBody extends StatelessWidget {
+  const _ProfileViewBody();
 class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = 'Carregando...';
   String _userEmail = 'Carregando...';
@@ -134,6 +143,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<ProfileViewModel>();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
@@ -146,6 +157,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fit: BoxFit.cover,
             ),
           ),
+
+          // Conteúdo principal
           Positioned.fill(
             child: SafeArea(
               child: Column(
@@ -176,14 +189,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  // Conteúdo principal
+                  // Conteúdo do perfil
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 20),
+                    child: Builder(
+                      builder: (context) {
+                        if (viewModel.isLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (viewModel.errorMessage != null) {
+                          return Center(
+                            child: Text(
+                              viewModel.errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+
+                        final user = viewModel.user;
+                        if (user == null) {
+                          return const Center(
+                            child: Text(
+                              'Usuário não encontrado.',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: Colors.black54,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 20),
 
                             // Card de perfil com edição inline
                             _isLoading
@@ -210,36 +252,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     },
                                   ),
 
-                            const SizedBox(height: 30),
+                              const SizedBox(height: 30),
 
-                            // Menu items
-                            _buildMenuItem(
-                              icon: Icons.help_outline,
-                              title: AppStrings.help,
-                              onTap: () {
-                                Navigator.pushNamed(context, '/help');
-                              },
-                            ),
+                              // Itens de menu
+                              _buildMenuItem(
+                                icon: Icons.help_outline,
+                                title: AppStrings.help,
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/help');
+                                },
+                              ),
 
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 16),
 
-                            _buildMenuItem(
-                              icon: Icons.info_outline,
-                              title: AppStrings.about,
-                              onTap: () {
-                                Navigator.pushNamed(context, '/about');
-                              },
-                            ),
+                              _buildMenuItem(
+                                icon: Icons.info_outline,
+                                title: AppStrings.about,
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/about');
+                                },
+                              ),
 
-                            const SizedBox(height: 32),
+                              const SizedBox(height: 32),
 
-                            // Botão de Sair
-                            _buildLogoutButton(),
+                              // Botão de sair
+                              _buildLogoutButton(context),
 
-                            const SizedBox(height: 100), // Espaço para o navbar
-                          ],
-                        ),
-                      ),
+                              const SizedBox(height: 100),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -287,7 +330,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 size: 24,
               ),
             ),
-
             const SizedBox(width: 16),
 
             // Título
@@ -303,7 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // Chevron para direita
+            // Seta para direita
             Icon(
               Icons.chevron_right,
               color: AppColors.secondaryDark,
@@ -315,9 +357,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
     return InkWell(
-      onTap: _handleLogout,
+      onTap: () => _handleLogout(context),
       borderRadius: BorderRadius.circular(15),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -350,7 +392,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(width: 16),
 
-            // Título
+            // Texto
             Expanded(
               child: Text(
                 'Sair',
@@ -368,8 +410,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _handleLogout() {
-    // Mostrar diálogo de confirmação
+  void _handleLogout(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -403,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Fechar diálogo
+                Navigator.pop(context);
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',
