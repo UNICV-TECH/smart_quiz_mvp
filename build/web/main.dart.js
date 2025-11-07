@@ -27310,7 +27310,7 @@ var $async$azr=A.u(function(a,b){if(a===1)return A.w(b,r)
 while(true)switch(s){case 0:if($.a2==null)A.aBZ()
 $.a2.toString
 s=2
-return A.p(A.akn("$(jq -r '.SUPABASE_ANON_KEY' .vscode/dev.json)","$(jq -r '.SUPABASE_URL' .vscode/dev.json)"),$async$azr)
+return A.p(A.akn("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ycW92b3Bid2ZkZmZ1bWh0Y2F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2MjMxMzUsImV4cCI6MjA3MTE5OTEzNX0.b0dRbLEragykIlsBjtjzUk8FDt5SpuNspYY3-6bnOIc","https://mrqovopbwfdffumhtcaz.supabase.co"),$async$azr)
 case 2:q=$.fO().b
 q===$&&A.a()
 p=new A.QK(q)
@@ -28799,7 +28799,7 @@ $S:2}
 A.axT.prototype={
 $1(a){var s=A.dH().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/d2913632a4578ee4d0b8b1c4a69888c8a0672c4b/":s)+a},
+return(s==null?"https://www.gstatic.com/flutter-canvaskit/035316565ad77281a75305515e4682e6c4c6f7ca/":s)+a},
 $S:57}
 A.a29.prototype={
 f8(a,b){var s,r=this.a
