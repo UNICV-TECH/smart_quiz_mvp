@@ -40,7 +40,7 @@ Future<void> main() async {
   // Na web, o arquivo .env não pode ser carregado como asset
   if (!kIsWeb) {
     try {
-      await dotenv.load(fileName: ".env");
+      await dotenv.load(fileName: "assets/dotenv.env");
       debugPrint('✓ Arquivo .env carregado com sucesso');
       final url = dotenv.env['SUPABASE_URL'] ?? '';
       final key = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
