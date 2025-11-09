@@ -237,74 +237,79 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
             child: Column(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 33.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(top: 15.0, bottom: 5.0),
-                          child: Center(
-                            child: AppLogoWidget.network(
-                              size: AppLogoSize.small,
-                              logoPath: _logoUrl,
-                              semanticLabel: 'Logo UniCV',
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: DefaultButtonArrowBack(
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
-                          ),
-                        ),
-                        const Spacer(flex: 1),
-                        const AppText(
-                          'Escolha a quantidade de questões',
-                          style: AppTextStyle.titleSmall,
-                          color: AppColors.primaryDark,
-                        ),
-                        const SizedBox(height: 5),
-                        AppText(
-                          'Alinhe ao seu tempo disponível!',
-                          style: AppTextStyle.subtitleMedium,
-                          color: AppColors.secondaryDark
-                              .withAlpha((0.8 * 255).round()),
-                        ),
-                        const SizedBox(height: 30),
-                        SelectionBox(
-                          options: _quantityOptions,
-                          initialOption: _selectedQuantity,
-                          onOptionSelected: _onQuantitySelected,
-                        ),
-                        if (_feedbackMessage != null &&
-                            _feedbackSeverity != null) ...[
-                          const SizedBox(height: 20),
-                          DefaultInlineMessage(
-                            message: _feedbackMessage!,
-                            severity: _feedbackSeverity!,
-                            onDismissed: _clearFeedback,
-                          ),
-                        ],
-                        const Spacer(flex: 2),
-                        _isLoading
-                            ? const Center(
-                                child: CircularProgressIndicator(
-                                    color: AppColors.orange))
-                            : DefaultButtonOrange(
-                                texto: 'Iniciar',
-                                onPressed: isButtonEnabled ? _startQuiz : null,
-                                tipo: isButtonEnabled
-                                    ? BotaoTipo.primario
-                                    : BotaoTipo.desabilitado,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                        child: ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 15),
+                              Center(
+                                child: AppLogoWidget.network(
+                                  size: AppLogoSize.small,
+                                  logoPath: _logoUrl,
+                                  semanticLabel: 'Logo UniCV',
+                                ),
                               ),
-                        const SizedBox(height: 35),
-                      ],
-                    ),
+                              const SizedBox(height: 20),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: DefaultButtonArrowBack(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              const AppText(
+                                'Escolha a quantidade de questões',
+                                style: AppTextStyle.titleSmall,
+                                color: AppColors.primaryDark,
+                              ),
+                              const SizedBox(height: 5),
+                              AppText(
+                                'Alinhe ao seu tempo disponível!',
+                                style: AppTextStyle.subtitleMedium,
+                                color: AppColors.secondaryDark
+                                    .withAlpha((0.8 * 255).round()),
+                              ),
+                              const SizedBox(height: 30),
+                              SelectionBox(
+                                options: _quantityOptions,
+                                initialOption: _selectedQuantity,
+                                onOptionSelected: _onQuantitySelected,
+                              ),
+                              if (_feedbackMessage != null &&
+                                  _feedbackSeverity != null) ...[
+                                const SizedBox(height: 20),
+                                DefaultInlineMessage(
+                                  message: _feedbackMessage!,
+                                  severity: _feedbackSeverity!,
+                                  onDismissed: _clearFeedback,
+                                ),
+                              ],
+                              const SizedBox(height: 24),
+                              _isLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(
+                                          color: AppColors.orange),
+                                    )
+                                  : DefaultButtonOrange(
+                                      texto: 'Iniciar',
+                                      onPressed:
+                                          isButtonEnabled ? _startQuiz : null,
+                                      tipo: isButtonEnabled
+                                          ? BotaoTipo.primario
+                                          : BotaoTipo.desabilitado,
+                                    ),
+                              const SizedBox(height: 35),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 CustomNavBar(
