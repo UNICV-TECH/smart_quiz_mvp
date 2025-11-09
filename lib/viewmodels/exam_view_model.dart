@@ -78,9 +78,7 @@ class ExamViewModel extends ChangeNotifier {
       startedAt: startTime,
     );
     // Só atualizar _startedAt se ainda não estava setado
-    if (_startedAt == null) {
-      _startedAt = startTime;
-    }
+    _startedAt ??= startTime;
     debugPrint('Nova tentativa criada: $_attemptId');
   }
 
