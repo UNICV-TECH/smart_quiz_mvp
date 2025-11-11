@@ -17,6 +17,7 @@ O **Smart Quiz** é um Projeto de Ensino do **UniCV** que busca conectar os alun
 - **Protótipo (Figma / Canva / outro)**: [Acessar protótipo](https://www.figma.com/design/GidS299VRzBeauUL8XFqjD/UniCV-Tech---Vers%C3%A3o-Principal?node-id=82-26&p=f&t=gxetva9GrY8AXUmv-0)
 - **Taiga**: [Acessar Lean Inception](https://tree.taiga.io/)
 - **Documentação Completa**: na pasta [`documentacao`](Documentacao/)
+- **Vercel**: [Acessar projeto](https://smart-quiz-mvp.vercel.app/)
 
 ---
 
@@ -33,14 +34,11 @@ ProjetosSmartQuiz/
 | ID    | Funcionalidade           | Descrição                                                   |
 |-------|--------------------------|-------------------------------------------------------------|
 | RF01  | Autenticação             | Login e registro via Supabase Auth                          |
-| RF02  | Cadastro de Salas        | Nome, capacidade e recursos das salas                       |
-| RF03  | Listagem de Salas        | Visualizar todas as salas disponíveis                       |
-| RF04  | Exclusão de Sala         | Remover salas do sistema                                    |
-| RF05  | Reservas                 | Criar, aprovar, negar, cancelar e remanejar reservas        |
-| RF06  | Relatórios e Dashboards  | Visualizar gráficos e gerar relatórios PDF/Excel            |
-| RF07  | Controle de Usuários     | Permissões de Admin e Funcionário                           |
-| RF08  | Integração com Supabase  | Autenticação, storage e sincronização                       |
-
+| RF02  | Listagem de Cursos       | Visualizar todos os cursos                                  |
+| RF03  | Controle de Usuários     | Permissões de Admin e Funcionário                           |
+| RF04  | Integração com Supabase  | Autenticação, storage e sincronização                       |
+| RF05  | Simulados                | Criação das provas, por quantidades de questões             |
+| RF06  | Usuário                  | Alterações de nome e senha                                  |
 ---
 
 ## 🛠 Tecnologias Utilizadas
@@ -53,10 +51,7 @@ ProjetosSmartQuiz/
 
 ⚠️ Pré-requisitos
 
-- Node.js >= 18.x
-- NPM >= 9.x
-- Angular CLI >= 17.x
-- .NET SDK >= 8.0
+- Flutter >= 3.35.6
 
 ---
 
@@ -75,9 +70,22 @@ Dentro da raiz do projeto do frontend execute o passo:
 
 ### Frontend
 ```bash
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter Local Dev",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome",
+      "args": [
+        "--dart-define-from-file=.vscode/dev.json",
+      ]
+    }
+  ]
+}
 cd SMART_QUIZ_MVP
-npm install
-ng serve
+F5
 ```
 ---
 
