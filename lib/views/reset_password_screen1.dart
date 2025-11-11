@@ -113,6 +113,7 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           // Imagem de fundo (igual ao layout do login)
