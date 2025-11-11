@@ -257,6 +257,7 @@ class ExamViewModel extends ChangeNotifier {
               }()
             : null;
 
+        bool usedFallbackCorrectChoice = false;
         final correctChoice = examQuestion.answerChoices.firstWhere(
           (ac) => ac.isCorrect == true,
           orElse: () {
@@ -270,10 +271,12 @@ class ExamViewModel extends ChangeNotifier {
             }
 
             // Se não encontrar nenhuma alternativa correta e houver alternativas disponíveis,
-            // usar a primeira como fallback (mas isso indica um problema nos dados)
+            // usar a primeira como fallback apenas para evitar crash,
+            // mas marcar que o fallback foi necessário para não contabilizar como acerto.
             if (examQuestion.answerChoices.isNotEmpty) {
               debugPrint(
                   'USANDO PRIMEIRA ALTERNATIVA COMO FALLBACK (dados incorretos no banco)');
+              usedFallbackCorrectChoice = true;
               return examQuestion.answerChoices.first;
             }
 
@@ -305,6 +308,12 @@ class ExamViewModel extends ChangeNotifier {
             '  Correct choice: ${correctChoice.choiceKey} (id: ${correctChoice.id})');
         debugPrint('  Selected isCorrect flag: ${selectedChoice?.isCorrect}');
         debugPrint('  Final isCorrect: $isCorrect');
+
+        if (usedFallbackCorrectChoice && isCorrect) {
+          debugPrint(
+              'Ignorando acerto por fallback: questionId=$questionId (dados incorretos no banco)');
+          isCorrect = false;
+        }
 
         final pointsEarned = isCorrect ? examQuestion.question.points : 0.0;
 
