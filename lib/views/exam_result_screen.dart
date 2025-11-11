@@ -159,151 +159,157 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         ),
         child: SafeArea(
           bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  children: [
-                    DefaultButtonArrowBack(
-                      onPressed: () => Navigator.pop(context, widget.results),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: logo.AppLogoWidget.asset(
-                          size: logo.AppLogoSize.small,
-                          logoPath: 'assets/images/logo_color.png',
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Row(
+                    children: [
+                      DefaultButtonArrowBack(
+                        onPressed: () => Navigator.pop(context, widget.results),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: logo.AppLogoWidget.asset(
+                            size: logo.AppLogoSize.small,
+                            logoPath: 'assets/images/logo_color.png',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 40),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      AppText(
-                        'Resultado do simulado',
-                        style: AppTextStyle.titleSmall,
-                        color: AppColors.primaryDark,
-                      ),
-                      SizedBox(height: 4),
-                      AppText(
-                        'Visualize seu desempenho e revise as questões',
-                        style: AppTextStyle.subtitleMedium,
-                        color: AppColors.secondaryDark,
-                      ),
+                      const SizedBox(width: 40),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _SummaryCard(
-                  percentageScore: _percentageScore,
-                  correctCount: _correctCount,
-                  incorrectCount: _incorrectCount,
-                  unansweredCount: _unansweredCount,
-                  totalQuestions: _totalQuestions,
-                  durationLabel: _formatDuration(_durationSeconds),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
+              SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _questionsBreakdown.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Nenhuma questão registrada para este simulado.',
-                            style: TextStyle(color: AppColors.secondaryDark),
-                          ),
-                        )
-                      : ListView.separated(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.only(bottom: 24, top: 8),
-                          itemCount: _questionsBreakdown.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final item = _questionsBreakdown[index];
-                            final isCorrect =
-                                item['isCorrect'] as bool? ?? false;
-                            final isAnswered =
-                                item['isAnswered'] as bool? ?? false;
-                            return Container(
-                              key: _tileKeys[index],
-                              child: ResultQuestionTile(
-                                questionNumber: index + 1,
-                                enunciation:
-                                    item['enunciation'] as String? ?? '',
-                                selectedChoiceKey:
-                                    item['selectedChoiceKey'] as String?,
-                                selectedChoiceText:
-                                    item['selectedChoiceText'] as String?,
-                                correctChoiceKey:
-                                    item['correctChoiceKey'] as String? ?? '',
-                                correctChoiceText:
-                                    item['correctChoiceText'] as String? ?? '',
-                                isCorrect: isCorrect,
-                                isAnswered: isAnswered,
-                              ),
-                            );
-                          },
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        AppText(
+                          'Resultado do simulado',
+                          style: AppTextStyle.titleSmall,
+                          color: AppColors.primaryDark,
                         ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha((0.92 * 255).round()),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 20,
-                      offset: Offset(0, -6),
+                        SizedBox(height: 4),
+                        AppText(
+                          'Visualize seu desempenho e revise as questões',
+                          style: AppTextStyle.subtitleMedium,
+                          color: AppColors.secondaryDark,
+                        ),
+                      ],
                     ),
-                  ],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DefaultButtonOrange(
-                      texto: 'Refazer prova',
-                      onPressed:
-                          _canRetake() ? () => _handleRetake(context) : null,
-                      largura: double.infinity,
-                      altura: 54,
-                      tipo: _canRetake()
-                          ? BotaoTipo.primario
-                          : BotaoTipo.desabilitado,
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _SummaryCard(
+                    percentageScore: _percentageScore,
+                    correctCount: _correctCount,
+                    incorrectCount: _incorrectCount,
+                    unansweredCount: _unansweredCount,
+                    totalQuestions: _totalQuestions,
+                    durationLabel: _formatDuration(_durationSeconds),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              if (_questionsBreakdown.isEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: const Center(
+                      child: Text(
+                        'Nenhuma questão registrada para este simulado.',
+                        style: TextStyle(color: AppColors.secondaryDark),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    DefaultButtonOrange(
-                      texto: 'Voltar ao início',
-                      onPressed: () {
-                        Navigator.popUntil(
-                          context,
-                          (route) =>
-                              route.settings.name == '/main' || route.isFirst,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final item = _questionsBreakdown[index];
+                        final isCorrect = item['isCorrect'] as bool? ?? false;
+                        final isAnswered =
+                            item['isAnswered'] as bool? ?? false;
+                        final isLast =
+                            index == _questionsBreakdown.length - 1;
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                          child: Container(
+                            key: _tileKeys[index],
+                            child: ResultQuestionTile(
+                              questionNumber: index + 1,
+                              enunciation: item['enunciation'] as String? ?? '',
+                              selectedChoiceKey:
+                                  item['selectedChoiceKey'] as String?,
+                              selectedChoiceText:
+                                  item['selectedChoiceText'] as String?,
+                              correctChoiceKey:
+                                  item['correctChoiceKey'] as String? ?? '',
+                              correctChoiceText:
+                                  item['correctChoiceText'] as String? ?? '',
+                              isCorrect: isCorrect,
+                              isAnswered: isAnswered,
+                            ),
+                          ),
                         );
                       },
-                      largura: double.infinity,
-                      altura: 54,
-                      tipo: BotaoTipo.secundario,
+                      childCount: _questionsBreakdown.length,
                     ),
-                  ],
+                  ),
+                ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DefaultButtonOrange(
+                          texto: 'Voltar ao início',
+                          onPressed: () {
+                            Navigator.popUntil(
+                              context,
+                              (route) =>
+                                  route.settings.name == '/main' ||
+                                  route.isFirst,
+                            );
+                          },
+                          largura: double.infinity,
+                          altura: 54,
+                          tipo: BotaoTipo.secundario,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DefaultButtonOrange(
+                          texto: 'Refazer prova',
+                          onPressed: _canRetake()
+                              ? () => _handleRetake(context)
+                              : null,
+                          largura: double.infinity,
+                          altura: 54,
+                          tipo: _canRetake()
+                              ? BotaoTipo.primario
+                              : BotaoTipo.desabilitado,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -60,19 +60,24 @@ class DefaultButtonOrange extends StatelessWidget {
           ),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icone != null) Icon(icone, color: textColor),
-            if (icone != null && texto.isNotEmpty) SizedBox(width: 8),
+            if (icone != null && texto.isNotEmpty) const SizedBox(width: 8),
             if (texto.isNotEmpty)
-              Text(
-                texto,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "", // Defina a fonte que quiser
+              Flexible(
+                child: Text(
+                  texto,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "", // Defina a fonte que quiser
+                  ),
                 ),
               ),
           ],
