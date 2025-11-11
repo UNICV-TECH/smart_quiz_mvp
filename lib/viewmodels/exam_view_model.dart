@@ -502,7 +502,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
       response = await _client
           .from('question')
           .select(
-              'id, enunciation, difficulty_level, points, is_active, created_at, updated_at')
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, updated_at')
           .eq('id_course', courseId)
           .eq('is_active', true)
           .order('created_at');
@@ -513,7 +513,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
       response = await _client
           .from('question')
           .select(
-              'id, enunciation, difficulty_level, points, is_active, created_at, update_at')
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, update_at')
           .eq('id_course', courseId)
           .eq('is_active', true)
           .order('created_at');
@@ -525,6 +525,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
       final normalized = Map<String, dynamic>.from(item);
       normalized['updated_at'] ??= normalized['update_at'];
       normalized.remove('update_at');
+      normalized['question_text'] ??= normalized['question'];
       normalized['exam_id'] = examId;
       normalized['question_order'] ??= i;
       mapped.add(normalized);

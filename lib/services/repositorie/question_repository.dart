@@ -1,12 +1,14 @@
 class Question {
   final int id;
   final String enunciation;
+  final String questionText;
   final List<String> alternatives;
   final String? correctAnswer;
 
   Question({
     required this.id,
     required this.enunciation,
+    required this.questionText,
     required this.alternatives,
     this.correctAnswer,
   });
@@ -20,4 +22,3 @@ class Exam {
     required this.questions,
   }) : totalQuestions = questions.length;
 }
-

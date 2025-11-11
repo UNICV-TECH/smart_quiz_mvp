@@ -58,6 +58,9 @@ class SupabaseQuestionRepository implements QuestionRepository {
           id: json['id'] as String,
           examId: json['exam_id'] as String,
           enunciation: json['enunciation'] as String,
+          questionText: json['question_text'] as String? ??
+              json['question'] as String? ??
+              '',
           questionOrder: json['question_order'] as int?,
           difficultyLevel: json['difficulty_level'] as String?,
           points: (json['points'] as num?)?.toDouble() ?? 1.0,

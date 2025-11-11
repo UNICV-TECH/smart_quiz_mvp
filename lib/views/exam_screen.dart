@@ -185,8 +185,13 @@ class _ExamScreenState extends State<ExamScreen> {
         final isFirstQuestion = currentQuestionIndex == 0;
         final isLastQuestion =
             currentQuestionIndex == viewModel.examQuestions.length - 1;
-        final hasSupportingTexts =
-            currentExamQuestion.supportingTexts.isNotEmpty;
+        final supportingTextWidgets = currentExamQuestion.supportingTexts
+            .map(_buildSupportingText)
+            .where((widget) => widget is! SizedBox)
+            .toList();
+        final hasSupportingTexts = supportingTextWidgets.isNotEmpty;
+        final questionBody = currentExamQuestion.question.questionText.trim();
+        final hasQuestionBody = questionBody.isNotEmpty;
 
         const horizontalPadding = 24.0;
 
@@ -218,12 +223,15 @@ class _ExamScreenState extends State<ExamScreen> {
                         _buildQuestionTitle(currentQuestionIndex + 1),
                         const SizedBox(height: 16),
                         if (hasSupportingTexts) ...[
-                          ...currentExamQuestion.supportingTexts
-                              .map((st) => _buildSupportingText(st)),
+                          ...supportingTextWidgets,
                           const SizedBox(height: 16),
                         ],
                         _buildEnunciation(
                             currentExamQuestion.question.enunciation),
+                        if (hasQuestionBody) ...[
+                          const SizedBox(height: 16),
+                          _buildQuestionBody(questionBody),
+                        ],
                         const SizedBox(height: 24),
                         AlternativeSelectorVertical(
                           labels: currentExamQuestion.answerChoices
@@ -431,9 +439,25 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
+  Widget _buildQuestionBody(String questionBody) {
+    return Text(
+      questionBody,
+      style: const TextStyle(
+        fontSize: 16,
+        height: 1.5,
+        fontWeight: FontWeight.w600,
+        color: AppColors.primaryDark,
+      ),
+      textAlign: TextAlign.justify,
+    );
+  }
+
   Widget _buildSupportingText(SupportingText supportingText) {
     if (supportingText.contentType == 'text' ||
         supportingText.contentType == null) {
+      if (supportingText.content.trim().isEmpty) {
+        return const SizedBox.shrink();
+      }
       return Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
         child: Container(

@@ -45,7 +45,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   final Duration _anim = const Duration(milliseconds: 520);
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
-    {'icon': Icons.explore, 'label': 'Explorar'},
+    {'icon': Icons.emoji_events_outlined, 'label': 'Ranking'},
     {'icon': Icons.person, 'label': 'Perfil'},
   ];
 
@@ -70,7 +70,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Fundo com ClipPath 
+          // Fundo com ClipPath
           Positioned(
             bottom: 0,
             left: 0,
@@ -141,20 +141,20 @@ class _CustomNavBarState extends State<CustomNavBar> {
             right: 0,
             bottom: 0, // Posição original
             child: SizedBox(
-              height: _navBarHeight - navBarTopOffset, 
+              height: _navBarHeight - navBarTopOffset,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(_items.length, (index) {
                   final bool isSelected = _currentIndex == index;
-                  
+
                   return GestureDetector(
                     onTap: () => _currentOnTap(index),
-                    behavior: HitTestBehavior.opaque, // Captura cliques no vazio
+                    behavior:
+                        HitTestBehavior.opaque, // Captura cliques no vazio
                     child: SizedBox(
                       width: itemWidth,
                       height: _navBarHeight - navBarTopOffset, // Ocupa a altura
                       child: Column(
-
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           AnimatedOpacity(
@@ -255,7 +255,7 @@ class NavBarClipper extends CustomClipper<Path> {
   }
 }
 
-// Preview Widget 
+// Preview Widget
 @Preview(name: 'Custom NavBar')
 Widget customNavBarPreview() {
   return const CustomNavBarTest();

@@ -7,7 +7,7 @@ class MockExamRepository implements ExamRepository {
   Future<ExamMetadata?> getExamMetadata(String courseId) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Return mock data
     return ExamMetadata(
       id: 'mock-exam-id-$courseId',
@@ -16,13 +16,13 @@ class MockExamRepository implements ExamRepository {
       totalQuestions: 20,
     );
   }
-  
+
   @override
   Future<int> getAvailableQuestionCount(String examId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     return 20;
   }
-  
+
   @override
   Future<String> createExamAttempt({
     required String userId,
@@ -33,16 +33,16 @@ class MockExamRepository implements ExamRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     return 'mock-attempt-${DateTime.now().millisecondsSinceEpoch}';
   }
-  
+
   @override
   Future<List<ExamQuestion>> fetchExamQuestions({
     required String examId,
     required int questionCount,
   }) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     final now = DateTime.now();
-    
+
     // Return mock questions
     return List.generate(questionCount, (index) {
       final question = models.Question(
@@ -50,6 +50,7 @@ class MockExamRepository implements ExamRepository {
         examId: examId,
         enunciation: 'Esta é a questão ${index + 1} de teste. '
             'O conteúdo real será carregado do Supabase quando conectado.',
+        questionText: 'Qual é a resposta correta para a questão ${index + 1}?',
         questionOrder: index + 1,
         difficultyLevel: 'medium',
         points: 1.0,
@@ -57,7 +58,7 @@ class MockExamRepository implements ExamRepository {
         createdAt: now,
         updatedAt: now,
       );
-      
+
       final choices = [
         models.AnswerChoice(
           id: 'choice-a-$index',
@@ -96,7 +97,7 @@ class MockExamRepository implements ExamRepository {
           createdAt: now,
         ),
       ];
-      
+
       return ExamQuestion(
         question: question,
         answerChoices: choices,
