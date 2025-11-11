@@ -185,6 +185,8 @@ class _ExamScreenState extends State<ExamScreen> {
         final isFirstQuestion = currentQuestionIndex == 0;
         final isLastQuestion =
             currentQuestionIndex == viewModel.examQuestions.length - 1;
+        final hasSupportingTexts =
+            currentExamQuestion.supportingTexts.isNotEmpty;
 
         const horizontalPadding = 24.0;
 
@@ -215,13 +217,13 @@ class _ExamScreenState extends State<ExamScreen> {
                       children: [
                         _buildQuestionTitle(currentQuestionIndex + 1),
                         const SizedBox(height: 16),
-                        _buildEnunciation(
-                            currentExamQuestion.question.enunciation),
-                        if (currentExamQuestion.supportingTexts.isNotEmpty) ...[
-                          const SizedBox(height: 16),
+                        if (hasSupportingTexts) ...[
                           ...currentExamQuestion.supportingTexts
                               .map((st) => _buildSupportingText(st)),
+                          const SizedBox(height: 16),
                         ],
+                        _buildEnunciation(
+                            currentExamQuestion.question.enunciation),
                         const SizedBox(height: 24),
                         AlternativeSelectorVertical(
                           labels: currentExamQuestion.answerChoices
