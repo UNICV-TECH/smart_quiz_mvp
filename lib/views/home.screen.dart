@@ -56,8 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
 //   final String _logoUrl =
 //       'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
 // =======
-  final String _logoUrl =
-      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoAssetPath = 'assets/images/logo_color.png';
 
   final Map<String, IconData> _iconMap = {
     'psychology_outlined': Icons.psychology_outlined,
@@ -220,9 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(
                                       top: 12.0, bottom: 20.0),
-                                  child: AppLogoWidget.network(
+                                  child: AppLogoWidget.asset(
                                     size: AppLogoSize.small,
-                                    logoPath: _logoUrl,
+                                    logoPath: _logoAssetPath,
                                     semanticLabel: 'Logo UniCV',
                                   ),
                                 ),

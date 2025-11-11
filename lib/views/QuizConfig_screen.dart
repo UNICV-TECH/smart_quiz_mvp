@@ -28,8 +28,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   FeedbackSeverity? _feedbackSeverity;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
-  final String _logoUrl =
-      'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
+  final String _logoAssetPath = 'assets/images/logo_color.png';
 
   void _onQuantitySelected(String quantity) {
     setState(() {
@@ -249,9 +248,9 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                             children: [
                               const SizedBox(height: 15),
                               Center(
-                                child: AppLogoWidget.network(
+                                child: AppLogoWidget.asset(
                                   size: AppLogoSize.small,
-                                  logoPath: _logoUrl,
+                                  logoPath: _logoAssetPath,
                                   semanticLabel: 'Logo UniCV',
                                 ),
                               ),
