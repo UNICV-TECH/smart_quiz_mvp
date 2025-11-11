@@ -322,11 +322,20 @@ class ExamViewModel extends ChangeNotifier {
           'answered_at': DateTime.now().toIso8601String(),
         });
 
+        final fallbackEnunciation = examQuestion.question.enunciation.isNotEmpty
+            ? examQuestion.question.enunciation
+            : (examQuestion.supportingTexts.isNotEmpty
+                ? examQuestion.supportingTexts
+                    .where((st) =>
+                        (st.contentType == null || st.contentType == 'text') &&
+                        st.content.trim().isNotEmpty)
+                    .map((st) => st.content.trim())
+                    .join('\n\n')
+                : 'Questão sem enunciado');
+
         questionsBreakdown.add({
           'questionId': questionId,
-          'enunciation': examQuestion.question.enunciation.isNotEmpty
-              ? examQuestion.question.enunciation
-              : 'Questão sem enunciado',
+          'enunciation': fallbackEnunciation,
           'selectedChoiceKey': selectedChoiceKey,
           'selectedChoiceText': selectedChoice?.choiceText,
           'correctChoiceKey': correctChoice.choiceKey,

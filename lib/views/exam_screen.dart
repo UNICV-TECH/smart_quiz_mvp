@@ -470,7 +470,6 @@ class _ExamScreenState extends State<ExamScreen> {
             supportingText.content,
             style: const TextStyle(
               fontSize: 14,
-              fontStyle: FontStyle.italic,
               color: AppColors.primaryDark,
             ),
             textAlign: TextAlign.justify,
