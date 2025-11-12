@@ -46,6 +46,7 @@ class _CustomNavBarState extends State<CustomNavBar> {
   final List<Map<String, dynamic>> _items = const [
     {'icon': Icons.home, 'label': 'Início'},
     {'icon': Icons.emoji_events_outlined, 'label': 'Ranking'},
+    {'icon': Icons.history, 'label': 'Histórico'},
     {'icon': Icons.person, 'label': 'Perfil'},
   ];
 

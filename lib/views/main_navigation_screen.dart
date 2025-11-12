@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../ui/components/default_navbar.dart';
 import '../viewmodels/course_selection_view_model.dart';
 import 'home.screen.dart';
-import 'explore_screen.dart';
+import 'ranking_screen.dart';
+import 'exam_history_screen.dart';
 import 'profile_screen.dart';
 import 'package:unicv_tech_mvp/repositories/course_repository.dart';
 
@@ -37,7 +38,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             child: const HomeScreen(),
           ),
-          const ExploreScreen(),
+          const RankingScreen(),
+          const ExamHistoryScreen(),
           const ProfileScreen(),
         ],
       ),

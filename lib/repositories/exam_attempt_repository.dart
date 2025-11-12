@@ -1,4 +1,5 @@
 import 'exam_attempt_repository_types.dart';
+import '../models/user_response.dart' as models;
 
 abstract class ExamAttemptRepository {
   Future<ExamAttemptCreated> createAttempt({
@@ -23,5 +24,9 @@ abstract class ExamAttemptRepository {
   Future<List<ExamAttemptHistory>> fetchUserAttempts({
     required String userId,
     String? courseId,
+  });
+
+  Future<List<models.UserResponse>> fetchAttemptResponses({
+    required String attemptId,
   });
 }

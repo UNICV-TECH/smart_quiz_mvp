@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
-import 'package:unicv_tech_mvp/services/repositorie/exam_history_repository.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_history_view_model.dart';
 
@@ -20,14 +19,12 @@ const _dividerColor = Color(0xFFD3D9CF);
 const _cardFill = Color(0xFFEFF4EA);
 
 class ExamHistoryAccordion extends StatelessWidget {
-  final ExamHistoryRepository service;
   final Map<String, IconData> iconByKey;
   final void Function(SubjectExamHistory subject, ExamAttempt attempt)?
       onExpandExam;
 
   const ExamHistoryAccordion({
     super.key,
-    required this.service,
     this.iconByKey = const {},
     this.onExpandExam,
   });
@@ -40,39 +37,37 @@ class ExamHistoryAccordion extends StatelessWidget {
         top: true,
         bottom: false,
         child: ChangeNotifierProvider<ExamHistoryViewModel>(
-          create: (_) => ExamHistoryViewModel(service: service)..load(),
+          create: (_) => ExamHistoryViewModel()..loadHistory(),
           child: Consumer<ExamHistoryViewModel>(
             builder: (context, viewModel, _) {
-              if (viewModel.loading && viewModel.subjects.isEmpty) {
+              if (viewModel.isLoading && viewModel.attempts.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (viewModel.error != null && viewModel.subjects.isEmpty) {
+              if (viewModel.errorMessage != null &&
+                  viewModel.attempts.isEmpty) {
                 return _ErrorState(
                   message: 'Não foi possível carregar o histórico.',
-                  onRetry: viewModel.load,
+                  onRetry: () => viewModel.loadHistory(),
                 );
               }
 
-              if (viewModel.subjects.isEmpty) {
+              if (viewModel.attempts.isEmpty) {
                 return const _EmptyState();
               }
 
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
-                children: [
-                  for (final subject in viewModel.subjects)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _SubjectHistoryTile(
-                        subject: subject,
-                        icon: iconByKey[subject.iconKey] ??
-                            subject.fallbackIcon ??
-                            Icons.book_outlined,
-                        onExpandExam: onExpandExam,
-                      ),
-                    ),
-                ],
+              // Este componente usa uma estrutura antiga (SubjectExamHistory)
+              // que não está mais disponível no novo ViewModel
+              // Retornando um placeholder até ser atualizado ou removido
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'Este componente precisa ser atualizado para usar a nova estrutura de histórico.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
               );
             },
           ),
@@ -85,13 +80,10 @@ class ExamHistoryAccordion extends StatelessWidget {
 class _SubjectHistoryTile extends StatefulWidget {
   final SubjectExamHistory subject;
   final IconData icon;
-  final void Function(SubjectExamHistory subject, ExamAttempt attempt)?
-      onExpandExam;
 
   const _SubjectHistoryTile({
     required this.subject,
     required this.icon,
-    this.onExpandExam,
   });
 
   @override
@@ -222,7 +214,7 @@ class _SubjectHistoryTileState extends State<_SubjectHistoryTile>
                             _AttemptBlock(
                               subject: widget.subject,
                               attempt: widget.subject.attempts[i],
-                              onExpandExam: widget.onExpandExam,
+                              onExpandExam: null,
                             ),
                           ],
                         ],

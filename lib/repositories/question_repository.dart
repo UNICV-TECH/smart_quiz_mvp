@@ -5,4 +5,8 @@ abstract class QuestionRepository {
     required String examId,
     required int limit,
   });
+
+  Future<List<Question>> fetchQuestionsByIds({
+    required List<String> questionIds,
+  });
 }

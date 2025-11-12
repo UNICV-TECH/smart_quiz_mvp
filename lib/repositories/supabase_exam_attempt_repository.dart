@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'exam_attempt_repository.dart';
 import 'exam_attempt_repository_types.dart';
+import '../models/user_response.dart' as models;
 
 class SupabaseExamAttemptRepository implements ExamAttemptRepository {
   SupabaseExamAttemptRepository({required SupabaseClient client})
@@ -106,9 +108,14 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
         query = query.eq('course_id', courseId);
       }
 
+      // Garantir que buscamos todos os registros (até 1000 por padrão do Supabase)
       final response = await query;
 
-      return (response as List)
+      final responseList = response as List;
+      debugPrint(
+          'SupabaseExamAttemptRepository: Retornados ${responseList.length} registros do banco');
+
+      final attempts = responseList
           .map((json) => ExamAttemptHistory(
                 id: json['id'] as String,
                 examId: json['exam_id'] as String,
@@ -124,9 +131,32 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
                 status: json['status'] as String,
               ))
           .toList();
+
+      return attempts;
     } catch (error) {
       throw ExamAttemptRepositoryException(
         'Não foi possível carregar o histórico de provas: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<List<models.UserResponse>> fetchAttemptResponses({
+    required String attemptId,
+  }) async {
+    try {
+      final response = await _client
+          .from('user_responses')
+          .select()
+          .eq('attempt_id', attemptId)
+          .order('created_at', ascending: true);
+
+      return (response as List)
+          .map((json) => models.UserResponse.fromJson(json))
+          .toList();
+    } catch (error) {
+      throw ExamAttemptRepositoryException(
+        'Não foi possível carregar as respostas da prova: ${error.toString()}',
       );
     }
   }
