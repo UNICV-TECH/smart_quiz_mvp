@@ -2,11 +2,17 @@ import '../models/auth_result.dart';
 import '../models/auth_user.dart';
 import '../repositories/auth/auth_repository.dart';
 import '../repositories/auth/auth_repository_types.dart';
+import 'session_manager.dart';
 
 class AuthService {
-  AuthService({required AuthRepository repository}) : _repository = repository;
+  AuthService({
+    required AuthRepository repository,
+    SessionManager? sessionManager,
+  })  : _repository = repository,
+        _sessionManager = sessionManager;
 
   final AuthRepository _repository;
+  final SessionManager? _sessionManager;
   AuthUser? _currentUser;
 
   AuthUser? get currentUser => _currentUser;
@@ -65,6 +71,7 @@ class AuthService {
       );
 
       _currentUser = user;
+      _sessionManager?.setAuthenticatedUser(user);
 
       final trimmedName = user.name?.trim();
       final greetingMessage = (trimmedName != null && trimmedName.isNotEmpty)
@@ -95,5 +102,10 @@ class AuthService {
         message: 'Não foi possível concluir o login. Tente novamente.',
       );
     }
+  }
+
+  Future<void> signOut() async {
+    _currentUser = null;
+    await _sessionManager?.signOut();
   }
 }

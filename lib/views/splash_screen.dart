@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../services/session_manager.dart';
 import '../ui/theme/app_color.dart';
 import 'welcome_screen.dart';
 
@@ -48,27 +51,36 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToNextScreen() async {
-    if (mounted) {
-      _animationController.reverse();
+    final sessionManager = context.read<SessionManager>();
+    await sessionManager.initialize();
+    final targetRoute = sessionManager.isAuthenticated ? '/main' : '/welcome';
 
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return const WelcomeScreen();
-          },
-          transitionDuration: const Duration(milliseconds: 1000),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              ),
-              child: child,
-            );
-          },
-        ),
-      );
+    if (!mounted) return;
+
+    _animationController.reverse();
+
+    if (targetRoute == '/main') {
+      Navigator.of(context).pushReplacementNamed('/main');
+      return;
     }
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return const WelcomeScreen();
+        },
+        transitionDuration: const Duration(milliseconds: 1000),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   @override

@@ -1,19 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
-import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'views/splash_screen.dart';
-import 'views/welcome_screen.dart';
-import 'views/signup_screen.dart';
-import 'views/login_screen.dart';
-import 'views/profile_screen.dart';
-import 'views/main_navigation_screen.dart';
-import 'views/help_screen.dart';
-import 'views/about_screen.dart';
-import 'ui/theme/app_color.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
+import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
+
 import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
 import 'repositories/auth/disabled_auth_repository.dart';
@@ -21,15 +13,27 @@ import 'repositories/auth/supabase_auth_repository.dart';
 import 'repositories/course_repository.dart';
 import 'repositories/supabase_course_repository.dart';
 import 'services/auth_service.dart';
+import 'services/session_manager.dart';
+import 'ui/theme/app_color.dart';
+import 'viewmodels/exam_view_model.dart';
 import 'viewmodels/login_view_model.dart';
 import 'viewmodels/signup_view_model.dart';
-import 'viewmodels/exam_view_model.dart';
-import 'views/exam_screen.dart';
+import 'views/about_screen.dart';
 import 'views/exam_result_screen.dart';
+import 'views/exam_screen.dart';
+import 'views/help_screen.dart';
+import 'views/login_screen.dart';
+import 'views/main_navigation_screen.dart';
+import 'views/profile_screen.dart';
 import 'views/quiz_config_screen_wrapper.dart';
+import 'views/signup_screen.dart';
+import 'views/splash_screen.dart';
+import 'views/welcome_screen.dart';
+import 'widgets/protected_route.dart';
 
 // Variável estática para rastrear se o Supabase já foi inicializado
 bool _supabaseInitialized = false;
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -101,12 +105,26 @@ Future<void> main() async {
     authRepository = const DisabledAuthRepository();
   }
 
-  final authService = AuthService(repository: authRepository);
+  final sessionManager = SupabaseOptions.isConfigured
+      ? SessionManager.enabled(
+          client: Supabase.instance.client,
+          navigatorKey: appNavigatorKey,
+        )
+      : SessionManager.disabled(
+          navigatorKey: appNavigatorKey,
+        );
+
+  final authService = AuthService(
+    repository: authRepository,
+    sessionManager: sessionManager,
+  );
 
   runApp(
     MyApp(
       authRepository: authRepository,
       authService: authService,
+      sessionManager: sessionManager,
+      navigatorKey: appNavigatorKey,
     ),
   );
 }
@@ -116,10 +134,14 @@ class MyApp extends StatelessWidget {
     super.key,
     required this.authRepository,
     required this.authService,
+    required this.sessionManager,
+    required this.navigatorKey,
   });
 
   final AuthRepository authRepository;
   final AuthService authService;
+  final SessionManager sessionManager;
+  final GlobalKey<NavigatorState> navigatorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +149,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<AuthRepository>.value(value: authRepository),
         Provider<AuthService>.value(value: authService),
+        ChangeNotifierProvider<SessionManager>.value(value: sessionManager),
         Provider<CourseRepository?>(
           create: (_) {
             if (!SupabaseOptions.isConfigured) {
@@ -144,6 +167,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Poppins',
         ),
+        navigatorKey: navigatorKey,
         home: const SplashScreen(),
         routes: {
           '/splash': (context) => const SplashScreen(),
@@ -164,69 +188,85 @@ class MyApp extends StatelessWidget {
               const Scaffold(body: Center(child: Text('Tela Principal'))),
           '/reset_password': (context) => const ResetPasswordScreen1(),
           '/reset_password2': (context) => const ResetPasswordScreen2(),
-          '/main': (context) => const MainNavigationScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/help': (context) => const HelpScreen(),
-          '/about': (context) => const AboutScreen(),
-          '/exam': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments
-                as Map<String, dynamic>?;
-            if (args == null) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Missing exam arguments'),
-                ),
-              );
-            }
-            final isRetake = args['isRetake'] as bool? ?? false;
-            final previousQuestionIdsRaw =
-                args['previousQuestionIds'] as List<dynamic>?;
-            final previousQuestionIds =
-                previousQuestionIdsRaw?.map((id) => id.toString()).toList();
+          '/main': (context) => ProtectedRoute(
+                builder: (innerContext) => const MainNavigationScreen(),
+              ),
+          '/profile': (context) => ProtectedRoute(
+                builder: (innerContext) => const ProfileScreen(),
+              ),
+          '/help': (context) => ProtectedRoute(
+                builder: (innerContext) => const HelpScreen(),
+              ),
+          '/about': (context) => ProtectedRoute(
+                builder: (innerContext) => const AboutScreen(),
+              ),
+          '/exam': (context) => ProtectedRoute(
+                builder: (innerContext) {
+                  final args = ModalRoute.of(innerContext)!.settings.arguments
+                      as Map<String, dynamic>?;
+                  if (args == null) {
+                    return const Scaffold(
+                      body: Center(
+                        child: Text('Missing exam arguments'),
+                      ),
+                    );
+                  }
+                  final isRetake = args['isRetake'] as bool? ?? false;
+                  final previousQuestionIdsRaw =
+                      args['previousQuestionIds'] as List<dynamic>?;
+                  final previousQuestionIds = previousQuestionIdsRaw
+                      ?.map((id) => id.toString())
+                      .toList();
 
-            return ChangeNotifierProvider(
-              create: (context) => ExamViewModel(
-                supabase: Supabase.instance.client,
-                userId: args['userId'] as String,
-                examId: args['examId'] as String,
-                courseId: args['courseId'] as String,
-                questionCount: args['questionCount'] as int,
-                isRetake: isRetake,
-                previousQuestionIds: previousQuestionIds,
+                  return ChangeNotifierProvider(
+                    create: (context) => ExamViewModel(
+                      supabase: Supabase.instance.client,
+                      sessionManager: context.read<SessionManager>(),
+                      userId: args['userId'] as String,
+                      examId: args['examId'] as String,
+                      courseId: args['courseId'] as String,
+                      questionCount: args['questionCount'] as int,
+                      isRetake: isRetake,
+                      previousQuestionIds: previousQuestionIds,
+                    ),
+                    child: ExamScreen(
+                      userId: args['userId'] as String,
+                      examId: args['examId'] as String,
+                      courseId: args['courseId'] as String,
+                      questionCount: args['questionCount'] as int,
+                    ),
+                  );
+                },
               ),
-              child: ExamScreen(
-                userId: args['userId'] as String,
-                examId: args['examId'] as String,
-                courseId: args['courseId'] as String,
-                questionCount: args['questionCount'] as int,
+          '/quiz/config': (context) => ProtectedRoute(
+                builder: (innerContext) {
+                  final args = ModalRoute.of(innerContext)!.settings.arguments
+                      as Map<String, dynamic>?;
+                  final course = args?['course'] as Map<String, dynamic>?;
+                  if (course == null) {
+                    return const Scaffold(
+                      body: Center(
+                        child: Text('Missing course data'),
+                      ),
+                    );
+                  }
+                  return QuizConfigScreenWrapper(course: course);
+                },
               ),
-            );
-          },
-          '/quiz/config': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments
-                as Map<String, dynamic>?;
-            final course = args?['course'] as Map<String, dynamic>?;
-            if (course == null) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Missing course data'),
-                ),
-              );
-            }
-            return QuizConfigScreenWrapper(course: course);
-          },
-          '/exam/result': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments
-                as Map<String, dynamic>?;
-            if (args == null) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Missing result data'),
-                ),
-              );
-            }
-            return ExamResultScreen(results: args);
-          },
+          '/exam/result': (context) => ProtectedRoute(
+                builder: (innerContext) {
+                  final args = ModalRoute.of(innerContext)!.settings.arguments
+                      as Map<String, dynamic>?;
+                  if (args == null) {
+                    return const Scaffold(
+                      body: Center(
+                        child: Text('Missing result data'),
+                      ),
+                    );
+                  }
+                  return ExamResultScreen(results: args);
+                },
+              ),
         },
       ),
     );
