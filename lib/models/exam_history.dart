@@ -62,12 +62,14 @@ class SubjectExamHistory {
 class Question {
   final String id;
   final String enunciation;
+  final String questionText;
   final String? difficultyLevel;
   final double points;
 
   Question({
     required this.id,
     required this.enunciation,
+    this.questionText = '',
     this.difficultyLevel,
     this.points = 1.0,
   });
@@ -76,6 +78,8 @@ class Question {
     return Question(
       id: json['id'] as String,
       enunciation: json['enunciation'] as String,
+      questionText:
+          json['question_text'] as String? ?? json['question'] as String? ?? '',
       difficultyLevel: json['difficulty_level'] as String?,
       points: (json['points'] as num?)?.toDouble() ?? 1.0,
     );

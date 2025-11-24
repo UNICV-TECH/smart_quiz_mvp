@@ -2,6 +2,7 @@ class Question {
   final String id;
   final String examId;
   final String enunciation;
+  final String questionText;
   final int? questionOrder;
   final String? difficultyLevel;
   final double points;
@@ -15,6 +16,7 @@ class Question {
     required this.id,
     required this.examId,
     required this.enunciation,
+    this.questionText = '',
     this.questionOrder,
     this.difficultyLevel,
     this.points = 1.0,
@@ -30,6 +32,8 @@ class Question {
       id: json['id'] as String,
       examId: json['exam_id'] as String,
       enunciation: json['enunciation'] as String,
+      questionText:
+          json['question_text'] as String? ?? json['question'] as String? ?? '',
       questionOrder: json['question_order'] as int?,
       difficultyLevel: json['difficulty_level'] as String?,
       points: (json['points'] as num?)?.toDouble() ?? 1.0,
@@ -54,6 +58,7 @@ class Question {
       'id': id,
       'exam_id': examId,
       'enunciation': enunciation,
+      'question_text': questionText,
       'question_order': questionOrder,
       'difficulty_level': difficultyLevel,
       'points': points,
@@ -77,11 +82,13 @@ class Question {
     DateTime? updatedAt,
     List<AnswerChoice>? answerChoices,
     List<SupportingText>? supportingTexts,
+    String? questionText,
   }) {
     return Question(
       id: id ?? this.id,
       examId: examId ?? this.examId,
       enunciation: enunciation ?? this.enunciation,
+      questionText: questionText ?? this.questionText,
       questionOrder: questionOrder ?? this.questionOrder,
       difficultyLevel: difficultyLevel ?? this.difficultyLevel,
       points: points ?? this.points,

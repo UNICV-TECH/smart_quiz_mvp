@@ -4,6 +4,7 @@ import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_user_data_card.dart';
 import '../viewmodels/profile_view_model.dart';
+import '../services/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -285,10 +286,12 @@ class _ProfileViewBody extends StatelessWidget {
     );
   }
 
-  void _handleLogout(BuildContext context) {
-    showDialog(
+  Future<void> _handleLogout(BuildContext context) async {
+    final authService = context.read<AuthService>();
+
+    await showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text(
             'Confirmar saída',
@@ -308,7 +311,7 @@ class _ProfileViewBody extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 'Cancelar',
                 style: TextStyle(
@@ -318,13 +321,9 @@ class _ProfileViewBody extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await authService.signOut();
               },
               child: Text(
                 'Sair',

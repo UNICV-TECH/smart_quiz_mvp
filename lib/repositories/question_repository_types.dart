@@ -43,6 +43,7 @@ class Question {
     required this.id,
     required this.examId,
     required this.enunciation,
+    required this.questionText,
     required this.questionOrder,
     required this.difficultyLevel,
     required this.points,
@@ -54,6 +55,7 @@ class Question {
   final String id;
   final String examId;
   final String enunciation;
+  final String questionText;
   final int? questionOrder;
   final String? difficultyLevel;
   final double points;

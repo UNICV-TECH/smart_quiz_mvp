@@ -1,38 +1,80 @@
 import 'package:flutter/foundation.dart';
-import 'package:unicv_tech_mvp/models/exam_history.dart';
-import 'package:unicv_tech_mvp/services/repositorie/exam_history_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../repositories/exam_attempt_repository_types.dart';
+import '../repositories/supabase_exam_attempt_repository.dart';
 
-/// Holds the UI state for the exam history accordion component.
 class ExamHistoryViewModel extends ChangeNotifier {
-  final ExamHistoryRepository service;
+  final SupabaseExamAttemptRepository _repository;
 
-  ExamHistoryViewModel({required this.service});
+  ExamHistoryViewModel()
+      : _repository = SupabaseExamAttemptRepository(
+          client: Supabase.instance.client,
+        );
 
-  List<SubjectExamHistory> _subjects = const [];
-  bool _loading = false;
-  String? _error;
+  List<ExamAttemptHistory> _attempts = [];
+  Map<String, String> _courseNames = {};
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  List<SubjectExamHistory> get subjects => _subjects;
-  bool get loading => _loading;
-  String? get error => _error;
+  List<ExamAttemptHistory> get attempts => _attempts;
+  Map<String, String> get courseNames => _courseNames;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
-  Future<void> load() async {
-    _setLoading(true);
+  Future<void> loadHistory({String? userId, String? courseId}) async {
     try {
-      final results = await service.loadExamHistory();
-      _subjects = results;
-      _error = null;
-    } catch (err, stack) {
-      _error = err.toString();
-      debugPrint('Failed to load exam history: $err');
-      debugPrintStack(stackTrace: stack);
-    } finally {
-      _setLoading(false);
-    }
-  }
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
 
-  void _setLoading(bool value) {
-    _loading = value;
-    notifyListeners();
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser == null) {
+        _errorMessage = 'Usuário não autenticado';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      _attempts = await _repository.fetchUserAttempts(
+        userId: userId ?? currentUser.id,
+        courseId: courseId,
+      );
+
+      // Buscar nomes dos cursos
+      final courseIds = _attempts.map((a) => a.courseId).toSet().toList();
+      if (courseIds.isNotEmpty) {
+        try {
+          final coursesResponse = await Supabase.instance.client
+              .from('course')
+              .select('id, name, title')
+              .inFilter('id', courseIds);
+
+          _courseNames = {};
+          for (var course in coursesResponse as List) {
+            final courseId = course['id'] as String;
+            final courseName = (course['title'] as String?) ??
+                (course['name'] as String?) ??
+                'Curso';
+            _courseNames[courseId] = courseName;
+          }
+        } catch (e) {
+          debugPrint('Erro ao buscar nomes dos cursos: $e');
+        }
+      }
+
+      debugPrint(
+          'ExamHistoryViewModel: Carregadas ${_attempts.length} tentativas');
+      for (var attempt in _attempts) {
+        debugPrint(
+            '  - Tentativa ${attempt.id}: examId=${attempt.examId}, completedAt=${attempt.completedAt}');
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = 'Erro ao carregar histórico: ${e.toString()}';
+      notifyListeners();
+    }
   }
 }
