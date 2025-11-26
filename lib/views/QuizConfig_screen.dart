@@ -269,7 +269,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                               ),
                               const SizedBox(height: 5),
                               AppText(
-                                'Alinhe ao seu tempo disponível!',
+                                'Quantas questões deseja fazer ?',
                                 style: AppTextStyle.subtitleMedium,
                                 color: AppColors.secondaryDark
                                     .withAlpha((0.8 * 255).round()),
