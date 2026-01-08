@@ -93,3 +93,5 @@ Toda a documentação está na pasta documentacao, incluindo:
 - Requisitos funcionais e não funcionais
 - Diagramas (fluxogramas, organogramas, etc.)
 - Detalhes de arquitetura
+
+teste
