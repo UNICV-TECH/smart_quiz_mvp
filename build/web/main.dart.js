@@ -94450,7 +94450,7 @@ A.aw1.prototype={
 $0(){this.a.e=!1},
 $S:0}
 A.aw5.prototype={
-$2(a,b){var s,r=null,q=this.a,p=t.p,o=A.b([B.T0,A.cq(new A.pr(B.ha,"assets/images/logo_color.png",B.jj,"Logo UniCV",r),r,r),B.az,new A.dd(B.bJ,r,r,A.aD7(new A.aw4(a)),r),B.ce,B.Cu,B.T5,A.aGJ("Alinhe ao seu tempo dispon\xedvel!",A.a5(204,B.t.n()>>>16&255,B.t.n()>>>8&255,B.t.n()&255),B.jJ),B.cf,new A.DE(q.x,q.gail(),q.d,r)],p),n=q.r
+$2(a,b){var s,r=null,q=this.a,p=t.p,o=A.b([B.T0,A.cq(new A.pr(B.ha,"assets/images/logo_color.png",B.jj,"Logo UniCV",r),r,r),B.az,new A.dd(B.bJ,r,r,A.aD7(new A.aw4(a)),r),B.ce,B.Cu,B.T5,A.aGJ("Quantas quest\xf5es deseja fazer ?",A.a5(204,B.t.n()>>>16&255,B.t.n()>>>8&255,B.t.n()&255),B.jJ),B.cf,new A.DE(q.x,q.gail(),q.d,r)],p),n=q.r
 if(n!=null&&q.w!=null){s=q.w
 s.toString
 B.b.N(o,A.b([B.az,A.Ml(n,q.ga9G(),s)],p))}o.push(B.ce)
