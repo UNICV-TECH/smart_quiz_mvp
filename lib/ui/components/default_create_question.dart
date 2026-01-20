@@ -251,28 +251,6 @@ class _DefaultCreateQuestionContextFormState
     });
   }
 
-  bool _validate() {
-    bool isValid = true;
-
-    setState(() {
-      _errors['course'] = _selectedCourse == null ? 'Selecione um curso' : null;
-      _errors['professor'] =
-          _selectedProfessor == null ? 'Selecione o professor' : null;
-      _errors['year'] = _selectedYear == null ? 'Selecione o ano' : null;
-      _errors['semester'] = widget.semesterRequired && _selectedSemester == null
-          ? 'Selecione o semestre'
-          : null;
-      _errors['subject'] =
-          _selectedSubject == null ? 'Selecione a matéria' : null;
-      _errors['content'] =
-          _selectedContent == null ? 'Selecione o conteúdo' : null;
-
-      isValid = _errors.values.every((error) => error == null);
-    });
-
-    return isValid;
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
