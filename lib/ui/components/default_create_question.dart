@@ -449,7 +449,7 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: alternative.isCorrect
-            ? AppColors.green.withOpacity(0.1)
+            ? AppColors.green.withValues(alpha: 0.1)
             : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
