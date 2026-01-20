@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_input_select.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 
@@ -10,7 +9,6 @@ class Preview {
 
   const Preview({required this.name, this.size, this.brightness});
 }
-
 
 @Preview(
   name: 'Criar Questões - Formulário',
@@ -273,21 +271,6 @@ class _DefaultCreateQuestionContextFormState
     });
 
     return isValid;
-  }
-
-  void _submit() {
-    if (!_validate()) return;
-
-    final data = QuestionContextFormData(
-      courseId: _selectedCourse!,
-      professorId: _selectedProfessor!,
-      yearId: _selectedYear!,
-      semesterId: _selectedSemester,
-      subjectId: _selectedSubject!,
-      contentId: _selectedContent!,
-    );
-
-    widget.onSubmit?.call(data);
   }
 
   @override
