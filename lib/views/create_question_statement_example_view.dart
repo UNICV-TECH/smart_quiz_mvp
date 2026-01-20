@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/ui/components/default_create_question.dart';
+import 'package:unicv_tech_mvp/ui/components/default_create_question-statement.dart';
 
 /// Exemplo de tela que utiliza o componente DefaultCreateQuestion
 ///
