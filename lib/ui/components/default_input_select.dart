@@ -4,7 +4,7 @@ class Preview {
   const Preview({required String name});
 }
 
-@Preview(name: 'Input Select com Pesquisa')
+@Preview(name: 'Select com Pesquisa')
 Widget defaultInputSelectPreview() {
   return const MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -47,18 +47,6 @@ class _ExamplePageState extends State<ExamplePage> {
     SelectOption(value: '5', label: 'Opção 5'),
     SelectOption(value: '6', label: 'Opção com texto longo para exemplo'),
   ];
-
-  void _handleSubmit() {
-    if (_selectedValue == null) {
-      setState(() {
-        _error = 'Este campo é obrigatório';
-      });
-    } else {
-      setState(() {
-        _error = null;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
