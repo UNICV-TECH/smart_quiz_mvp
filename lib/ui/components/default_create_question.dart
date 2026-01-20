@@ -387,12 +387,6 @@ class _DefaultCreateQuestionContextFormState
             enabled: _selectedSubject != null,
             onChanged: _selectedSubject != null ? _setContent : null,
           ),
-          const SizedBox(height: 24),
-          DefaultButtonOrange(
-            texto: 'Salvar contexto da questão',
-            onPressed: _submit,
-            tipo: BotaoTipo.primario,
-          ),
         ],
       ),
     );
