@@ -21,6 +21,7 @@ import '../views/welcome_screen.dart';
 import '../views/reset_password_screen1.dart';
 import '../views/reset_password_screen2.dart';
 import '../views/teacher/teacher_main_screen.dart';
+import '../views/teacher/teacher_create_question.dart';
 import '../widgets/protected_route.dart';
 
 /// Classe centralizada para gerenciar todas as rotas da aplicação
@@ -46,6 +47,7 @@ class AppRoutes {
   // Constantes para rotas de professores
   static const String teacher = '/teacher';
   static const String teacherHome = '/teacher/home';
+  static const String teacherCreateQuestion = '/teacher/create-question';
 
   /// Retorna o mapa completo de rotas da aplicação
   static Map<String, WidgetBuilder> getRoutes() {
@@ -95,9 +97,8 @@ class AppRoutes {
               final isRetake = args['isRetake'] as bool? ?? false;
               final previousQuestionIdsRaw =
                   args['previousQuestionIds'] as List<dynamic>?;
-              final previousQuestionIds = previousQuestionIdsRaw
-                  ?.map((id) => id.toString())
-                  .toList();
+              final previousQuestionIds =
+                  previousQuestionIdsRaw?.map((id) => id.toString()).toList();
 
               return ChangeNotifierProvider(
                 create: (context) => ExamViewModel(
@@ -156,7 +157,9 @@ class AppRoutes {
       teacherHome: (context) => ProtectedRoute(
             builder: (innerContext) => const TeacherMainScreen(),
           ),
+      teacherCreateQuestion: (context) => ProtectedRoute(
+            builder: (innerContext) => const TeacherScreenCreateQuestion(),
+          ),
     };
   }
 }
-
