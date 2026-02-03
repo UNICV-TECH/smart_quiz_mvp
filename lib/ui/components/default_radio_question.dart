@@ -386,11 +386,31 @@ class _SelectionControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (selectionMode == QuestionSelectionMode.single) {
-      return Radio<bool>(
-        value: true,
-        groupValue: isSelected,
-        onChanged: (_) => onChanged(),
-        activeColor: AppColors.green,
+      return GestureDetector(
+        onTap: onChanged,
+        child: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected ? AppColors.green : AppColors.webNeutral400,
+              width: 2,
+            ),
+          ),
+          child: isSelected
+              ? Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.green,
+                    ),
+                  ),
+                )
+              : null,
+        ),
       );
     }
 
