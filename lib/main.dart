@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:unicv_tech_mvp/views/reset_password_screen1.dart';
-import 'package:unicv_tech_mvp/views/reset_password_screen2.dart';
 
 import 'constants/supabase_options.dart';
 import 'repositories/auth/auth_repository.dart';
@@ -12,23 +10,12 @@ import 'repositories/auth/disabled_auth_repository.dart';
 import 'repositories/auth/supabase_auth_repository.dart';
 import 'repositories/course_repository.dart';
 import 'repositories/supabase_course_repository.dart';
+import 'routes/app_routes.dart';
 import 'services/auth_service.dart';
 import 'services/session_manager.dart';
 import 'ui/theme/app_color.dart';
-import 'viewmodels/exam_view_model.dart';
-import 'viewmodels/login_view_model.dart';
-import 'viewmodels/signup_view_model.dart';
-import 'views/about_screen.dart';
-import 'views/exam_result_screen.dart';
-import 'views/exam_screen.dart';
-import 'views/help_screen.dart';
-import 'views/login_screen.dart';
-import 'views/main_navigation_screen.dart';
-import 'views/profile_screen.dart';
-import 'views/quiz_config_screen_wrapper.dart';
-import 'views/signup_screen.dart';
 import 'views/splash_screen.dart';
-import 'views/welcome_screen.dart';
+import 'views/teacher/teacher_main_screen.dart';
 import 'widgets/protected_route.dart';
 
 // Variável estática para rastrear se o Supabase já foi inicializado
@@ -169,105 +156,23 @@ class MyApp extends StatelessWidget {
         ),
         navigatorKey: navigatorKey,
         home: const SplashScreen(),
-        routes: {
-          '/splash': (context) => const SplashScreen(),
-          '/welcome': (context) => const WelcomeScreen(),
-          '/signup': (context) => ChangeNotifierProvider(
-                create: (context) => SignUpViewModel(
-                  authService: context.read<AuthService>(),
-                ),
-                child: const SignupScreen(),
+        onGenerateRoute: (settings) {
+          // Interceptar rotas que começam com /teacher ou /professor
+          if (settings.name?.startsWith('/teacher') == true ||
+              settings.name?.startsWith('/professor') == true) {
+            return MaterialPageRoute(
+              builder: (context) => ProtectedRoute(
+                builder: (innerContext) => const TeacherMainScreen(),
+                redirectRoute: AppRoutes.login,
               ),
-          '/login': (context) => ChangeNotifierProvider(
-                create: (context) => LoginViewModel(
-                  authService: context.read<AuthService>(),
-                ),
-                child: const LoginScreen(),
-              ),
-          '/home': (context) =>
-              const Scaffold(body: Center(child: Text('Tela Principal'))),
-          '/reset_password': (context) => const ResetPasswordScreen1(),
-          '/reset_password2': (context) => const ResetPasswordScreen2(),
-          '/main': (context) => ProtectedRoute(
-                builder: (innerContext) => const MainNavigationScreen(),
-              ),
-          '/profile': (context) => ProtectedRoute(
-                builder: (innerContext) => const ProfileScreen(),
-              ),
-          '/help': (context) => ProtectedRoute(
-                builder: (innerContext) => const HelpScreen(),
-              ),
-          '/about': (context) => ProtectedRoute(
-                builder: (innerContext) => const AboutScreen(),
-              ),
-          '/exam': (context) => ProtectedRoute(
-                builder: (innerContext) {
-                  final args = ModalRoute.of(innerContext)!.settings.arguments
-                      as Map<String, dynamic>?;
-                  if (args == null) {
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('Missing exam arguments'),
-                      ),
-                    );
-                  }
-                  final isRetake = args['isRetake'] as bool? ?? false;
-                  final previousQuestionIdsRaw =
-                      args['previousQuestionIds'] as List<dynamic>?;
-                  final previousQuestionIds = previousQuestionIdsRaw
-                      ?.map((id) => id.toString())
-                      .toList();
+              settings: settings,
+            );
+          }
 
-                  return ChangeNotifierProvider(
-                    create: (context) => ExamViewModel(
-                      supabase: Supabase.instance.client,
-                      sessionManager: context.read<SessionManager>(),
-                      userId: args['userId'] as String,
-                      examId: args['examId'] as String,
-                      courseId: args['courseId'] as String,
-                      questionCount: args['questionCount'] as int,
-                      isRetake: isRetake,
-                      previousQuestionIds: previousQuestionIds,
-                    ),
-                    child: ExamScreen(
-                      userId: args['userId'] as String,
-                      examId: args['examId'] as String,
-                      courseId: args['courseId'] as String,
-                      questionCount: args['questionCount'] as int,
-                    ),
-                  );
-                },
-              ),
-          '/quiz/config': (context) => ProtectedRoute(
-                builder: (innerContext) {
-                  final args = ModalRoute.of(innerContext)!.settings.arguments
-                      as Map<String, dynamic>?;
-                  final course = args?['course'] as Map<String, dynamic>?;
-                  if (course == null) {
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('Missing course data'),
-                      ),
-                    );
-                  }
-                  return QuizConfigScreenWrapper(course: course);
-                },
-              ),
-          '/exam/result': (context) => ProtectedRoute(
-                builder: (innerContext) {
-                  final args = ModalRoute.of(innerContext)!.settings.arguments
-                      as Map<String, dynamic>?;
-                  if (args == null) {
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('Missing result data'),
-                      ),
-                    );
-                  }
-                  return ExamResultScreen(results: args);
-                },
-              ),
+          // Para outras rotas, retorna null para usar o sistema padrão
+          return null;
         },
+        routes: AppRoutes.getRoutes(),
       ),
     );
   }

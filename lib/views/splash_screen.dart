@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -51,19 +52,47 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToNextScreen() async {
-    final sessionManager = context.read<SessionManager>();
-    await sessionManager.initialize();
-    final targetRoute = sessionManager.isAuthenticated ? '/main' : '/welcome';
+    // Verificar se está na web e se há uma rota /teacher na URL
+    String? targetRoute;
+
+    if (kIsWeb) {
+      try {
+        // Uri.base funciona em todas as plataformas e retorna a URL atual na web
+        final path = Uri.base.path;
+
+        // Se a URL é /teacher ou começa com /teacher/, redirecione para professores
+        if (path.startsWith('/teacher') || path.startsWith('/professor')) {
+          targetRoute = path.isEmpty ? '/teacher' : path;
+        }
+      } catch (e) {
+        debugPrint('Erro ao ler URL no splash: $e');
+      }
+    }
+
+    // Se não encontrou rota de professor na URL, verifica autenticação normal
+    if (targetRoute == null) {
+      final sessionManager = context.read<SessionManager>();
+      await sessionManager.initialize();
+      targetRoute = sessionManager.isAuthenticated ? '/main' : '/welcome';
+    }
 
     if (!mounted) return;
 
     _animationController.reverse();
 
+    // Navegar para a rota determinada
     if (targetRoute == '/main') {
       Navigator.of(context).pushReplacementNamed('/main');
       return;
     }
 
+    if (targetRoute.startsWith('/teacher') ||
+        targetRoute.startsWith('/professor')) {
+      Navigator.of(context).pushReplacementNamed(targetRoute);
+      return;
+    }
+
+    // Para welcome screen, usar transição customizada
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) {
