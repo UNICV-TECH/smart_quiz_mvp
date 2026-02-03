@@ -125,9 +125,8 @@ class _SelectPesquisaState extends State<SelectPesquisa> {
   }
 
   void _openSelectModal() {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      isScrollControlled: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -138,51 +137,49 @@ class _SelectPesquisaState extends State<SelectPesquisa> {
                   .contains(_searchTerm.toLowerCase());
             }).toList();
 
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Pesquisar',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (value) {
-                      setModalState(() {
-                        _searchTerm = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final option = filtered[index];
-                        final selected = option.value == widget.value;
-
-                        return ListTile(
-                          title: Text(option.label),
-                          trailing: selected
-                              ? const Icon(Icons.check, color: Colors.green)
-                              : null,
-                          onTap: () {
-                            widget.onChanged(option.value);
-                            Navigator.of(context).pop();
-                          },
-                        );
+            return Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Pesquisar',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        setModalState(() {
+                          _searchTerm = value;
+                        });
                       },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final option = filtered[index];
+                          final selected = option.value == widget.value;
+
+                          return ListTile(
+                            title: Text(option.label),
+                            trailing: selected
+                                ? const Icon(Icons.check, color: Colors.green)
+                                : null,
+                            onTap: () {
+                              widget.onChanged(option.value);
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
