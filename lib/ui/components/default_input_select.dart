@@ -138,7 +138,7 @@ class _SelectPesquisaState extends State<SelectPesquisa> {
             }).toList();
 
             return Dialog(
-              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 420),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
