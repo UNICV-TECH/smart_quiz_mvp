@@ -7,6 +7,7 @@ import '../../ui/components/default_user_data_card.dart';
 import '../../viewmodels/profile_view_model.dart';
 import '../../constants/app_strings.dart';
 import 'teacher_create_question.dart';
+import 'teacher_create_test.dart';
 
 class TeacherMainScreen extends StatefulWidget {
   const TeacherMainScreen({super.key});
@@ -34,7 +35,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
   // Telas correspondentes às opções do menu
   final List<Widget> _screens = [
-    const BuildExamsScreen(),
+    const TeacherCreateTestView(),
     const TeacherScreenCreateQuestion(),
     const TeacherProfileScreen(),
   ];
@@ -432,39 +433,6 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Telas placeholder (podem ser desenvolvidas depois)
-class BuildExamsScreen extends StatelessWidget {
-  const BuildExamsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      color: const Color(0xFFF9F9F9),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Montar Provas',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32),
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Aqui você pode criar e gerenciar suas provas. '
-            'Use as opções para adicionar questões, definir parâmetros '
-            'e organizar por disciplina ou período.',
-            style: TextStyle(fontSize: 16, color: Colors.black87),
           ),
         ],
       ),
