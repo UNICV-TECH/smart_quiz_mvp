@@ -22,6 +22,9 @@ import '../views/reset_password_screen1.dart';
 import '../views/reset_password_screen2.dart';
 import '../views/teacher/teacher_main_screen.dart';
 import '../views/teacher/teacher_create_question.dart';
+import '../views/teacher/teacher_question_list_screen.dart';
+import '../views/teacher/teacher_exam_templates_screen.dart';
+import '../views/teacher/teacher_stats_screen.dart';
 import '../widgets/protected_route.dart';
 
 /// Classe centralizada para gerenciar todas as rotas da aplicação
@@ -48,6 +51,11 @@ class AppRoutes {
   static const String teacher = '/teacher';
   static const String teacherHome = '/teacher/home';
   static const String teacherCreateQuestion = '/teacher/create-question';
+  static const String teacherQuestions = '/teacher/questions';
+  static const String teacherQuestionEdit = '/teacher/questions/edit';
+  static const String teacherTemplates = '/teacher/templates';
+  static const String teacherTemplateEdit = '/teacher/templates/edit';
+  static const String teacherStats = '/teacher/stats';
 
   /// Retorna o mapa completo de rotas da aplicação
   static Map<String, WidgetBuilder> getRoutes() {
@@ -159,6 +167,15 @@ class AppRoutes {
           ),
       teacherCreateQuestion: (context) => ProtectedRoute(
             builder: (innerContext) => const TeacherScreenCreateQuestion(),
+          ),
+      teacherQuestions: (context) => ProtectedRoute(
+            builder: (innerContext) => const TeacherQuestionListScreen(),
+          ),
+      teacherTemplates: (context) => ProtectedRoute(
+            builder: (innerContext) => const TeacherExamTemplatesScreen(),
+          ),
+      teacherStats: (context) => ProtectedRoute(
+            builder: (innerContext) => const TeacherStatsScreen(),
           ),
     };
   }
