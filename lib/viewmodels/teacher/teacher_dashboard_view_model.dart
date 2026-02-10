@@ -6,12 +6,12 @@ import '../../repositories/teacher_repository.dart';
 class TeacherDashboardViewModel extends ChangeNotifier {
   TeacherDashboardViewModel({
     required String teacherId,
-    TeacherRepository? teacherRepository,
+    required TeacherRepository teacherRepository,
   })  : _teacherId = teacherId,
         _teacherRepository = teacherRepository;
 
   final String _teacherId;
-  final TeacherRepository? _teacherRepository;
+  final TeacherRepository _teacherRepository;
 
   // State
   bool _isLoading = false;
@@ -72,18 +72,12 @@ class TeacherDashboardViewModel extends ChangeNotifier {
     _clearError();
 
     try {
-      if (_teacherRepository != null) {
-        final results = await Future.wait([
-          _teacherRepository!.getQuestionStats(_teacherId),
-          _teacherRepository!.getExamStats(_teacherId),
-        ]);
-        _questionStats = results[0] as List<TeacherQuestionStats>;
-        _examStats = results[1] as List<TeacherExamStats>;
-      } else {
-        await Future.delayed(const Duration(milliseconds: 500));
-        _questionStats = _getMockQuestionStats();
-        _examStats = _getMockExamStats();
-      }
+      final results = await Future.wait([
+        _teacherRepository.getQuestionStats(_teacherId),
+        _teacherRepository.getExamStats(_teacherId),
+      ]);
+      _questionStats = results[0] as List<TeacherQuestionStats>;
+      _examStats = results[1] as List<TeacherExamStats>;
     } catch (error) {
       _setError('Erro ao carregar estatisticas: $error');
       _questionStats = [];
@@ -117,53 +111,5 @@ class TeacherDashboardViewModel extends ChangeNotifier {
   void clearError() {
     _clearError();
     notifyListeners();
-  }
-
-  List<TeacherQuestionStats> _getMockQuestionStats() {
-    return [
-      TeacherQuestionStats(
-        teacherId: _teacherId,
-        courseId: '1',
-        courseName: 'Psicologia',
-        totalQuestions: 45,
-        activeQuestions: 42,
-        categoriesUsed: 5,
-        avgPoints: 1.5,
-      ),
-      TeacherQuestionStats(
-        teacherId: _teacherId,
-        courseId: '2',
-        courseName: 'Direito',
-        totalQuestions: 80,
-        activeQuestions: 75,
-        categoriesUsed: 8,
-        avgPoints: 1.2,
-      ),
-    ];
-  }
-
-  List<TeacherExamStats> _getMockExamStats() {
-    return [
-      TeacherExamStats(
-        teacherId: _teacherId,
-        courseId: '1',
-        courseName: 'Psicologia',
-        totalTemplates: 3,
-        publishedTemplates: 2,
-        totalExamsTaken: 150,
-        avgScore: 72.5,
-        totalPassed: 120,
-      ),
-      TeacherExamStats(
-        teacherId: _teacherId,
-        courseId: '2',
-        courseName: 'Direito',
-        totalTemplates: 5,
-        publishedTemplates: 4,
-        totalExamsTaken: 230,
-        avgScore: 68.3,
-        totalPassed: 165,
-      ),
-    ];
   }
 }

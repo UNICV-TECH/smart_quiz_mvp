@@ -10,15 +10,15 @@ import '../../repositories/teacher_repository_types.dart';
 class CreateQuestionViewModel extends ChangeNotifier {
   CreateQuestionViewModel({
     required String teacherId,
-    TeacherRepository? teacherRepository,
-    CourseRepository? courseRepository,
+    required TeacherRepository teacherRepository,
+    required CourseRepository courseRepository,
   })  : _teacherId = teacherId,
         _teacherRepository = teacherRepository,
         _courseRepository = courseRepository;
 
   final String _teacherId;
-  final TeacherRepository? _teacherRepository;
-  final CourseRepository? _courseRepository;
+  final TeacherRepository _teacherRepository;
+  final CourseRepository _courseRepository;
 
   // State
   bool _isLoading = false;
@@ -112,27 +112,17 @@ class CreateQuestionViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadCourses() async {
-    if (_courseRepository != null) {
-      final repoCourses = await _courseRepository!.fetchActiveCourses();
-      _courses = repoCourses.map(_mapRepoCourse).toList();
-    } else {
-      _courses = _getMockCourses();
-    }
+    final repoCourses = await _courseRepository.fetchActiveCourses();
+    _courses = repoCourses.map(_mapRepoCourse).toList();
   }
 
   Future<void> loadCategories(String courseId) async {
     _categories = [];
     notifyListeners();
 
-    if (_teacherRepository == null) {
-      _categories = _getMockCategories(courseId);
-      notifyListeners();
-      return;
-    }
-
     try {
       _categories =
-          await _teacherRepository!.fetchCategories(courseId: courseId);
+          await _teacherRepository.fetchCategories(courseId: courseId);
       notifyListeners();
     } catch (error) {
       debugPrint('Erro ao carregar categorias: $error');
@@ -269,12 +259,7 @@ class CreateQuestionViewModel extends ChangeNotifier {
         answerChoices: filteredChoices,
       );
 
-      if (_teacherRepository != null) {
-        await _teacherRepository!.createQuestion(request);
-      } else {
-        // Mock delay
-        await Future.delayed(const Duration(seconds: 1));
-      }
+      await _teacherRepository.createQuestion(request);
 
       _setSuccess('Questao criada com sucesso!');
       _resetForm();
@@ -345,47 +330,5 @@ class CreateQuestionViewModel extends ChangeNotifier {
       iconKey: repo.iconKey,
       createdAt: repo.createdAt,
     );
-  }
-
-  List<Course> _getMockCourses() {
-    return [
-      Course(
-        id: '1',
-        courseKey: 'psicologia',
-        title: 'Psicologia',
-        createdAt: DateTime.now(),
-      ),
-      Course(
-        id: '2',
-        courseKey: 'direito',
-        title: 'Direito',
-        createdAt: DateTime.now(),
-      ),
-      Course(
-        id: '3',
-        courseKey: 'administracao',
-        title: 'Administracao',
-        createdAt: DateTime.now(),
-      ),
-    ];
-  }
-
-  List<QuestionCategory> _getMockCategories(String courseId) {
-    return [
-      QuestionCategory(
-        id: '1',
-        name: 'Fundamentos',
-        courseId: courseId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      QuestionCategory(
-        id: '2',
-        name: 'Metodologia',
-        courseId: courseId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    ];
   }
 }

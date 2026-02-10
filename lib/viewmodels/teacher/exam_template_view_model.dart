@@ -12,15 +12,15 @@ import '../../repositories/teacher_repository_types.dart';
 class ExamTemplateViewModel extends ChangeNotifier {
   ExamTemplateViewModel({
     required String teacherId,
-    TeacherRepository? teacherRepository,
-    CourseRepository? courseRepository,
+    required TeacherRepository teacherRepository,
+    required CourseRepository courseRepository,
   })  : _teacherId = teacherId,
         _teacherRepository = teacherRepository,
         _courseRepository = courseRepository;
 
   final String _teacherId;
-  final TeacherRepository? _teacherRepository;
-  final CourseRepository? _courseRepository;
+  final TeacherRepository _teacherRepository;
+  final CourseRepository _courseRepository;
 
   // State
   bool _isLoading = false;
@@ -100,23 +100,14 @@ class ExamTemplateViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadCourses() async {
-    if (_courseRepository != null) {
-      final repoCourses = await _courseRepository!.fetchActiveCourses();
-      _courses = repoCourses.map(_mapRepoCourse).toList();
-    } else {
-      _courses = _getMockCourses();
-    }
+    final repoCourses = await _courseRepository.fetchActiveCourses();
+    _courses = repoCourses.map(_mapRepoCourse).toList();
   }
 
   Future<void> loadTemplates() async {
     try {
-      if (_teacherRepository != null) {
-        _templates =
-            await _teacherRepository!.fetchTemplates(teacherId: _teacherId);
-      } else {
-        await Future.delayed(const Duration(milliseconds: 500));
-        _templates = _getMockTemplates();
-      }
+      _templates =
+          await _teacherRepository.fetchTemplates(teacherId: _teacherId);
       notifyListeners();
     } catch (error) {
       _setError('Erro ao carregar templates: $error');
@@ -127,14 +118,9 @@ class ExamTemplateViewModel extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      if (_teacherRepository != null) {
-        _selectedTemplate = await _teacherRepository!.fetchTemplate(templateId);
-        _templateQuestions =
-            await _teacherRepository!.fetchTemplateQuestions(templateId);
-      } else {
-        _selectedTemplate = _templates.firstWhere((t) => t.id == templateId);
-        _templateQuestions = _getMockTemplateQuestions();
-      }
+      _selectedTemplate = await _teacherRepository.fetchTemplate(templateId);
+      _templateQuestions =
+          await _teacherRepository.fetchTemplateQuestions(templateId);
       _populateFormFromTemplate(_selectedTemplate!);
       notifyListeners();
     } catch (error) {
@@ -159,17 +145,13 @@ class ExamTemplateViewModel extends ChangeNotifier {
     }
 
     try {
-      if (_teacherRepository != null) {
-        final filter = TeacherQuestionsFilter(
-          teacherId: _teacherId,
-          courseId: _selectedCourseId,
-          activeOnly: true,
-        );
-        _availableQuestions =
-            await _teacherRepository!.fetchTeacherQuestions(filter);
-      } else {
-        _availableQuestions = _getMockAvailableQuestions();
-      }
+      final filter = TeacherQuestionsFilter(
+        teacherId: _teacherId,
+        courseId: _selectedCourseId,
+        activeOnly: true,
+      );
+      _availableQuestions =
+          await _teacherRepository.fetchTeacherQuestions(filter);
       notifyListeners();
     } catch (error) {
       debugPrint('Erro ao carregar questoes disponiveis: $error');
@@ -270,27 +252,16 @@ class ExamTemplateViewModel extends ChangeNotifier {
         updatedAt: now,
       );
 
-      if (_teacherRepository != null) {
-        if (_selectedTemplate == null) {
-          final created = await _teacherRepository!.createTemplate(template);
-          _templates = [created, ..._templates];
-          _selectedTemplate = created;
-        } else {
-          await _teacherRepository!.updateTemplate(template);
-          _templates = _templates.map((t) {
-            return t.id == template.id ? template : t;
-          }).toList();
-          _selectedTemplate = template;
-        }
+      if (_selectedTemplate == null) {
+        final created = await _teacherRepository.createTemplate(template);
+        _templates = [created, ..._templates];
+        _selectedTemplate = created;
       } else {
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (_selectedTemplate == null) {
-          final newTemplate = template.copyWith(
-            id: 'mock_${DateTime.now().millisecondsSinceEpoch}',
-          );
-          _templates = [newTemplate, ..._templates];
-          _selectedTemplate = newTemplate;
-        }
+        await _teacherRepository.updateTemplate(template);
+        _templates = _templates.map((t) {
+          return t.id == template.id ? template : t;
+        }).toList();
+        _selectedTemplate = template;
       }
 
       _setSuccess(_selectedTemplate == null
@@ -307,10 +278,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
 
   Future<bool> deleteTemplate(String templateId) async {
     try {
-      if (_teacherRepository != null) {
-        await _teacherRepository!.deleteTemplate(templateId);
-      }
-
+      await _teacherRepository.deleteTemplate(templateId);
       _templates = _templates.where((t) => t.id != templateId).toList();
       if (_selectedTemplate?.id == templateId) {
         _selectedTemplate = null;
@@ -328,10 +296,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
 
   Future<bool> publishTemplate(String templateId) async {
     try {
-      if (_teacherRepository != null) {
-        await _teacherRepository!.publishTemplate(templateId);
-      }
-
+      await _teacherRepository.publishTemplate(templateId);
       _templates = _templates.map((t) {
         return t.id == templateId ? t.copyWith(isPublished: true) : t;
       }).toList();
@@ -351,10 +316,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
 
   Future<bool> unpublishTemplate(String templateId) async {
     try {
-      if (_teacherRepository != null) {
-        await _teacherRepository!.unpublishTemplate(templateId);
-      }
-
+      await _teacherRepository.unpublishTemplate(templateId);
       _templates = _templates.map((t) {
         return t.id == templateId ? t.copyWith(isPublished: false) : t;
       }).toList();
@@ -386,16 +348,9 @@ class ExamTemplateViewModel extends ChangeNotifier {
         createdAt: DateTime.now(),
       );
 
-      if (_teacherRepository != null) {
-        final created =
-            await _teacherRepository!.addQuestionToTemplate(templateQuestion);
-        _templateQuestions = [..._templateQuestions, created];
-      } else {
-        final mockQuestion = templateQuestion.copyWith(
-          id: 'mock_${DateTime.now().millisecondsSinceEpoch}',
-        );
-        _templateQuestions = [..._templateQuestions, mockQuestion];
-      }
+      final created =
+          await _teacherRepository.addQuestionToTemplate(templateQuestion);
+      _templateQuestions = [..._templateQuestions, created];
 
       notifyListeners();
       return true;
@@ -407,10 +362,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
 
   Future<bool> removeQuestionFromTemplate(String templateQuestionId) async {
     try {
-      if (_teacherRepository != null) {
-        await _teacherRepository!.removeQuestionFromTemplate(templateQuestionId);
-      }
-
+      await _teacherRepository.removeQuestionFromTemplate(templateQuestionId);
       _templateQuestions =
           _templateQuestions.where((q) => q.id != templateQuestionId).toList();
       notifyListeners();
@@ -441,11 +393,9 @@ class ExamTemplateViewModel extends ChangeNotifier {
   }
 
   Future<void> _persistQuestionOrder() async {
-    if (_teacherRepository == null) return;
-
     try {
       for (final question in _templateQuestions) {
-        await _teacherRepository!.updateTemplateQuestionOrder(
+        await _teacherRepository.updateTemplateQuestionOrder(
           question.id,
           question.questionOrder,
         );
@@ -528,106 +478,5 @@ class ExamTemplateViewModel extends ChangeNotifier {
       iconKey: repo.iconKey,
       createdAt: repo.createdAt,
     );
-  }
-
-  List<Course> _getMockCourses() {
-    return [
-      Course(
-        id: '1',
-        courseKey: 'psicologia',
-        title: 'Psicologia',
-        createdAt: DateTime.now(),
-      ),
-      Course(
-        id: '2',
-        courseKey: 'direito',
-        title: 'Direito',
-        createdAt: DateTime.now(),
-      ),
-    ];
-  }
-
-  List<ExamTemplate> _getMockTemplates() {
-    final now = DateTime.now();
-    return [
-      ExamTemplate(
-        id: '1',
-        name: 'Prova de Psicologia - Modulo 1',
-        description: 'Prova sobre fundamentos da psicologia',
-        courseId: '1',
-        teacherId: _teacherId,
-        timeLimitMinutes: 60,
-        questionCount: 20,
-        passingScorePercentage: 70.0,
-        isPublished: true,
-        createdAt: now.subtract(const Duration(days: 30)),
-        updatedAt: now.subtract(const Duration(days: 5)),
-        courseName: 'Psicologia',
-      ),
-      ExamTemplate(
-        id: '2',
-        name: 'Simulado OAB',
-        description: 'Simulado preparatorio para OAB',
-        courseId: '2',
-        teacherId: _teacherId,
-        timeLimitMinutes: 120,
-        questionCount: 40,
-        passingScorePercentage: 60.0,
-        isPublished: false,
-        createdAt: now.subtract(const Duration(days: 10)),
-        updatedAt: now.subtract(const Duration(days: 2)),
-        courseName: 'Direito',
-      ),
-    ];
-  }
-
-  List<ExamTemplateQuestion> _getMockTemplateQuestions() {
-    return [
-      ExamTemplateQuestion(
-        id: '1',
-        examTemplateId: _selectedTemplate?.id ?? '',
-        questionId: 'q1',
-        questionOrder: 1,
-        createdAt: DateTime.now(),
-        questionEnunciation: 'Qual e a principal funcao...',
-      ),
-      ExamTemplateQuestion(
-        id: '2',
-        examTemplateId: _selectedTemplate?.id ?? '',
-        questionId: 'q2',
-        questionOrder: 2,
-        createdAt: DateTime.now(),
-        questionEnunciation: 'De acordo com a teoria...',
-      ),
-    ];
-  }
-
-  List<TeacherQuestion> _getMockAvailableQuestions() {
-    return [
-      TeacherQuestion(
-        id: 'q1',
-        enunciation: 'Qual e a principal funcao do sistema nervoso central?',
-        difficultyLevel: 'medium',
-        points: 1.0,
-        isActive: true,
-        categoryName: 'Fundamentos',
-        courseName: 'Psicologia',
-        answerCount: 5,
-        supportingTextCount: 0,
-        createdAt: DateTime.now(),
-      ),
-      TeacherQuestion(
-        id: 'q2',
-        enunciation: 'De acordo com a teoria de Freud...',
-        difficultyLevel: 'hard',
-        points: 2.0,
-        isActive: true,
-        categoryName: 'Psicanalise',
-        courseName: 'Psicologia',
-        answerCount: 4,
-        supportingTextCount: 1,
-        createdAt: DateTime.now(),
-      ),
-    ];
   }
 }

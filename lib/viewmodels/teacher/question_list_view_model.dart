@@ -11,15 +11,15 @@ import '../../repositories/teacher_repository_types.dart';
 class QuestionListViewModel extends ChangeNotifier {
   QuestionListViewModel({
     required String teacherId,
-    TeacherRepository? teacherRepository,
-    CourseRepository? courseRepository,
+    required TeacherRepository teacherRepository,
+    required CourseRepository courseRepository,
   })  : _teacherId = teacherId,
         _teacherRepository = teacherRepository,
         _courseRepository = courseRepository;
 
   final String _teacherId;
-  final TeacherRepository? _teacherRepository;
-  final CourseRepository? _courseRepository;
+  final TeacherRepository _teacherRepository;
+  final CourseRepository _courseRepository;
 
   // State
   bool _isLoading = false;
@@ -68,12 +68,8 @@ class QuestionListViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadCourses() async {
-    if (_courseRepository != null) {
-      final repoCourses = await _courseRepository!.fetchActiveCourses();
-      _courses = repoCourses.map(_mapRepoCourse).toList();
-    } else {
-      _courses = _getMockCourses();
-    }
+    final repoCourses = await _courseRepository.fetchActiveCourses();
+    _courses = repoCourses.map(_mapRepoCourse).toList();
   }
 
   Future<void> loadQuestions() async {
@@ -81,18 +77,13 @@ class QuestionListViewModel extends ChangeNotifier {
     _clearMessages();
 
     try {
-      if (_teacherRepository != null) {
-        final filter = TeacherQuestionsFilter(
-          teacherId: _teacherId,
-          courseId: _filterCourseId,
-          categoryId: _filterCategoryId,
-          activeOnly: !_showInactiveOnly,
-        );
-        _questions = await _teacherRepository!.fetchTeacherQuestions(filter);
-      } else {
-        await Future.delayed(const Duration(milliseconds: 500));
-        _questions = _getMockQuestions();
-      }
+      final filter = TeacherQuestionsFilter(
+        teacherId: _teacherId,
+        courseId: _filterCourseId,
+        categoryId: _filterCategoryId,
+        activeOnly: !_showInactiveOnly,
+      );
+      _questions = await _teacherRepository.fetchTeacherQuestions(filter);
     } catch (error) {
       _setError('Erro ao carregar questoes: $error');
       _questions = [];
@@ -105,15 +96,9 @@ class QuestionListViewModel extends ChangeNotifier {
     _categories = [];
     notifyListeners();
 
-    if (_teacherRepository == null) {
-      _categories = _getMockCategories(courseId);
-      notifyListeners();
-      return;
-    }
-
     try {
       _categories =
-          await _teacherRepository!.fetchCategories(courseId: courseId);
+          await _teacherRepository.fetchCategories(courseId: courseId);
       notifyListeners();
     } catch (error) {
       debugPrint('Erro ao carregar categorias: $error');
@@ -159,10 +144,7 @@ class QuestionListViewModel extends ChangeNotifier {
   // Actions
   Future<bool> deleteQuestion(String questionId) async {
     try {
-      if (_teacherRepository != null) {
-        await _teacherRepository!.deleteQuestion(questionId);
-      }
-
+      await _teacherRepository.deleteQuestion(questionId);
       _questions = _questions.where((q) => q.id != questionId).toList();
       _setSuccess('Questao removida com sucesso!');
       notifyListeners();
@@ -212,85 +194,5 @@ class QuestionListViewModel extends ChangeNotifier {
       iconKey: repo.iconKey,
       createdAt: repo.createdAt,
     );
-  }
-
-  List<Course> _getMockCourses() {
-    return [
-      Course(
-        id: '1',
-        courseKey: 'psicologia',
-        title: 'Psicologia',
-        createdAt: DateTime.now(),
-      ),
-      Course(
-        id: '2',
-        courseKey: 'direito',
-        title: 'Direito',
-        createdAt: DateTime.now(),
-      ),
-    ];
-  }
-
-  List<QuestionCategory> _getMockCategories(String courseId) {
-    return [
-      QuestionCategory(
-        id: '1',
-        name: 'Fundamentos',
-        courseId: courseId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      QuestionCategory(
-        id: '2',
-        name: 'Metodologia',
-        courseId: courseId,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    ];
-  }
-
-  List<TeacherQuestion> _getMockQuestions() {
-    return [
-      TeacherQuestion(
-        id: '1',
-        enunciation:
-            'Qual e a principal funcao do sistema nervoso central no processamento cognitivo?',
-        difficultyLevel: 'medium',
-        points: 1.0,
-        isActive: true,
-        categoryName: 'Fundamentos',
-        courseName: 'Psicologia',
-        answerCount: 5,
-        supportingTextCount: 0,
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-      TeacherQuestion(
-        id: '2',
-        enunciation:
-            'De acordo com o Codigo Civil, qual e o prazo prescricional para acoes de reparacao civil?',
-        difficultyLevel: 'hard',
-        points: 2.0,
-        isActive: true,
-        categoryName: 'Legislacao',
-        courseName: 'Direito',
-        answerCount: 4,
-        supportingTextCount: 1,
-        createdAt: DateTime.now().subtract(const Duration(days: 10)),
-      ),
-      TeacherQuestion(
-        id: '3',
-        enunciation:
-            'Questao inativa de exemplo para teste do filtro.',
-        difficultyLevel: 'easy',
-        points: 1.0,
-        isActive: false,
-        categoryName: null,
-        courseName: 'Psicologia',
-        answerCount: 3,
-        supportingTextCount: 0,
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      ),
-    ];
   }
 }

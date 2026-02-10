@@ -15,12 +15,20 @@ class TeacherExamTemplatesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sessionManager = context.watch<SessionManager>();
     final teacherId = sessionManager.currentUser?.id ?? '';
+    final teacherRepo = context.read<TeacherRepository?>();
+    final courseRepo = context.read<CourseRepository?>();
+
+    if (teacherRepo == null || courseRepo == null) {
+      return const Center(
+        child: Text('Erro: conexao com o servidor nao disponivel'),
+      );
+    }
 
     return ChangeNotifierProvider(
       create: (context) => ExamTemplateViewModel(
         teacherId: teacherId,
-        teacherRepository: context.read<TeacherRepository?>(),
-        courseRepository: context.read<CourseRepository?>(),
+        teacherRepository: teacherRepo,
+        courseRepository: courseRepo,
       )..loadInitialData(),
       child: const _ExamTemplatesContent(),
     );

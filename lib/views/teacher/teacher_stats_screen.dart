@@ -14,11 +14,18 @@ class TeacherStatsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sessionManager = context.watch<SessionManager>();
     final teacherId = sessionManager.currentUser?.id ?? '';
+    final teacherRepo = context.read<TeacherRepository?>();
+
+    if (teacherRepo == null) {
+      return const Center(
+        child: Text('Erro: conexao com o servidor nao disponivel'),
+      );
+    }
 
     return ChangeNotifierProvider(
       create: (context) => TeacherDashboardViewModel(
         teacherId: teacherId,
-        teacherRepository: context.read<TeacherRepository?>(),
+        teacherRepository: teacherRepo,
       )..loadStats(),
       child: const _StatsContent(),
     );
