@@ -1,73 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
-import 'package:unicv_tech_mvp/ui/components/default_radio_question.dart';
 import 'package:unicv_tech_mvp/ui/components/default_input.dart';
+import 'package:unicv_tech_mvp/viewmodels/teacher_exam_template_view_model.dart';
 
-/// Modelo para representar uma questão
-class Question {
-  final String id;
-  final String enunciation;
-  final List<String> options;
-  final int order;
-  final double? score;
-
-  Question({
-    required this.id,
-    required this.enunciation,
-    required this.options,
-    required this.order,
-    this.score,
-  });
-
-  Question copyWith({
-    String? id,
-    String? enunciation,
-    List<String>? options,
-    int? order,
-    double? score,
-  }) {
-    return Question(
-      id: id ?? this.id,
-      enunciation: enunciation ?? this.enunciation,
-      options: options ?? this.options,
-      order: order ?? this.order,
-      score: score ?? this.score,
-    );
-  }
-}
-
-/// Modelo para representar a resposta de um aluno
-class StudentAnswerData {
-  final String id;
-  final String studentName;
-  final String studentEmail;
-  final DateTime completedAt;
-  final int questionsAnswered;
-  final int totalQuestions;
-  final int durationMinutes;
-  final int durationSeconds;
-  final int score;
-  final int totalScore;
-  final double points;
-
-  StudentAnswerData({
-    required this.id,
-    required this.studentName,
-    required this.studentEmail,
-    required this.completedAt,
-    required this.questionsAnswered,
-    required this.totalQuestions,
-    required this.durationMinutes,
-    required this.durationSeconds,
-    required this.score,
-    required this.totalScore,
-    required this.points,
-  });
-}
+/// Alias para compatibilidade
+typedef QuestionListItemData = QuestionBankItem;
 
 /// Tela de criação de prova com abas e gerenciamento de questões
 class TeacherCreateTestView extends StatefulWidget {
-  const TeacherCreateTestView({super.key});
+  final String? templateId;
+  final String? courseId;
+  
+  const TeacherCreateTestView({
+    super.key,
+    this.templateId,
+    this.courseId,
+  });
 
   @override
   State<TeacherCreateTestView> createState() => _TeacherCreateTestViewState();
@@ -80,111 +29,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   // Controladores de texto
   late TextEditingController _testTitleController;
   late TextEditingController _testDescriptionController;
-
-  // Estado da prova
-  List<Question> questions = [];
-
-  // Controlador de busca para respostas
   late TextEditingController _answerSearchController;
-
-  // Estado das configurações da prova
-  bool _showWrongQuestions = true;
-  bool _showCorrectAnswers = true;
-  bool _showScores = true;
-  bool _requireInstitutionalLogin = true;
-  bool _singleAttemptOnly = true;
-  bool _useDefaultQuestionScore = true;
-
-  // Dados fictícios de respostas dos alunos
-  final List<StudentAnswerData> studentAnswers = [
-    StudentAnswerData(
-      id: '1',
-      studentName: 'Debora Rosada',
-      studentEmail: 'deboraRosada@unicv.gov.br',
-      completedAt: DateTime(2025, 12, 1, 21, 59),
-      questionsAnswered: 5,
-      totalQuestions: 5,
-      durationMinutes: 2,
-      durationSeconds: 50,
-      score: 4,
-      totalScore: 5,
-      points: 8.0,
-    ),
-    StudentAnswerData(
-      id: '2',
-      studentName: 'Debora Rosada',
-      studentEmail: 'deboraRosada@unicv.gov.br',
-      completedAt: DateTime(2025, 12, 1, 21, 59),
-      questionsAnswered: 5,
-      totalQuestions: 5,
-      durationMinutes: 2,
-      durationSeconds: 50,
-      score: 4,
-      totalScore: 5,
-      points: 8.0,
-    ),
-  ];
-
-  // Dados fictícios para importação com informações completas
-  final List<QuestionListItemData> availableQuestions = [
-    QuestionListItemData(
-      id: 'q1',
-      enunciation:
-          'Qual é a definição correta de Programação Orientada a Objetos?',
-      content: 'POO',
-      subject: 'Algoritmos',
-      professor: 'Prof. João Lima',
-      semester: '1º semestre',
-      year: '2024',
-    ),
-    QuestionListItemData(
-      id: 'q2',
-      enunciation:
-          'Em uma matriz A de ordem 3x3, qual é o determinante se todos os elementos da diagonal principal são iguais a 2 e os demais são zero?',
-      content: 'Matrizes',
-      subject: 'Cálculo I',
-      professor: 'Profa. Maria Clara',
-      semester: '1º semestre',
-      year: '2024',
-    ),
-    QuestionListItemData(
-      id: 'q3',
-      enunciation: 'O que caracteriza um número complexo na forma algébrica?',
-      content: 'Números Complexos',
-      subject: 'Cálculo I',
-      professor: 'Profa. Maria Clara',
-      semester: '2º semestre',
-      year: '2024',
-    ),
-    QuestionListItemData(
-      id: 'q4',
-      enunciation:
-          'Qual é a principal diferença entre herança e composição em POO?',
-      content: 'POO',
-      subject: 'Algoritmos',
-      professor: 'Prof. João Lima',
-      semester: '2º semestre',
-      year: '2025',
-    ),
-    QuestionListItemData(
-      id: 'q5',
-      enunciation: 'Explique o conceito de polimorfismo na programação.',
-      content: 'POO',
-      subject: 'Algoritmos',
-      professor: 'Prof. João Lima',
-      semester: '1º semestre',
-      year: '2025',
-    ),
-    QuestionListItemData(
-      id: 'q6',
-      enunciation: 'Qual é a definição de limite em cálculo diferencial?',
-      content: 'Limites',
-      subject: 'Cálculo I',
-      professor: 'Profa. Maria Clara',
-      semester: '1º semestre',
-      year: '2024',
-    ),
-  ];
 
   @override
   void initState() {
@@ -193,6 +38,13 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     _testTitleController = TextEditingController();
     _testDescriptionController = TextEditingController();
     _answerSearchController = TextEditingController();
+    
+    // Carregar dados
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = context.read<TeacherExamTemplateViewModel>();
+      viewModel.loadAvailableQuestions();
+      viewModel.loadStudentAttempts();
+    });
   }
 
   @override
@@ -205,95 +57,33 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   }
 
   void _deleteQuestion(String questionId) {
-    setState(() {
-      questions.removeWhere((q) => q.id == questionId);
-      // Reordenar
-      for (int i = 0; i < questions.length; i++) {
-        questions[i] = questions[i].copyWith(order: i);
-      }
-    });
+    context.read<TeacherExamTemplateViewModel>().deleteQuestion(questionId);
   }
 
   void _duplicateQuestion(String questionId) {
-    final questionIndex = questions.indexWhere((q) => q.id == questionId);
-    if (questionIndex != -1) {
-      final originalQuestion = questions[questionIndex];
-      final duplicatedQuestion = Question(
-        id: 'q_${DateTime.now().millisecondsSinceEpoch}',
-        enunciation: originalQuestion.enunciation,
-        options: List.from(originalQuestion.options),
-        order: questionIndex + 1,
-        score: originalQuestion.score,
-      );
-
-      setState(() {
-        questions.insert(questionIndex + 1, duplicatedQuestion);
-        // Reordenar
-        for (int i = 0; i < questions.length; i++) {
-          questions[i] = questions[i].copyWith(order: i);
-        }
-      });
-    }
+    context.read<TeacherExamTemplateViewModel>().duplicateQuestion(questionId);
   }
 
   void _moveQuestionUp(String questionId) {
-    final index = questions.indexWhere((q) => q.id == questionId);
-    if (index > 0) {
-      setState(() {
-        final temp = questions[index];
-        questions[index] = questions[index - 1].copyWith(order: index);
-        questions[index - 1] = temp.copyWith(order: index - 1);
-
-        // Trocar posições
-        questions[index] = questions[index];
-        questions[index - 1] = questions[index - 1];
-      });
-    }
+    context.read<TeacherExamTemplateViewModel>().moveQuestionUp(questionId);
   }
 
   void _moveQuestionDown(String questionId) {
-    final index = questions.indexWhere((q) => q.id == questionId);
-    if (index < questions.length - 1) {
-      setState(() {
-        final temp = questions[index];
-        questions[index] = questions[index + 1].copyWith(order: index);
-        questions[index + 1] = temp.copyWith(order: index + 1);
-
-        // Trocar posições
-        questions[index] = questions[index];
-        questions[index + 1] = questions[index + 1];
-      });
-    }
+    context.read<TeacherExamTemplateViewModel>().moveQuestionDown(questionId);
   }
 
   void _showImportModal() {
+    final viewModel = context.read<TeacherExamTemplateViewModel>();
+    
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => _ImportQuestionModal(
-        availableQuestions: availableQuestions,
+        availableQuestions: viewModel.availableQuestions,
         onImport: (selectedIds) {
-          // Lógica para importar as questões selecionadas
-          for (final questionId in selectedIds) {
-            final importedQuestion =
-                availableQuestions.firstWhere((q) => q.id == questionId);
-
-            final newQuestion = Question(
-              id: 'q_${DateTime.now().millisecondsSinceEpoch}_$questionId',
-              enunciation: importedQuestion.enunciation,
-              options: ['', '', '', ''],
-              order: questions.length,
-              score: 0,
-            );
-
-            setState(() {
-              questions.add(newQuestion);
-            });
-          }
-
+          viewModel.importQuestions(selectedIds.toList());
           Navigator.pop(context);
 
-          // Mostrar feedback
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -309,146 +99,190 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   }
 
   void _updateQuestion(String questionId, String enunciation) {
-    final index = questions.indexWhere((q) => q.id == questionId);
-    if (index != -1) {
-      setState(() {
-        questions[index] = questions[index].copyWith(enunciation: enunciation);
-      });
-    }
+    context
+        .read<TeacherExamTemplateViewModel>()
+        .updateQuestionEnunciation(questionId, enunciation);
   }
 
   void _updateQuestionScore(String questionId, String value) {
-    final index = questions.indexWhere((q) => q.id == questionId);
-    if (index == -1) return;
-
     final parsed = double.tryParse(value.replaceAll(',', '.'));
-    setState(() {
-      questions[index] = questions[index].copyWith(score: parsed);
-    });
+    context
+        .read<TeacherExamTemplateViewModel>()
+        .updateQuestionScore(questionId, parsed);
+  }
+
+  Future<void> _saveTemplate() async {
+    final viewModel = context.read<TeacherExamTemplateViewModel>();
+    
+    // Atualizar título e descrição do ViewModel
+    viewModel.updateTitle(_testTitleController.text);
+   viewModel.updateDescription(_testDescriptionController.text);
+
+    final success = await viewModel.saveTemplate();
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Prova salva com sucesso!'),
+          backgroundColor: AppColors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(viewModel.errorMessage ?? 'Erro ao salvar prova'),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteBg,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.primaryDark),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return ChangeNotifierProvider(
+      create: (_) => TeacherExamTemplateViewModel(),
+      child: Scaffold(
+        backgroundColor: AppColors.whiteBg,
+        appBar: AppBar(
+          backgroundColor: AppColors.white,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppColors.primaryDark),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Montar Provas',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                    ),
+              ),
+              Text(
+                'Criar questões',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.greyText,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        body: Column(
           children: [
-            Text(
-              'Montar Provas',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                  ),
+            // Abas de navegação
+            Container(
+              color: AppColors.white,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: AppColors.green,
+                unselectedLabelColor: AppColors.greyText,
+                indicatorColor: AppColors.green,
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: const [
+                  Tab(text: 'Perguntas'),
+                  Tab(text: 'Respostas'),
+                  Tab(text: 'Configurações'),
+                ],
+              ),
             ),
-            Text(
-              'Criar questões',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.greyText,
-                  ),
+            // Conteúdo das abas
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Aba Perguntas
+                  _buildQuestionsTab(),
+                  // Aba Respostas
+                  _buildAnswersTab(),
+                  // Aba Configurações
+                  _buildSettingsTab(),
+                ],
+              ),
             ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          // Abas de navegação
-          Container(
-            color: AppColors.white,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: AppColors.green,
-              unselectedLabelColor: AppColors.greyText,
-              indicatorColor: AppColors.green,
-              indicatorSize: TabBarIndicatorSize.tab,
-              tabs: const [
-                Tab(text: 'Perguntas'),
-                Tab(text: 'Respostas'),
-                Tab(text: 'Configurações'),
-              ],
-            ),
-          ),
-          // Conteúdo das abas
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Aba Perguntas
-                _buildQuestionsTab(),
-                // Aba Respostas
-                _buildAnswersTab(),
-                // Aba Configurações
-                _buildSettingsTab(),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildQuestionsTab() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Cabeçalho da Prova
-          _buildTestHeader(),
+    return Consumer<TeacherExamTemplateViewModel>(
+      builder: (context, viewModel, child) {
+        final questions = viewModel.questions;
+        
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              // Cabeçalho da Prova
+              _buildTestHeader(),
 
-          const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-          // Card de Importação de Questões
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildImportQuestionsCard(),
-          ),
+              // Card de Importação de Questões
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildImportQuestionsCard(),
+              ),
 
-          const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-          // Lista de Questões
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Lista de Questões
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Questões Adicionadas (${questions.length})',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Questões Adicionadas (${questions.length})',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        if (questions.isNotEmpty)
+                          ElevatedButton.icon(
+                            onPressed: _saveTemplate,
+                            icon: const Icon(Icons.save, size: 20),
+                            label: const Text('Salvar Prova'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.green,
+                              foregroundColor: AppColors.white,
+                            ),
                           ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+
+                    // Cards de Questões
+                    if (questions.isEmpty)
+                      _buildEmptyState()
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: questions.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final question = questions[index];
+                          return _buildQuestionCard(question, index, questions.length);
+                        },
+                      ),
+
+                    const SizedBox(height: 24),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                // Cards de Questões
-                if (questions.isEmpty)
-                  _buildEmptyState()
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: questions.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final question = questions[index];
-                      return _buildQuestionCard(question, index);
-                    },
-                  ),
-
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -679,7 +513,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     );
   }
 
-  Widget _buildQuestionCard(Question question, int index) {
+  Widget _buildQuestionCard(ExamQuestion question, int index, int totalQuestions) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -779,7 +613,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                     ),
                     _buildIconButton(
                       icon: Icons.arrow_downward,
-                      onPressed: index < questions.length - 1
+                      onPressed: index < totalQuestions - 1
                           ? () => _moveQuestionDown(question.id)
                           : null,
                       tooltip: 'Mover para baixo',
@@ -982,15 +816,17 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   }
 
   Widget _buildAnswersTab() {
-    // Filtrar respostas baseado na busca
-    final filteredAnswers = studentAnswers.where((answer) {
-      final query = _answerSearchController.text.toLowerCase();
-      return query.isEmpty ||
-          answer.studentName.toLowerCase().contains(query) ||
-          answer.studentEmail.toLowerCase().contains(query);
-    }).toList();
+    return Consumer<TeacherExamTemplateViewModel>(
+      builder: (context, viewModel, _) {
+        // Filtrar respostas baseado na busca
+        final filteredAnswers = viewModel.studentAttempts.where((answer) {
+          final query = _answerSearchController.text.toLowerCase();
+          return query.isEmpty ||
+              answer.studentName.toLowerCase().contains(query) ||
+              answer.studentEmail.toLowerCase().contains(query);
+        }).toList();
 
-    return SingleChildScrollView(
+        return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1121,6 +957,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -1171,7 +1009,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     );
   }
 
-  Widget _buildAnswerCard(StudentAnswerData answer) {
+  Widget _buildAnswerCard(StudentAttempt answer) {
     final formattedDate = _formatDateTime(answer.completedAt);
     final duration =
         '${answer.durationMinutes}:${answer.durationSeconds.toString().padLeft(2, '0')}';
@@ -1379,7 +1217,9 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   }
 
   Widget _buildSettingsTab() {
-    return SingleChildScrollView(
+    return Consumer<TeacherExamTemplateViewModel>(
+      builder: (context, viewModel, _) {
+        return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
@@ -1429,10 +1269,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                     title: 'Perguntas erradas',
                     description:
                         'O alunos poderão ver as perguntas que foram respondidas incorretamente.',
-                    value: _showWrongQuestions,
-                    onChanged: (value) {
-                      setState(() => _showWrongQuestions = value);
-                    },
+                    value: viewModel.showWrongQuestions,
+                    onChanged: viewModel.updateShowWrongQuestions,
                   ),
 
                   const SizedBox(height: 20),
@@ -1442,10 +1280,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                     title: 'Respostas corretas',
                     description:
                         'Os alunos poderão ver as respostas corretas após a liberação das notas.',
-                    value: _showCorrectAnswers,
-                    onChanged: (value) {
-                      setState(() => _showCorrectAnswers = value);
-                    },
+                    value: viewModel.showCorrectAnswers,
+                    onChanged: viewModel.updateShowCorrectAnswers,
                   ),
 
                   const SizedBox(height: 20),
@@ -1455,10 +1291,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                     title: 'Valores',
                     description:
                         'Os alunos poderão ver a pontuação total e os pontos recebidos para cada pergunta.',
-                    value: _showScores,
-                    onChanged: (value) {
-                      setState(() => _showScores = value);
-                    },
+                    value: viewModel.showScores,
+                    onChanged: viewModel.updateShowScores,
                   ),
 
                   const SizedBox(height: 32),
@@ -1478,10 +1312,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                   _buildSettingItem(
                     title: 'Acesso a prova',
                     description: 'Login com email institucional necessário.',
-                    value: _requireInstitutionalLogin,
-                    onChanged: (value) {
-                      setState(() => _requireInstitutionalLogin = value);
-                    },
+                    value: viewModel.requireInstitutionalLogin,
+                    onChanged: viewModel.updateRequireInstitutionalLogin,
                   ),
 
                   const SizedBox(height: 20),
@@ -1491,10 +1323,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                     title:
                         'Restringe a realização da prova a uma única tentativa.',
                     description: '',
-                    value: _singleAttemptOnly,
-                    onChanged: (value) {
-                      setState(() => _singleAttemptOnly = value);
-                    },
+                    value: viewModel.singleAttemptOnly,
+                    onChanged: viewModel.updateSingleAttemptOnly,
                   ),
 
                   const SizedBox(height: 32),
@@ -1514,10 +1344,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                   _buildSettingItem(
                     title: 'Pontuação padrão das perguntas',
                     description: 'Pontos de cada pergunta nova.',
-                    value: _useDefaultQuestionScore,
-                    onChanged: (value) {
-                      setState(() => _useDefaultQuestionScore = value);
-                    },
+                    value: viewModel.useDefaultQuestionScore,
+                    onChanged: viewModel.updateUseDefaultQuestionScore,
                   ),
                 ],
               ),
@@ -1527,6 +1355,8 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
           ],
         ),
       ),
+        );
+      },
     );
   }
 
