@@ -37,12 +37,12 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
   // Telas correspondentes às opções do menu
   List<Widget> get _screens => [
-    const TeacherExamTemplatesScreen(),  // 0: Montar Provas
-    const TeacherScreenCreateQuestion(), // 1: Nova Questão
-    const TeacherProfileScreen(),        // 2: Perfil
-    const TeacherQuestionListScreen(),   // 3: Listar Questões
-    const TeacherStatsScreen(),          // 4: Dashboard
-  ];
+        const TeacherExamTemplatesScreen(), // 0: Montar Provas
+        const TeacherScreenCreateQuestion(), // 1: Nova Questão
+        const TeacherProfileScreen(), // 2: Perfil
+        const TeacherQuestionListScreen(), // 3: Listar Questões
+        const TeacherStatsScreen(), // 4: Dashboard
+      ];
 
   @override
   Widget build(BuildContext context) {
