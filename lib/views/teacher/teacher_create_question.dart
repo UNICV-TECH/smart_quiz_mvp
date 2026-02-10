@@ -1,54 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:unicv_tech_mvp/ui/components/default_create_question-statement.dart';
-import 'package:unicv_tech_mvp/ui/components/default_create_question.dart'
-    hide Preview;
-import 'package:unicv_tech_mvp/ui/components/default_input_select.dart'
-    hide Preview;
-import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
+import 'package:provider/provider.dart';
 
-/// Tela de criação de questões que se integra ao menu lateral do professor
+import '../../repositories/course_repository.dart';
+import '../../repositories/teacher_repository.dart';
+import '../../repositories/teacher_repository_types.dart';
+import '../../services/session_manager.dart';
+import '../../ui/components/default_create_question-statement.dart' hide Preview;
+import '../../ui/components/default_input_select.dart' hide Preview;
+import '../../ui/theme/app_color.dart';
+import '../../viewmodels/teacher/create_question_view_model.dart';
+
+/// Tela de criacao de questoes que se integra ao menu lateral do professor
 class TeacherScreenCreateQuestion extends StatelessWidget {
   const TeacherScreenCreateQuestion({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return _CreateQuestionContent();
+    final sessionManager = context.watch<SessionManager>();
+    final teacherId = sessionManager.currentUser?.id ?? '';
+
+    return ChangeNotifierProvider(
+      create: (context) => CreateQuestionViewModel(
+        teacherId: teacherId,
+        teacherRepository: context.read<TeacherRepository?>(),
+        courseRepository: context.read<CourseRepository?>(),
+      )..loadInitialData(),
+      child: const _CreateQuestionContent(),
+    );
   }
 }
 
 class _CreateQuestionContent extends StatelessWidget {
   const _CreateQuestionContent();
 
-  static const List<SelectOption> _courseOptions = [
-    SelectOption(value: 'ads', label: 'Análise e Desenvolvimento de Sistemas'),
-    SelectOption(value: 'adm', label: 'Administração'),
-  ];
-
-  static const List<SelectOption> _professorOptions = [
-    SelectOption(value: 'prof-1', label: 'Prof. João Lima'),
-    SelectOption(value: 'prof-2', label: 'Profa. Maria Clara'),
-  ];
-  static const List<SelectOption> _yearOptions = [
-    SelectOption(value: '2024', label: '2024'),
-    SelectOption(value: '2025', label: '2025'),
-  ];
-
-  static const List<SelectOption> _semesterOptions = [
-    SelectOption(value: '1', label: '1º semestre'),
-    SelectOption(value: '2', label: '2º semestre'),
-  ];
-  static const List<SelectOption> _subjectOptions = [
-    SelectOption(value: 'math-1', label: 'Cálculo I'),
-    SelectOption(value: 'prog-1', label: 'Algoritmos'),
-  ];
-
-  static const List<SelectOption> _contentOptions = [
-    SelectOption(value: 'matriz', label: 'Matrizes'),
-    SelectOption(value: 'complexos', label: 'Números complexos'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<CreateQuestionViewModel>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
       child: Center(
@@ -57,9 +45,29 @@ class _CreateQuestionContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildContextCard(context),
+              // Messages
+              if (viewModel.errorMessage != null)
+                _buildMessageBanner(
+                  viewModel.errorMessage!,
+                  isError: true,
+                  onDismiss: viewModel.clearMessages,
+                ),
+              if (viewModel.successMessage != null)
+                _buildMessageBanner(
+                  viewModel.successMessage!,
+                  isError: false,
+                  onDismiss: viewModel.clearMessages,
+                ),
+              if (viewModel.errorMessage != null ||
+                  viewModel.successMessage != null)
+                const SizedBox(height: 16),
+
+              // Context Card (Course and Category selection)
+              _buildContextCard(context, viewModel),
               const SizedBox(height: 32),
-              _buildQuestionCard(context),
+
+              // Question Card
+              _buildQuestionCard(context, viewModel),
             ],
           ),
         ),
@@ -67,7 +75,59 @@ class _CreateQuestionContent extends StatelessWidget {
     );
   }
 
-  Widget _buildContextCard(BuildContext context) {
+  Widget _buildMessageBanner(
+    String message, {
+    required bool isError,
+    required VoidCallback onDismiss,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isError
+            ? AppColors.red.withValues(alpha: 0.1)
+            : AppColors.green.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isError ? AppColors.red : AppColors.green,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isError ? Icons.error_outline : Icons.check_circle_outline,
+            color: isError ? AppColors.red : AppColors.green,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: isError ? AppColors.red : AppColors.green,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            onPressed: onDismiss,
+            color: isError ? AppColors.red : AppColors.green,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContextCard(
+      BuildContext context, CreateQuestionViewModel viewModel) {
+    final courseOptions = viewModel.courses
+        .map((c) => SelectOption(value: c.id, label: c.title))
+        .toList();
+
+    final categoryOptions = viewModel.categories
+        .map((c) => SelectOption(value: c.id, label: c.name))
+        .toList();
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -77,33 +137,146 @@ class _CreateQuestionContent extends StatelessWidget {
               color: AppColors.shadow, blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(16),
-        child: DefaultCreateQuestionContextForm(
-          courseOptions: _courseOptions,
-          professorOptions: _professorOptions,
-          yearOptions: _yearOptions,
-          semesterOptions: _semesterOptions,
-          subjectOptions: _subjectOptions,
-          contentOptions: _contentOptions,
-          semesterRequired: false,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Contexto da Questao',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            if (viewModel.isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else
+              _buildContextForm(
+                context,
+                viewModel,
+                courseOptions,
+                categoryOptions,
+              ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildQuestionCard(BuildContext context) {
-    final initialAlternatives = [
-      AlternativeModel(id: 'alt_0', text: 'Questão 1', isCorrect: false),
-      AlternativeModel(
-          id: 'alt_1', text: 'Adicionar questão', isCorrect: false),
-    ];
+  Widget _buildContextForm(
+    BuildContext context,
+    CreateQuestionViewModel viewModel,
+    List<SelectOption> courseOptions,
+    List<SelectOption> categoryOptions,
+  ) {
+    return Column(
+      children: [
+        // Row 1: Course and Category
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SelectPesquisa(
+                label: 'Curso',
+                options: courseOptions,
+                value: viewModel.selectedCourseId,
+                required: true,
+                placeholder: 'Selecione o curso',
+                onChanged: viewModel.setCourse,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: SelectPesquisa(
+                label: 'Categoria',
+                options: categoryOptions,
+                value: viewModel.selectedCategoryId,
+                required: false,
+                placeholder: viewModel.selectedCourseId != null
+                    ? 'Selecione a categoria'
+                    : 'Selecione um curso primeiro',
+                onChanged: viewModel.setCategory,
+                enabled: viewModel.selectedCourseId != null,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Row 2: Difficulty and Points
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SelectPesquisa(
+                label: 'Dificuldade',
+                options: const [
+                  SelectOption(value: 'easy', label: 'Facil'),
+                  SelectOption(value: 'medium', label: 'Medio'),
+                  SelectOption(value: 'hard', label: 'Dificil'),
+                ],
+                value: viewModel.difficultyLevel,
+                required: true,
+                placeholder: 'Selecione a dificuldade',
+                onChanged: (value) {
+                  if (value != null) {
+                    viewModel.setDifficultyLevel(value);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: SelectPesquisa(
+                label: 'Pontos',
+                options: const [
+                  SelectOption(value: '0.5', label: '0.5 pontos'),
+                  SelectOption(value: '1.0', label: '1.0 ponto'),
+                  SelectOption(value: '1.5', label: '1.5 pontos'),
+                  SelectOption(value: '2.0', label: '2.0 pontos'),
+                  SelectOption(value: '2.5', label: '2.5 pontos'),
+                  SelectOption(value: '3.0', label: '3.0 pontos'),
+                ],
+                value: viewModel.points.toString(),
+                required: true,
+                placeholder: 'Selecione os pontos',
+                onChanged: (value) {
+                  if (value != null) {
+                    viewModel.setPoints(double.parse(value));
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuestionCard(
+      BuildContext context, CreateQuestionViewModel viewModel) {
+    final initialAlternatives = viewModel.answerChoices.map((choice) {
+      return AlternativeModel(
+        id: choice.letter ?? 'A',
+        text: choice.content,
+        isCorrect: choice.isCorrect,
+      );
+    }).toList();
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: AppColors.green, width: 6)),
+        border: const Border(left: BorderSide(color: AppColors.green, width: 6)),
         boxShadow: const [
           BoxShadow(
               color: AppColors.shadow, blurRadius: 10, offset: Offset(0, 4)),
@@ -113,20 +286,57 @@ class _CreateQuestionContent extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: DefaultCreateQuestion(
           initialSupportingText: '',
-          initialStatementText: '',
+          initialStatementText: viewModel.enunciation,
           initialQuestion: '',
           initialAlternatives: initialAlternatives,
-          onSave: (
-              {required String question,
-              required List<AlternativeModel> alternatives,
-              String? supportingText,
-              String? statement}) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Questão salva com sucesso!'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+          onSave: ({
+            required String question,
+            required List<AlternativeModel> alternatives,
+            String? supportingText,
+            String? statement,
+          }) async {
+            // Update viewmodel with the form data
+            viewModel.setEnunciation(statement ?? question);
+
+            // Update answer choices
+            for (int i = 0; i < alternatives.length && i < 5; i++) {
+              final alt = alternatives[i];
+              viewModel.updateAnswerChoice(
+                i,
+                AnswerChoiceInput(
+                  letter: String.fromCharCode(65 + i), // A, B, C, D, E
+                  content: alt.text,
+                  isCorrect: alt.isCorrect,
+                ),
+              );
+            }
+
+            // Add supporting text if provided
+            if (supportingText != null && supportingText.isNotEmpty) {
+              if (viewModel.supportingTexts.isEmpty) {
+                viewModel.addSupportingText(
+                  SupportingTextInput(content: supportingText),
+                );
+              } else {
+                viewModel.updateSupportingText(
+                  0,
+                  SupportingTextInput(content: supportingText),
+                );
+              }
+            }
+
+            // Save the question
+            final success = await viewModel.saveQuestion();
+
+            if (success && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Questao salva com sucesso!'),
+                  backgroundColor: AppColors.green,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
           },
         ),
       ),

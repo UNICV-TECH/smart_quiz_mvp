@@ -8,6 +8,9 @@ import '../../viewmodels/profile_view_model.dart';
 import '../../constants/app_strings.dart';
 import 'teacher_create_question.dart';
 import 'teacher_create_test.dart';
+import 'teacher_question_list_screen.dart';
+import 'teacher_exam_templates_screen.dart';
+import 'teacher_stats_screen.dart';
 
 class TeacherMainScreen extends StatefulWidget {
   const TeacherMainScreen({super.key});
@@ -34,10 +37,12 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
   }
 
   // Telas correspondentes às opções do menu
-  final List<Widget> _screens = [
-    const TeacherCreateTestView(),
-    const TeacherScreenCreateQuestion(),
-    const TeacherProfileScreen(),
+  List<Widget> get _screens => [
+    const TeacherExamTemplatesScreen(),  // 0: Montar Provas
+    const TeacherScreenCreateQuestion(), // 1: Nova Questão
+    const TeacherProfileScreen(),        // 2: Perfil
+    const TeacherQuestionListScreen(),   // 3: Listar Questões
+    const TeacherStatsScreen(),          // 4: Dashboard
   ];
 
   @override
@@ -102,7 +107,16 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
                   const SizedBox(height: 8),
 
-                  // Opção 3: Perfil
+                  // Opção 3: Dashboard
+                  _buildMenuItem(
+                    icon: Icons.dashboard_outlined,
+                    title: 'Dashboard',
+                    index: 4,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Opção 4: Perfil
                   _buildMenuItem(
                     icon: Icons.person,
                     title: 'Perfil',

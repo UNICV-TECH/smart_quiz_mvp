@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/auth_user.dart' as local;
+import '../models/user_model.dart';
 
 class SessionManager extends ChangeNotifier {
   SessionManager._({
@@ -43,6 +44,15 @@ class SessionManager extends ChangeNotifier {
   local.AuthUser? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
   bool get initialized => _initialized;
+
+  /// Returns the user's role (student, teacher, or admin)
+  UserRole get userRole => _currentUser?.role ?? UserRole.student;
+
+  /// Checks if the current user is a teacher or admin
+  bool get isTeacher => _currentUser?.isTeacher ?? false;
+
+  /// Checks if the current user is an admin
+  bool get isAdmin => _currentUser?.isAdmin ?? false;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -145,6 +155,29 @@ class SessionManager extends ChangeNotifier {
       email: email,
       name: name,
     );
+
+    // Fetch user role from database asynchronously
+    _fetchUserRole(supabaseUser.id);
+  }
+
+  Future<void> _fetchUserRole(String userId) async {
+    if (_client == null) return;
+
+    try {
+      final response = await _client!
+          .from('user')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response != null && _currentUser != null) {
+        final role = UserRole.fromString(response['role'] as String?);
+        _currentUser = _currentUser!.copyWith(role: role);
+        notifyListeners();
+      }
+    } catch (error) {
+      debugPrint('SessionManager: erro ao buscar role do usuario: $error');
+    }
   }
 
   String? _extractFullName(Map<String, dynamic> metadata) {
