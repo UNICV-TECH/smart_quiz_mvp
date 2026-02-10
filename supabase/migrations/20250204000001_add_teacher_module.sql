@@ -443,6 +443,7 @@ DECLARE
   v_supporting_text jsonb;
   v_answer_choice jsonb;
   v_order integer := 1;
+  v_next_number integer;
 BEGIN
   -- Validate teacher role
   IF NOT EXISTS (
@@ -452,15 +453,20 @@ BEGIN
     RAISE EXCEPTION 'User is not a teacher or admin';
   END IF;
 
+  -- Calculate next question number for the course
+  SELECT COALESCE(MAX(number), 0) + 1 INTO v_next_number
+  FROM public.question
+  WHERE id_course = p_course_id;
+
   -- Create the question
   INSERT INTO public.question (
     id_course, id_teacher, id_category,
     enunciation, difficulty_level, points, is_active,
-    created_at, updated_at
+    number, created_at, updated_at
   ) VALUES (
     p_course_id, p_teacher_id, p_category_id,
     p_enunciation, p_difficulty_level, p_points, true,
-    NOW(), NOW()
+    v_next_number, NOW(), NOW()
   ) RETURNING id INTO v_question_id;
 
   -- Insert supporting texts
