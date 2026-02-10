@@ -36,6 +36,35 @@ class Question {
   }
 }
 
+/// Modelo para representar a resposta de um aluno
+class StudentAnswerData {
+  final String id;
+  final String studentName;
+  final String studentEmail;
+  final DateTime completedAt;
+  final int questionsAnswered;
+  final int totalQuestions;
+  final int durationMinutes;
+  final int durationSeconds;
+  final int score;
+  final int totalScore;
+  final double points;
+
+  StudentAnswerData({
+    required this.id,
+    required this.studentName,
+    required this.studentEmail,
+    required this.completedAt,
+    required this.questionsAnswered,
+    required this.totalQuestions,
+    required this.durationMinutes,
+    required this.durationSeconds,
+    required this.score,
+    required this.totalScore,
+    required this.points,
+  });
+}
+
 /// Tela de criação de prova com abas e gerenciamento de questões
 class TeacherCreateTestView extends StatefulWidget {
   const TeacherCreateTestView({super.key});
@@ -54,6 +83,47 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
 
   // Estado da prova
   List<Question> questions = [];
+
+  // Controlador de busca para respostas
+  late TextEditingController _answerSearchController;
+
+  // Estado das configurações da prova
+  bool _showWrongQuestions = true;
+  bool _showCorrectAnswers = true;
+  bool _showScores = true;
+  bool _requireInstitutionalLogin = true;
+  bool _singleAttemptOnly = true;
+  bool _useDefaultQuestionScore = true;
+
+  // Dados fictícios de respostas dos alunos
+  final List<StudentAnswerData> studentAnswers = [
+    StudentAnswerData(
+      id: '1',
+      studentName: 'Debora Rosada',
+      studentEmail: 'deboraRosada@unicv.gov.br',
+      completedAt: DateTime(2025, 12, 1, 21, 59),
+      questionsAnswered: 5,
+      totalQuestions: 5,
+      durationMinutes: 2,
+      durationSeconds: 50,
+      score: 4,
+      totalScore: 5,
+      points: 8.0,
+    ),
+    StudentAnswerData(
+      id: '2',
+      studentName: 'Debora Rosada',
+      studentEmail: 'deboraRosada@unicv.gov.br',
+      completedAt: DateTime(2025, 12, 1, 21, 59),
+      questionsAnswered: 5,
+      totalQuestions: 5,
+      durationMinutes: 2,
+      durationSeconds: 50,
+      score: 4,
+      totalScore: 5,
+      points: 8.0,
+    ),
+  ];
 
   // Dados fictícios para importação com informações completas
   final List<QuestionListItemData> availableQuestions = [
@@ -122,6 +192,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     _tabController = TabController(length: 3, vsync: this);
     _testTitleController = TextEditingController();
     _testDescriptionController = TextEditingController();
+    _answerSearchController = TextEditingController();
   }
 
   @override
@@ -129,6 +200,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     _tabController.dispose();
     _testTitleController.dispose();
     _testDescriptionController.dispose();
+    _answerSearchController.dispose();
     super.dispose();
   }
 
@@ -910,68 +982,616 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
   }
 
   Widget _buildAnswersTab() {
-    return Center(
+    // Filtrar respostas baseado na busca
+    final filteredAnswers = studentAnswers.where((answer) {
+      final query = _answerSearchController.text.toLowerCase();
+      return query.isEmpty ||
+          answer.studentName.toLowerCase().contains(query) ||
+          answer.studentEmail.toLowerCase().contains(query);
+    }).toList();
+
+    return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 64,
-              color: AppColors.green.withValues(alpha: 0.5),
+            // Cabeçalho com contador de respostas
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${filteredAnswers.length} resposta${filteredAnswers.length != 1 ? 's' : ''}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            Text(
-              'Gerenciar Respostas',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+
+            // Campo de busca com filtro
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _answerSearchController,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: 'Pesquise pelo aluno',
+                      hintStyle: TextStyle(
+                        color: AppColors.greyText.withValues(alpha: 0.6),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppColors.greyText,
+                        size: 20,
+                      ),
+                      suffixIcon: _answerSearchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.clear,
+                                color: AppColors.greyText,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                _answerSearchController.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: AppColors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.greyLight,
+                          width: 1,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.greyLight,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: AppColors.green,
+                          width: 2,
+                        ),
+                      ),
+                    ),
                   ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Aqui você configurará as respostas corretas e feedback para cada questão.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.greyText,
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.greyLight,
+                      width: 1,
+                    ),
                   ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.tune,
+                      color: AppColors.greyText,
+                    ),
+                    onPressed: () {
+                      // TODO: Implementar filtros avançados
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Filtros em desenvolvimento'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
+
+            const SizedBox(height: 24),
+
+            // Lista de cards de respostas
+            if (filteredAnswers.isEmpty)
+              _buildEmptyAnswersState()
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filteredAnswers.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final answer = filteredAnswers[index];
+                  return _buildAnswerCard(answer);
+                },
+              ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildEmptyAnswersState() {
+    final hasSearch = _answerSearchController.text.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.greyLight,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            hasSearch ? Icons.search_off : Icons.assignment_outlined,
+            size: 64,
+            color: AppColors.greyText.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            hasSearch
+                ? 'Nenhuma resposta encontrada'
+                : 'Ainda não há respostas',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            hasSearch
+                ? 'Tente buscar por outro nome ou e-mail'
+                : 'As respostas dos alunos aparecerão aqui quando eles completarem a prova',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.greyText,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnswerCard(StudentAnswerData answer) {
+    final formattedDate = _formatDateTime(answer.completedAt);
+    final duration =
+        '${answer.durationMinutes}:${answer.durationSeconds.toString().padLeft(2, '0')}';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.greyLight,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cabeçalho com informações do aluno
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            answer.studentName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryDark,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            answer.studentEmail,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.greyText,
+                                    ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      formattedDate,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.greyText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 0, color: AppColors.greyLight),
+
+          // Estatísticas da prova
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(
+                  icon: Icons.article_outlined,
+                  label: 'Questões',
+                  value: answer.questionsAnswered.toString(),
+                ),
+                _buildStatItem(
+                  icon: Icons.timer_outlined,
+                  label: 'Duração',
+                  value: duration,
+                ),
+                _buildStatItem(
+                  icon: Icons.check_circle_outline,
+                  label: 'Nota',
+                  value: '${answer.score}/${answer.totalScore}',
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 0, color: AppColors.greyLight),
+
+          // Pontuação e ação
+          Container(
+            padding: const EdgeInsets.all(20),
+            color: AppColors.whiteBg,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Pontuação: ',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryDark,
+                          ),
+                    ),
+                    Text(
+                      answer.points.toStringAsFixed(1),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.green,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () {
+                    // TODO: Navegar para tela de detalhes da resposta
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Visualizando detalhes de ${answer.studentName}',
+                        ),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Clique para ver detalhes',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: AppColors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 28,
+          color: AppColors.greyText,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryDark,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppColors.greyText,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final year = dateTime.year;
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$day/$month/$year $hour:$minute';
+  }
+
   Widget _buildSettingsTab() {
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.settings_outlined,
-              size: 64,
-              color: AppColors.green.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Configurações da Prova',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            // Card principal de configurações
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadow.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Configure tempo, dificuldade, data de aplicação e outras opções.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.greyText,
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Título da página
+                  Text(
+                    'Configurações',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                   ),
+
+                  const SizedBox(height: 24),
+
+                  // Seção: Configuração das Perguntas
+                  Text(
+                    'Configuração das perguntas',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryDark,
+                        ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 1: Perguntas erradas
+                  _buildSettingItem(
+                    title: 'Perguntas erradas',
+                    description:
+                        'O alunos poderão ver as perguntas que foram respondidas incorretamente.',
+                    value: _showWrongQuestions,
+                    onChanged: (value) {
+                      setState(() => _showWrongQuestions = value);
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 2: Respostas corretas
+                  _buildSettingItem(
+                    title: 'Respostas corretas',
+                    description:
+                        'Os alunos poderão ver as respostas corretas após a liberação das notas.',
+                    value: _showCorrectAnswers,
+                    onChanged: (value) {
+                      setState(() => _showCorrectAnswers = value);
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 3: Valores
+                  _buildSettingItem(
+                    title: 'Valores',
+                    description:
+                        'Os alunos poderão ver a pontuação total e os pontos recebidos para cada pergunta.',
+                    value: _showScores,
+                    onChanged: (value) {
+                      setState(() => _showScores = value);
+                    },
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Seção: Configuração de Acesso
+                  Text(
+                    'Configuração de acesso',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryDark,
+                        ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 4: Acesso à prova
+                  _buildSettingItem(
+                    title: 'Acesso a prova',
+                    description: 'Login com email institucional necessário.',
+                    value: _requireInstitutionalLogin,
+                    onChanged: (value) {
+                      setState(() => _requireInstitutionalLogin = value);
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 5: Tentativa única
+                  _buildSettingItem(
+                    title:
+                        'Restringe a realização da prova a uma única tentativa.',
+                    description: '',
+                    value: _singleAttemptOnly,
+                    onChanged: (value) {
+                      setState(() => _singleAttemptOnly = value);
+                    },
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Seção: Pontuação
+                  Text(
+                    'Pontuação',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryDark,
+                        ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Opção 6: Pontuação padrão
+                  _buildSettingItem(
+                    title: 'Pontuação padrão das perguntas',
+                    description: 'Pontos de cada pergunta nova.',
+                    value: _useDefaultQuestionScore,
+                    onChanged: (value) {
+                      setState(() => _useDefaultQuestionScore = value);
+                    },
+                  ),
+                ],
+              ),
             ),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSettingItem({
+    required String title,
+    required String description,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryDark,
+                          ),
+                    ),
+                    if (description.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.greyText,
+                              height: 1.4,
+                            ),
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildSwitch(
+                value: value,
+                onChanged: onChanged,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitch({
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Switch(
+      value: value,
+      onChanged: onChanged,
+      activeColor: AppColors.green,
+      activeTrackColor: AppColors.green.withValues(alpha: 0.3),
+      inactiveThumbColor: AppColors.greyLight,
+      inactiveTrackColor: AppColors.greyLight.withValues(alpha: 0.3),
     );
   }
 }
