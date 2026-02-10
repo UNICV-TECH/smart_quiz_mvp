@@ -258,11 +258,9 @@ class _ExamTemplatesContent extends StatelessWidget {
           passingScore: template.passingScorePercentage,
           isPublished: template.isPublished,
           createdAt: template.createdAt,
-          onEdit: () async {
-            await viewModel.selectTemplate(template.id);
-            if (context.mounted) {
-              _showTemplateEditor(context, viewModel, isEditing: true);
-            }
+          onEdit: () {
+            viewModel.prepareForEditing(template);
+            _showTemplateEditor(context, viewModel, isEditing: true);
           },
           onPublish: template.isPublished
               ? () => viewModel.unpublishTemplate(template.id)
@@ -540,13 +538,18 @@ class _TemplateEditorDialog extends StatefulWidget {
   State<_TemplateEditorDialog> createState() => _TemplateEditorDialogState();
 }
 
-class _TemplateEditorDialogState extends State<_TemplateEditorDialog> {
+class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
+  late bool _isEditing;
 
   @override
   void initState() {
     super.initState();
+    _isEditing = widget.isEditing;
+    _tabController = TabController(length: 2, vsync: this);
     final viewModel = context.read<ExamTemplateViewModel>();
     _nameController = TextEditingController(text: viewModel.templateName);
     _descriptionController =
@@ -555,6 +558,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -565,241 +569,460 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog> {
     final viewModel = context.watch<ExamTemplateViewModel>();
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-      child: Container(
-        width: 800,
-        constraints: const BoxConstraints(maxHeight: 700),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
+      child: SizedBox(
+        width: 900,
+        height: 700,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF2E7D32),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                ),
-              ),
-              child: Row(
+            _buildHeader(viewModel),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  const Icon(Icons.assignment, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Text(
-                    widget.isEditing ? 'Editar Template' : 'Novo Template',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () {
-                      viewModel.clearSelection();
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.close, color: Colors.white),
-                  ),
+                  _buildInfoTab(viewModel),
+                  _buildQuestionsTab(viewModel),
                 ],
               ),
             ),
+            _buildFooter(viewModel),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // Content
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name and Description
-                    TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nome do Template *',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: viewModel.setTemplateName,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        labelText: 'Descricao',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 2,
-                      onChanged: viewModel.setTemplateDescription,
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Course selection
-                    DropdownButtonFormField<String>(
-                      initialValue: viewModel.selectedCourseId,
-                      decoration: const InputDecoration(
-                        labelText: 'Curso *',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: viewModel.courses.map((course) {
-                        return DropdownMenuItem(
-                          value: course.id,
-                          child: Text(course.title),
-                        );
-                      }).toList(),
-                      onChanged: (value) => viewModel.setCourse(value),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Settings
-                    const Text(
-                      'Configuracoes da Prova',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            initialValue: viewModel.questionCount.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Numero de questoes',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final count = int.tryParse(value);
-                              if (count != null) {
-                                viewModel.setQuestionCount(count);
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            initialValue:
-                                viewModel.timeLimitMinutes?.toString() ?? '',
-                            decoration: const InputDecoration(
-                              labelText: 'Tempo limite (min)',
-                              border: OutlineInputBorder(),
-                              hintText: 'Vazio = sem limite',
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final minutes =
-                                  value.isEmpty ? null : int.tryParse(value);
-                              viewModel.setTimeLimitMinutes(minutes);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            initialValue:
-                                viewModel.passingScorePercentage.toString(),
-                            decoration: const InputDecoration(
-                              labelText: 'Nota de aprovacao (%)',
-                              border: OutlineInputBorder(),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              final score = double.tryParse(value);
-                              if (score != null) {
-                                viewModel.setPassingScorePercentage(score);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Toggles
-                    Wrap(
-                      spacing: 24,
-                      runSpacing: 8,
-                      children: [
-                        _buildToggle(
-                          'Embaralhar questoes',
-                          viewModel.shuffleQuestions,
-                          viewModel.setShuffleQuestions,
-                        ),
-                        _buildToggle(
-                          'Embaralhar alternativas',
-                          viewModel.shuffleChoices,
-                          viewModel.setShuffleChoices,
-                        ),
-                        _buildToggle(
-                          'Mostrar gabarito',
-                          viewModel.showCorrectAnswers,
-                          viewModel.setShowCorrectAnswers,
-                        ),
-                        _buildToggle(
-                          'Permitir revisao',
-                          viewModel.allowReview,
-                          viewModel.setAllowReview,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+  Widget _buildHeader(ExamTemplateViewModel viewModel) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Color(0xFF2E7D32),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(4),
             ),
-
-            // Actions
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                border: const Border(
-                  top: BorderSide(color: Color(0xFFEEEEEE)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.assignment, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                _isEditing ? 'Editar Template' : 'Novo Template',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      viewModel.clearSelection();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Cancelar'),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: viewModel.isSaving || !viewModel.isFormValid
-                        ? null
-                        : () async {
-                            final success = await viewModel.saveTemplate();
-                            if (success && context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.green,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: viewModel.isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(widget.isEditing ? 'Atualizar' : 'Criar'),
-                  ),
-                ],
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  viewModel.clearSelection();
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.close, color: Colors.white),
               ),
+            ],
+          ),
+        ),
+        Material(
+          color: Colors.white,
+          child: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.info_outline, size: 20),
+                text: 'Informacoes',
+              ),
+              Tab(
+                icon: Icon(Icons.quiz_outlined, size: 20),
+                text: 'Questoes',
+              ),
+            ],
+            labelColor: const Color(0xFF2E7D32),
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: const Color(0xFF2E7D32),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoTab(ExamTemplateViewModel viewModel) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nome do Template *',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: viewModel.setTemplateName,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(
+              labelText: 'Descricao',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2,
+            onChanged: viewModel.setTemplateDescription,
+          ),
+          const SizedBox(height: 24),
+          DropdownButtonFormField<String>(
+            initialValue: viewModel.selectedCourseId,
+            decoration: const InputDecoration(
+              labelText: 'Curso *',
+              border: OutlineInputBorder(),
+            ),
+            items: viewModel.courses.map((course) {
+              return DropdownMenuItem(
+                value: course.id,
+                child: Text(course.title),
+              );
+            }).toList(),
+            onChanged: (value) => viewModel.setCourse(value),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Configuracoes da Prova',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  initialValue: viewModel.questionCount.toString(),
+                  decoration: const InputDecoration(
+                    labelText: 'Numero de questoes',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    final count = int.tryParse(value);
+                    if (count != null) {
+                      viewModel.setQuestionCount(count);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  initialValue:
+                      viewModel.timeLimitMinutes?.toString() ?? '',
+                  decoration: const InputDecoration(
+                    labelText: 'Tempo limite (min)',
+                    border: OutlineInputBorder(),
+                    hintText: 'Vazio = sem limite',
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    final minutes =
+                        value.isEmpty ? null : int.tryParse(value);
+                    viewModel.setTimeLimitMinutes(minutes);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  initialValue:
+                      viewModel.passingScorePercentage.toString(),
+                  decoration: const InputDecoration(
+                    labelText: 'Nota de aprovacao (%)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    final score = double.tryParse(value);
+                    if (score != null) {
+                      viewModel.setPassingScorePercentage(score);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 24,
+            runSpacing: 8,
+            children: [
+              _buildToggle(
+                'Embaralhar questoes',
+                viewModel.shuffleQuestions,
+                viewModel.setShuffleQuestions,
+              ),
+              _buildToggle(
+                'Embaralhar alternativas',
+                viewModel.shuffleChoices,
+                viewModel.setShuffleChoices,
+              ),
+              _buildToggle(
+                'Mostrar gabarito',
+                viewModel.showCorrectAnswers,
+                viewModel.setShowCorrectAnswers,
+              ),
+              _buildToggle(
+                'Permitir revisao',
+                viewModel.allowReview,
+                viewModel.setAllowReview,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestionsTab(ExamTemplateViewModel viewModel) {
+    if (!_isEditing) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save_outlined, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Salve o template primeiro',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'para adicionar questoes',
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
+      );
+    }
+
+    if (viewModel.isLoadingQuestions) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(Icons.format_list_numbered,
+                  color: Colors.grey[600], size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '${viewModel.templateQuestions.length} questao(oes) no template',
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: () => _showQuestionSelector(viewModel),
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('Adicionar Questoes'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: viewModel.templateQuestions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.quiz_outlined,
+                          size: 48, color: Colors.grey[300]),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Nenhuma questao adicionada',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Clique em "Adicionar Questoes" para comecar',
+                        style: TextStyle(
+                            fontSize: 13, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  itemCount: viewModel.templateQuestions.length,
+                  itemBuilder: (context, index) {
+                    final question = viewModel.templateQuestions[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          radius: 16,
+                          backgroundColor:
+                              AppColors.green.withValues(alpha: 0.1),
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: AppColors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          question.questionEnunciation ??
+                              'Questao ${index + 1}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_upward,
+                                  size: 20),
+                              tooltip: 'Mover para cima',
+                              onPressed: index > 0
+                                  ? () => viewModel.reorderQuestions(
+                                      index, index - 1)
+                                  : null,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_downward,
+                                  size: 20),
+                              tooltip: 'Mover para baixo',
+                              onPressed: index <
+                                      viewModel.templateQuestions.length -
+                                          1
+                                  ? () => viewModel.reorderQuestions(
+                                      index, index + 2)
+                                  : null,
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete_outline,
+                                  size: 20, color: AppColors.red),
+                              tooltip: 'Remover',
+                              onPressed: () =>
+                                  viewModel.removeQuestionFromTemplate(
+                                      question.id),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooter(ExamTemplateViewModel viewModel) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: const Border(
+          top: BorderSide(color: Color(0xFFEEEEEE)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (!_isEditing) ...[
+            TextButton(
+              onPressed: () {
+                viewModel.clearSelection();
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: viewModel.isSaving || !viewModel.isFormValid
+                  ? null
+                  : () async {
+                      final success = await viewModel.saveTemplate();
+                      if (success && mounted) {
+                        setState(() => _isEditing = true);
+                        _tabController.animateTo(1);
+                        viewModel.loadAvailableQuestions();
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: viewModel.isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Criar'),
+            ),
+          ],
+          if (_isEditing) ...[
+            OutlinedButton(
+              onPressed: viewModel.isSaving || !viewModel.isFormValid
+                  ? null
+                  : () async {
+                      await viewModel.saveTemplate();
+                    },
+              child: viewModel.isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Salvar'),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.clearSelection();
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.green,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Concluir'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showQuestionSelector(ExamTemplateViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const _QuestionSelectorDialog(),
       ),
     );
   }
@@ -815,6 +1038,162 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog> {
         ),
         Text(label),
       ],
+    );
+  }
+}
+
+class _QuestionSelectorDialog extends StatelessWidget {
+  const _QuestionSelectorDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<ExamTemplateViewModel>();
+    final templateQuestionIds =
+        viewModel.templateQuestions.map((q) => q.questionId).toSet();
+    final available = viewModel.availableQuestions
+        .where((q) => !templateQuestionIds.contains(q.id))
+        .toList();
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
+      child: SizedBox(
+        width: 700,
+        height: 500,
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFEEEEEE)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.playlist_add, color: Color(0xFF2E7D32)),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Selecionar Questoes',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${available.length} disponivel(is)',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: available.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 48, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Nenhuma questao disponivel',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          const SizedBox(height: 4),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 32),
+                            child: Text(
+                              'Todas as questoes ja foram adicionadas ou nao ha questoes para este curso',
+                              style: TextStyle(
+                                  fontSize: 13, color: Colors.grey[500]),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: available.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final question = available[index];
+                        return ListTile(
+                          title: Text(
+                            question.enunciationPreview,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Row(
+                              children: [
+                                _buildChip(question.difficultyLabel),
+                                if (question.categoryName != null) ...[
+                                  const SizedBox(width: 8),
+                                  _buildChip(question.categoryName!),
+                                ],
+                                const SizedBox(width: 8),
+                                _buildChip(
+                                    '${question.answerCount} alternativas'),
+                              ],
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.add_circle,
+                                color: Color(0xFF2E7D32)),
+                            tooltip: 'Adicionar ao template',
+                            onPressed: () async {
+                              await viewModel
+                                  .addQuestionToTemplate(question.id);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFFEEEEEE)),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Fechar'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+      ),
     );
   }
 }

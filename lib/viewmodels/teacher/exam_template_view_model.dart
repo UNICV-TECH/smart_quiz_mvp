@@ -25,6 +25,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
   // State
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isLoadingQuestions = false;
   String? _errorMessage;
   String? _successMessage;
 
@@ -51,6 +52,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
   // Getters
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get isLoadingQuestions => _isLoadingQuestions;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
@@ -127,6 +129,29 @@ class ExamTemplateViewModel extends ChangeNotifier {
       _setError('Erro ao carregar template: $error');
     } finally {
       _setLoading(false);
+    }
+  }
+
+  void prepareForEditing(ExamTemplate template) {
+    _selectedTemplate = template;
+    _populateFormFromTemplate(template);
+    _templateQuestions = [];
+    notifyListeners();
+    _loadTemplateQuestions(template.id);
+    loadAvailableQuestions();
+  }
+
+  Future<void> _loadTemplateQuestions(String templateId) async {
+    _isLoadingQuestions = true;
+    notifyListeners();
+    try {
+      _templateQuestions =
+          await _teacherRepository.fetchTemplateQuestions(templateId);
+    } catch (error) {
+      debugPrint('Erro ao carregar questoes do template: $error');
+    } finally {
+      _isLoadingQuestions = false;
+      notifyListeners();
     }
   }
 
@@ -252,7 +277,9 @@ class ExamTemplateViewModel extends ChangeNotifier {
         updatedAt: now,
       );
 
-      if (_selectedTemplate == null) {
+      final isCreating = _selectedTemplate == null;
+
+      if (isCreating) {
         final created = await _teacherRepository.createTemplate(template);
         _templates = [created, ..._templates];
         _selectedTemplate = created;
@@ -264,7 +291,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
         _selectedTemplate = template;
       }
 
-      _setSuccess(_selectedTemplate == null
+      _setSuccess(isCreating
           ? 'Template criado com sucesso!'
           : 'Template atualizado com sucesso!');
       return true;
