@@ -48,6 +48,10 @@ class TeacherExamTemplateViewModel extends ChangeNotifier {
   int? get timeLimitMinutes => _timeLimitMinutes;
   double get passingScorePercentage => _passingScorePercentage;
 
+  List<ExamQuestion> get questions => _questions;
+  List<StudentAttempt> get studentAttempts => _studentAttempts;
+  List<QuestionBankItem> get availableQuestions => _availableQuestions;
+
   /// Atualizar título
   void updateTitle(String value) {
     _title = value;
