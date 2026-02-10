@@ -1588,7 +1588,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     return Switch(
       value: value,
       onChanged: onChanged,
-      activeColor: AppColors.green,
+      activeThumbColor: AppColors.green,
       activeTrackColor: AppColors.green.withValues(alpha: 0.3),
       inactiveThumbColor: AppColors.greyLight,
       inactiveTrackColor: AppColors.greyLight.withValues(alpha: 0.3),

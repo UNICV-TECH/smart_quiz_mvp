@@ -7,7 +7,6 @@ import '../../ui/components/default_user_data_card.dart';
 import '../../viewmodels/profile_view_model.dart';
 import '../../constants/app_strings.dart';
 import 'teacher_create_question.dart';
-import 'teacher_create_test.dart';
 import 'teacher_question_list_screen.dart';
 import 'teacher_exam_templates_screen.dart';
 import 'teacher_stats_screen.dart';
@@ -38,12 +37,12 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
   // Telas correspondentes às opções do menu
   List<Widget> get _screens => [
-    const TeacherExamTemplatesScreen(),  // 0: Montar Provas
-    const TeacherScreenCreateQuestion(), // 1: Nova Questão
-    const TeacherProfileScreen(),        // 2: Perfil
-    const TeacherQuestionListScreen(),   // 3: Listar Questões
-    const TeacherStatsScreen(),          // 4: Dashboard
-  ];
+        const TeacherExamTemplatesScreen(), // 0: Montar Provas
+        const TeacherScreenCreateQuestion(), // 1: Nova Questão
+        const TeacherProfileScreen(), // 2: Perfil
+        const TeacherQuestionListScreen(), // 3: Listar Questões
+        const TeacherStatsScreen(), // 4: Dashboard
+      ];
 
   @override
   Widget build(BuildContext context) {
