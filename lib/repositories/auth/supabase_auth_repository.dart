@@ -67,6 +67,45 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> resetPasswordForEmail(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'https://smart-quiz-mvp.vercel.app/',
+      );
+    } on AuthException catch (error) {
+      throw AuthRepositoryException(
+        error.message.isNotEmpty
+            ? error.message
+            : 'Não foi possível enviar o e-mail de recuperação.',
+      );
+    } catch (_) {
+      throw const AuthRepositoryException(
+        'Não foi possível comunicar com o serviço de autenticação.',
+      );
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } on AuthException catch (error) {
+      throw AuthRepositoryException(
+        error.message.isNotEmpty
+            ? error.message
+            : 'Não foi possível atualizar a senha.',
+      );
+    } catch (_) {
+      throw const AuthRepositoryException(
+        'Não foi possível comunicar com o serviço de autenticação.',
+      );
+    }
+  }
+
+  @override
   Future<AuthRepositorySignInResponse> signIn({
     required String email,
     required String password,

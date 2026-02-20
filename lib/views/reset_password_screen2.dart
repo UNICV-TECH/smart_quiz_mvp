@@ -1,6 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../ui/components/default_button_orange.dart';
 import '../ui/components/default_password_input_47.dart';
 import '../ui/theme/app_color.dart';
@@ -28,7 +28,6 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
   }
 
   bool _meetsCriteria(String pwd) {
-    // Critérios: mínimo 8 chars, ao menos 1 letra maiúscula e 1 número
     if (pwd.length < 8) return false;
     if (!RegExp(r'[A-Z]').hasMatch(pwd)) return false;
     if (!RegExp(r'\d').hasMatch(pwd)) return false;
@@ -71,28 +70,40 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
       _isLoading = true;
     });
 
-    // Simula chamada de backend para redefinir a senha
-    await Future.delayed(const Duration(seconds: 2));
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final result = await authService.updatePassword(_passwordController.text);
+
+    if (!mounted) return;
 
     setState(() {
       _isLoading = false;
     });
 
-    // Mostra modal de sucesso, fecha após 2s e redireciona para login
-    if (!mounted) return;
+    if (!result.success) {
+      setState(() {
+        _passwordError = result.message;
+      });
+      return;
+    }
+
+    // Mostra dialog de sucesso com botão OK que redireciona para login
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => const AlertDialog(
-        title: Text('Senha alterada'),
-        content: Text('Senha alterada com sucesso!'),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Senha alterada'),
+        content: const Text('Senha alterada com sucesso!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
-
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

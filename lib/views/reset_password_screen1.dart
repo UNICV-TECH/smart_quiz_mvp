@@ -1,6 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../ui/components/default_input.dart';
 import '../ui/components/default_button_orange.dart';
 import '../ui/theme/app_color.dart';
@@ -18,12 +18,6 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _errorMessage;
-
-  // Simulação de backend: mapa de e-mails existentes e contador de tentativas
-  static const _registeredEmails = {
-    'teste@unicv.edu': true,
-    'user@example.com': true,
-  };
 
   final Map<String, List<DateTime>> _attempts = {};
 
@@ -57,7 +51,7 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
     _attempts.putIfAbsent(email, () => []);
     _attempts[email] = _attempts[email]!
         .where((t) => now.difference(t).inHours < 1)
-        .toList(); // mantém apenas última hora
+        .toList();
 
     if (_attempts[email]!.length >= 3) {
       setState(() {
@@ -66,46 +60,48 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
       return;
     }
 
-    // registra tentativa
     _attempts[email]!.add(now);
 
     setState(() {
       _isLoading = true;
     });
 
-    // Simula chamada assíncrona ao serviço de autenticação (ex: Supabase)
-    await Future.delayed(const Duration(seconds: 2));
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final result = await authService.resetPasswordForEmail(email);
+
+    if (!mounted) return;
 
     setState(() {
       _isLoading = false;
     });
 
-    // Simula respostas do backend
-    final exists = _registeredEmails.containsKey(email);
-
-    if (!exists) {
+    if (!result.success) {
       setState(() {
-        _errorMessage = 'E-mail não encontrado. Tente novamente.';
+        _errorMessage = result.message;
       });
       return;
     }
 
-    // Sucesso: mostra modal, fecha após 3s e redireciona para login
-    if (!mounted) return;
+    // Sucesso: mostra dialog informando que o email foi enviado
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => const AlertDialog(
-        title: Text('E-mail enviado'),
-        content: Text('Link de recuperação enviado com sucesso!'),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('E-mail enviado'),
+        content: const Text(
+          'Se o e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
-
-    // Aguarda 3 segundos, fecha o modal e navega para login se ainda estiver montado
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    Navigator.of(context).pop(); // fecha o dialog
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

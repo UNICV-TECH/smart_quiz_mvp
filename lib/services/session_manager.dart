@@ -130,6 +130,13 @@ class SessionManager extends ChangeNotifier {
         return;
       }
 
+      if (authEvent == AuthChangeEvent.passwordRecovery) {
+        _updateFromSession(event.session);
+        notifyListeners();
+        _navigateTo('/reset_password2');
+        return;
+      }
+
       if (authEvent == AuthChangeEvent.signedIn ||
           authEvent == AuthChangeEvent.tokenRefreshed ||
           authEvent == AuthChangeEvent.userUpdated) {
@@ -194,6 +201,12 @@ class SessionManager extends ChangeNotifier {
       return firstName.trim();
     }
     return null;
+  }
+
+  void _navigateTo(String route) {
+    final navigator = navigatorKey.currentState;
+    if (navigator == null) return;
+    navigator.pushNamedAndRemoveUntil(route, (route) => false);
   }
 
   void _redirectToLogin() {

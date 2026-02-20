@@ -24,4 +24,18 @@ class DisabledAuthRepository implements AuthRepository {
       'Login temporariamente indisponível. Verifique a configuração do Supabase.',
     );
   }
+
+  @override
+  Future<void> resetPasswordForEmail(String email) async {
+    throw const AuthRepositoryException(
+      'Recuperação de senha temporariamente indisponível. Verifique a configuração do Supabase.',
+    );
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    throw const AuthRepositoryException(
+      'Alteração de senha temporariamente indisponível. Verifique a configuração do Supabase.',
+    );
+  }
 }

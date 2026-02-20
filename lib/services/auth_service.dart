@@ -104,6 +104,46 @@ class AuthService {
     }
   }
 
+  Future<ResetPasswordResult> resetPasswordForEmail(String email) async {
+    try {
+      await _repository.resetPasswordForEmail(email);
+      return const ResetPasswordResult(
+        success: true,
+        message: 'E-mail de recuperação enviado com sucesso.',
+      );
+    } on AuthRepositoryException catch (error) {
+      return ResetPasswordResult(
+        success: false,
+        message: error.message,
+      );
+    } catch (_) {
+      return const ResetPasswordResult(
+        success: false,
+        message: 'Não foi possível enviar o e-mail de recuperação. Tente novamente.',
+      );
+    }
+  }
+
+  Future<ResetPasswordResult> updatePassword(String newPassword) async {
+    try {
+      await _repository.updatePassword(newPassword);
+      return const ResetPasswordResult(
+        success: true,
+        message: 'Senha alterada com sucesso.',
+      );
+    } on AuthRepositoryException catch (error) {
+      return ResetPasswordResult(
+        success: false,
+        message: error.message,
+      );
+    } catch (_) {
+      return const ResetPasswordResult(
+        success: false,
+        message: 'Não foi possível alterar a senha. Tente novamente.',
+      );
+    }
+  }
+
   Future<void> signOut() async {
     _currentUser = null;
     await _sessionManager?.signOut();
