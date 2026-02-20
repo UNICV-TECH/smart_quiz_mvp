@@ -25,3 +25,13 @@ class SignInResult {
   final bool requiresEmailConfirmation;
   final String? message;
 }
+
+class ResetPasswordResult {
+  const ResetPasswordResult({
+    required this.success,
+    this.message,
+  });
+
+  final bool success;
+  final String? message;
+}
