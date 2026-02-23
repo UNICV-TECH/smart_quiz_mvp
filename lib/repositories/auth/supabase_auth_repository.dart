@@ -69,10 +69,25 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> resetPasswordForEmail(String email) async {
     try {
+      // Verificar se o e-mail existe na tabela user antes de enviar
+      final existing = await _client
+          .from('user')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+
+      if (existing == null) {
+        throw const AuthRepositoryException(
+          'E-mail não encontrado. Verifique o endereço informado.',
+        );
+      }
+
       await _client.auth.resetPasswordForEmail(
         email,
         redirectTo: 'https://smart-quiz-mvp.vercel.app/',
       );
+    } on AuthRepositoryException {
+      rethrow;
     } on AuthException catch (error) {
       throw AuthRepositoryException(
         error.message.isNotEmpty
