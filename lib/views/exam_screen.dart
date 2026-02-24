@@ -11,6 +11,7 @@ import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
+import 'package:unicv_tech_mvp/repositories/gamification_repository.dart';
 
 class ExamScreen extends StatefulWidget {
   final String userId;
@@ -600,6 +601,45 @@ class _ExamScreenState extends State<ExamScreen> {
   Future<void> _submitExam(ExamViewModel viewModel) async {
     try {
       final results = await viewModel.finalize();
+
+      if (!mounted) return;
+
+      // Gamification persistence (non-blocking)
+      final gamRepo = context.read<GamificationRepository?>();
+      if (gamRepo != null) {
+        try {
+          final season = await gamRepo.getOrCreateActiveSeason();
+          final saveResult = await gamRepo.saveAttemptPoints(
+            userId: results['userId'] as String,
+            seasonId: season.id,
+            attemptId: results['attemptId'] as String,
+            examId: results['examId'] as String,
+            courseId: results['courseId'] as String,
+            questionCount: results['totalQuestions'] as int,
+            correctCount: results['correctCount'] as int,
+            percentageScore:
+                (results['percentageScore'] as num).toDouble(),
+            durationSeconds: results['durationSeconds'] as int,
+            basePoints:
+                (results['gamificationBasePoints'] as num).toDouble(),
+            timeBonus:
+                (results['gamificationTimeBonus'] as num).toDouble(),
+            totalPoints:
+                (results['gamificationTotalPoints'] as num).toDouble(),
+          );
+          results['gamificationAccumulatedPoints'] =
+              saveResult.accumulatedPoints;
+          results['gamificationPreviousPoints'] =
+              saveResult.previousPoints;
+          results['gamificationDidImprove'] = saveResult.didImprove;
+          results['gamificationPointsSaved'] = saveResult.pointsSaved;
+          results['gamificationSeasonName'] = season.name;
+          results['gamificationSaved'] = true;
+        } catch (e) {
+          debugPrint('Gamification save failed (non-blocking): $e');
+          results['gamificationSaved'] = false;
+        }
+      }
 
       if (!mounted) return;
 

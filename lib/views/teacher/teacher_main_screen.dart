@@ -7,6 +7,7 @@ import '../../ui/components/default_user_data_card.dart';
 import '../../viewmodels/profile_view_model.dart';
 import '../../constants/app_strings.dart';
 import 'teacher_create_question.dart';
+import 'teacher_gamification_screen.dart';
 import 'teacher_question_list_screen.dart';
 import 'teacher_exam_templates_screen.dart';
 import 'teacher_stats_screen.dart';
@@ -42,6 +43,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         const TeacherProfileScreen(), // 2: Perfil
         const TeacherQuestionListScreen(), // 3: Listar Questões
         const TeacherStatsScreen(), // 4: Dashboard
+        const TeacherGamificationScreen(), // 5: Gamificação
       ];
 
   @override
@@ -115,7 +117,16 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
                   const SizedBox(height: 8),
 
-                  // Opção 4: Perfil
+                  // Opção 4: Gamificação
+                  _buildMenuItem(
+                    icon: Icons.emoji_events,
+                    title: 'Gamificação',
+                    index: 5,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Opção 5: Perfil
                   _buildMenuItem(
                     icon: Icons.person,
                     title: 'Perfil',

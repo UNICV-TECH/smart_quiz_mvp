@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../repositories/gamification_repository.dart';
 import '../ui/components/default_navbar.dart';
 import '../viewmodels/course_selection_view_model.dart';
+import '../viewmodels/gamification_view_model.dart';
 import 'home.screen.dart';
 import 'ranking_screen.dart';
 import 'exam_history_screen.dart';
@@ -17,6 +19,27 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
+  GamificationViewModel? _gamificationVm;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create ViewModel once in initState to avoid recreation on setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final gamRepo = context.read<GamificationRepository?>();
+      if (gamRepo != null) {
+        setState(() {
+          _gamificationVm = GamificationViewModel(repository: gamRepo);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _gamificationVm?.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -26,6 +49,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget rankingChild;
+    if (_gamificationVm != null) {
+      rankingChild = ChangeNotifierProvider<GamificationViewModel>.value(
+        value: _gamificationVm!,
+        child: const RankingScreen(),
+      );
+    } else {
+      rankingChild = const RankingScreen();
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
@@ -38,7 +71,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             child: const HomeScreen(),
           ),
-          const RankingScreen(),
+          rankingChild,
           const ExamHistoryScreen(),
           const ProfileScreen(),
         ],

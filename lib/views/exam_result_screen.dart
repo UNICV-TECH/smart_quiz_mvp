@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter/foundation.dart';
+import 'package:unicv_tech_mvp/models/gamification_level.dart';
+import 'package:unicv_tech_mvp/services/gamification_calculator.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
@@ -45,6 +46,25 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
   int get _unansweredCount => _questionsBreakdown
       .where((q) => !(q['isAnswered'] as bool? ?? false))
       .length;
+
+  // Gamification getters
+  bool get _gamificationSaved =>
+      widget.results['gamificationSaved'] as bool? ?? false;
+  double get _gamificationBasePoints =>
+      (widget.results['gamificationBasePoints'] as num?)?.toDouble() ?? 0;
+  double get _gamificationTimeBonus =>
+      (widget.results['gamificationTimeBonus'] as num?)?.toDouble() ?? 0;
+  double get _gamificationTotalPoints =>
+      (widget.results['gamificationTotalPoints'] as num?)?.toDouble() ?? 0;
+  bool get _gamificationHasTimeBonus =>
+      widget.results['gamificationHasTimeBonus'] as bool? ?? false;
+  double get _gamificationAccumulatedPoints =>
+      (widget.results['gamificationAccumulatedPoints'] as num?)?.toDouble() ??
+      0;
+  double get _gamificationPreviousPoints =>
+      (widget.results['gamificationPreviousPoints'] as num?)?.toDouble() ?? 0;
+  bool get _gamificationDidImprove =>
+      widget.results['gamificationDidImprove'] as bool? ?? false;
 
   @override
   void initState() {
@@ -222,7 +242,39 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              // Gamification: Level Up Card
+              if (_gamificationSaved) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _LevelUpCard(
+                      previousPoints: _gamificationPreviousPoints,
+                      accumulatedPoints: _gamificationAccumulatedPoints,
+                    ),
+                  ),
+                ),
+              ],
+              // Gamification: Feedback Card
+              if (_gamificationSaved || _gamificationTotalPoints > 0) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: _GamificationFeedbackCard(
+                      basePoints: _gamificationBasePoints,
+                      timeBonus: _gamificationTimeBonus,
+                      totalPoints: _gamificationTotalPoints,
+                      hasTimeBonus: _gamificationHasTimeBonus,
+                      accumulatedPoints: _gamificationAccumulatedPoints,
+                      percentageScore: _percentageScore,
+                      didImprove: _gamificationDidImprove,
+                      gamificationSaved: _gamificationSaved,
+                      questionCount: _totalQuestions,
+                    ),
+                  ),
+                ),
+              ],
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
               if (_questionsBreakdown.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -457,6 +509,295 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LevelUpCard extends StatelessWidget {
+  const _LevelUpCard({
+    required this.previousPoints,
+    required this.accumulatedPoints,
+  });
+
+  final double previousPoints;
+  final double accumulatedPoints;
+
+  @override
+  Widget build(BuildContext context) {
+    final previousLevel = GamificationLevel.fromPoints(previousPoints);
+    final currentLevel = GamificationLevel.fromPoints(accumulatedPoints);
+
+    // Only show if level actually changed
+    if (previousLevel == currentLevel) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.elasticOut,
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: child,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFF8E1), Color(0xFFFFF3E0)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFFD54F), width: 2),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x30FFD54F),
+                blurRadius: 16,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.emoji_events,
+                color: Color(0xFFFFA000),
+                size: 48,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Parabéns! Você alcançou o nível ${currentLevel.label}!',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF5D4037),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Image.asset(
+                currentLevel.medalAsset,
+                width: 64,
+                height: 64,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.military_tech,
+                  size: 64,
+                  color: Color(0xFFFFA000),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GamificationFeedbackCard extends StatelessWidget {
+  const _GamificationFeedbackCard({
+    required this.basePoints,
+    required this.timeBonus,
+    required this.totalPoints,
+    required this.hasTimeBonus,
+    required this.accumulatedPoints,
+    required this.percentageScore,
+    required this.didImprove,
+    required this.gamificationSaved,
+    required this.questionCount,
+  });
+
+  final double basePoints;
+  final double timeBonus;
+  final double totalPoints;
+  final bool hasTimeBonus;
+  final double accumulatedPoints;
+  final double percentageScore;
+  final bool didImprove;
+  final bool gamificationSaved;
+  final int questionCount;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!gamificationSaved && totalPoints <= 0) return const SizedBox.shrink();
+
+    final level = GamificationLevel.fromPoints(accumulatedPoints);
+    final message = GamificationCalculator.getMotivationalMessage(
+      percentageScore: percentageScore,
+      hasTimeBonus: hasTimeBonus,
+      didImprove: didImprove,
+    );
+
+    final recordTimeMinutes =
+        GamificationCalculator.recordTimeSeconds(questionCount) / 60;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5ED),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Motivational message
+          Row(
+            children: [
+              const Icon(Icons.star, color: Color(0xFFFFA000), size: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Points breakdown
+          if (didImprove || !gamificationSaved) ...[
+            _buildPointRow(
+              'Pontos base',
+              '+${basePoints.toStringAsFixed(1)} pts',
+              Icons.check_circle_outline,
+            ),
+            if (hasTimeBonus)
+              _buildPointRow(
+                'Bônus de tempo',
+                '+${timeBonus.toStringAsFixed(0)} pts!',
+                Icons.timer,
+                highlight: true,
+              ),
+            if (!hasTimeBonus && totalPoints > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Complete em menos de ${recordTimeMinutes.toStringAsFixed(0)} min para ganhar bônus!',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF558B2F),
+                    fontFamily: 'Poppins',
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            const Divider(height: 20, color: Color(0xFFC8E6C9)),
+            _buildPointRow(
+              'Total ganho',
+              '+${totalPoints.toStringAsFixed(1)} pts',
+              Icons.emoji_events,
+              bold: true,
+            ),
+          ],
+
+          // Level progress (only if saved)
+          if (gamificationSaved) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Image.asset(
+                  level.medalAsset,
+                  width: 28,
+                  height: 28,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.military_tech,
+                    size: 28,
+                    color: Color(0xFF4CAF50),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  level.label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  level.pointsLabel(accumulatedPoints),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF558B2F),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: level.progressInLevel(accumulatedPoints),
+                minHeight: 8,
+                backgroundColor: const Color(0xFFC8E6C9),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.green),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPointRow(
+    String label,
+    String value,
+    IconData icon, {
+    bool highlight = false,
+    bool bold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color:
+                highlight ? const Color(0xFFFFA000) : const Color(0xFF4CAF50),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
+                color: const Color(0xFF2E7D32),
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: highlight
+                  ? const Color(0xFFFFA000)
+                  : const Color(0xFF2E7D32),
+              fontFamily: 'Poppins',
+            ),
           ),
         ],
       ),

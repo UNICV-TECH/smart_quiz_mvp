@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/gamification_level.dart';
+import '../repositories/gamification_repository.dart';
+import '../services/session_manager.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_user_data_card.dart';
+import '../viewmodels/gamification_view_model.dart';
 import '../viewmodels/profile_view_model.dart';
 import '../services/auth_service.dart';
 
@@ -11,8 +15,27 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ProfileViewModel()..loadUserProfile(),
+    final gamRepo = context.read<GamificationRepository?>();
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ProfileViewModel()..loadUserProfile(),
+        ),
+        if (gamRepo != null)
+          ChangeNotifierProvider(
+            create: (_) {
+              final userId =
+                  context.read<SessionManager>().currentUser?.id;
+              final vm = GamificationViewModel(repository: gamRepo);
+              if (userId != null) {
+                vm.loadUserGamification(userId);
+                vm.loadSeasonHistory(userId);
+              }
+              return vm;
+            },
+          ),
+      ],
       child: const _ProfileViewBody(),
     );
   }
@@ -108,27 +131,41 @@ class _ProfileViewBody extends StatelessWidget {
                               const SizedBox(height: 20),
 
                               // Card de perfil
-                              UserDataCard(
-                                userName: user.name,
-                                userEmail: user.email,
-                                onNameUpdate: (newName) async {
-                                  final success =
-                                      await viewModel.updateUserName(newName);
-                                  return success;
-                                },
-                                onShowFeedback: (message, {isError = false}) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(message),
-                                      backgroundColor: isError
-                                          ? AppColors.red
-                                          : AppColors.green,
-                                    ),
+                              Builder(
+                                builder: (ctx) {
+                                  final gamVm = ctx.watch<GamificationViewModel?>();
+                                  final medalAsset = gamVm != null && gamVm.userPoints > 0
+                                      ? gamVm.userLevel.medalAsset
+                                      : null;
+                                  return UserDataCard(
+                                    userName: user.name,
+                                    userEmail: user.email,
+                                    medalAsset: medalAsset,
+                                    onNameUpdate: (newName) async {
+                                      final success =
+                                          await viewModel.updateUserName(newName);
+                                      return success;
+                                    },
+                                    onShowFeedback: (message, {isError = false}) {
+                                      ScaffoldMessenger.of(ctx).showSnackBar(
+                                        SnackBar(
+                                          content: Text(message),
+                                          backgroundColor: isError
+                                              ? AppColors.red
+                                              : AppColors.green,
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
                               ),
 
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
+
+                              // Gamification card
+                              _buildGamificationCard(context),
+
+                              const SizedBox(height: 20),
 
                               // Itens de menu
                               _buildMenuItem(
@@ -167,6 +204,184 @@ class _ProfileViewBody extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGamificationCard(BuildContext context) {
+    final gamVm = context.watch<GamificationViewModel?>();
+    if (gamVm == null || gamVm.activeSeason == null) {
+      return const SizedBox.shrink();
+    }
+
+    final level = gamVm.userLevel;
+    final points = gamVm.userPoints;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Current level card
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8F5ED),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFC8E6C9)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    level.medalAsset,
+                    width: 48,
+                    height: 48,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.military_tech,
+                      size: 48,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          level.label,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E7D32),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Text(
+                          level.pointsLabel(points),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF558B2F),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: level.progressInLevel(points),
+                  minHeight: 8,
+                  backgroundColor: const Color(0xFFC8E6C9),
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(AppColors.green),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Temporada ${gamVm.activeSeason!.name}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF558B2F),
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Season history
+        if (gamVm.seasonHistory.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const Text(
+            'Histórico',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryDark,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...gamVm.seasonHistory.map((entry) {
+            final entryLevel =
+                GamificationLevel.fromPoints(entry.totalPoints);
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: entry.isActive
+                    ? Border.all(color: AppColors.green, width: 1.5)
+                    : Border.all(color: const Color(0xFFE2E7DE)),
+              ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    entryLevel.medalAsset,
+                    width: 28,
+                    height: 28,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.military_tech,
+                      size: 28,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Temporada ${entry.seasonName}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Text(
+                          '${entry.totalPoints.toStringAsFixed(0)} pts — #${entry.rankPosition}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.secondaryDark,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (entry.isActive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Atual',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF2E7D32),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ],
     );
   }
 
