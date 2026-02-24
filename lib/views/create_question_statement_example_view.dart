@@ -22,7 +22,7 @@ class CreateQuestionExampleView extends StatelessWidget {
           required List<AlternativeModel> alternatives,
           String? supportingText,
           String? statement,
-        }) {
+        }) async {
           // Aqui você pode:
           // 1. Salvar no banco de dados via repository
           // 2. Atualizar um ViewModel
