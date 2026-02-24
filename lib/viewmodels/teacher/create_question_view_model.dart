@@ -90,6 +90,8 @@ class CreateQuestionViewModel extends ChangeNotifier {
 
   bool get isFormValid {
     return _selectedCourseId != null &&
+        _difficultyLevel.trim().isNotEmpty &&
+        _points > 0 &&
         _enunciation.trim().isNotEmpty &&
         _answerChoices.where((c) => c.content.trim().isNotEmpty).length >= 2 &&
         hasCorrectAnswer;
@@ -217,6 +219,12 @@ class CreateQuestionViewModel extends ChangeNotifier {
   String? validate() {
     if (_selectedCourseId == null) {
       return 'Selecione um curso';
+    }
+    if (_difficultyLevel.trim().isEmpty) {
+      return 'Selecione a dificuldade';
+    }
+    if (_points <= 0) {
+      return 'Selecione os pontos';
     }
     if (_enunciation.trim().isEmpty) {
       return 'Digite o enunciado da questao';
