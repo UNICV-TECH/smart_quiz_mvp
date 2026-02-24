@@ -6,6 +6,7 @@ import '../../repositories/teacher_repository.dart';
 import '../../services/session_manager.dart';
 import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
+import '../../routes/app_routes.dart';
 import '../../viewmodels/teacher/question_list_view_model.dart';
 
 /// Tela de listagem de questoes do professor
@@ -318,6 +319,16 @@ class _QuestionListContent extends StatelessWidget {
           answerCount: question.answerCount,
           isActive: question.isActive,
           createdAt: question.createdAt,
+          onEdit: () async {
+            final result = await Navigator.pushNamed(
+              context,
+              AppRoutes.teacherQuestionEdit,
+              arguments: {'questionId': question.id},
+            );
+            if (result == true) {
+              viewModel.loadQuestions();
+            }
+          },
           onDelete: () async {
             final confirmed = await _showDeleteConfirmation(context);
             if (confirmed == true) {
@@ -363,6 +374,7 @@ class _QuestionCard extends StatelessWidget {
   final int answerCount;
   final bool isActive;
   final DateTime createdAt;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _QuestionCard({
@@ -374,6 +386,7 @@ class _QuestionCard extends StatelessWidget {
     required this.answerCount,
     required this.isActive,
     required this.createdAt,
+    required this.onEdit,
     required this.onDelete,
   });
 
@@ -422,6 +435,11 @@ class _QuestionCard extends StatelessWidget {
                 if (!isActive)
                   _buildBadge('Inativa', Colors.grey),
                 const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                  onPressed: onEdit,
+                  tooltip: 'Editar questao',
+                ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
                   onPressed: onDelete,

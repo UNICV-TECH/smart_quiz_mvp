@@ -52,16 +52,24 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToNextScreen() async {
-    // Verificar se está na web e se há uma rota /teacher na URL
+    // Verificar se está na web e se há uma rota especial na URL
     String? targetRoute;
 
     if (kIsWeb) {
       try {
-        // Uri.base funciona em todas as plataformas e retorna a URL atual na web
-        final path = Uri.base.path;
+        final uri = Uri.base;
+        final path = uri.path;
 
+        // Verificar se é um fluxo de recuperação de senha (PKCE ou implicit)
+        final isRecovery = uri.queryParameters['type'] == 'recovery' ||
+            uri.fragment.contains('type=recovery');
+
+        if (isRecovery) {
+          targetRoute = '/reset_password2';
+        }
         // Se a URL é /teacher ou começa com /teacher/, redirecione para professores
-        if (path.startsWith('/teacher') || path.startsWith('/professor')) {
+        else if (path.startsWith('/teacher') ||
+            path.startsWith('/professor')) {
           targetRoute = path.isEmpty ? '/teacher' : path;
         }
       } catch (e) {
@@ -81,6 +89,11 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.reverse();
 
     // Navegar para a rota determinada
+    if (targetRoute == '/reset_password2') {
+      Navigator.of(context).pushReplacementNamed('/reset_password2');
+      return;
+    }
+
     if (targetRoute == '/main') {
       Navigator.of(context).pushReplacementNamed('/main');
       return;

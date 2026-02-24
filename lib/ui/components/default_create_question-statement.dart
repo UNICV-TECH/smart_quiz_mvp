@@ -29,7 +29,7 @@ Widget componenteCriarQuestaoPadraoPreview() {
         required List<AlternativeModel> alternatives,
         String? supportingText,
         String? statement,
-      }) {
+      }) async {
         debugPrint('Preview: Questão salva com sucesso!');
       },
     ),
@@ -58,7 +58,7 @@ class AlternativeModel {
 /// - Validação de campos obrigatórios
 class DefaultCreateQuestion extends StatefulWidget {
   /// Callback chamado ao salvar a questão com sucesso
-  final Function({
+  final Future<void> Function({
     required String question,
     required List<AlternativeModel> alternatives,
     String? supportingText,
@@ -100,8 +100,10 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
   final List<AlternativeModel> _alternatives = [];
 
   // Mensagens de erro
+  String? _statementError;
   String? _questionError;
   String? _correctAnswerError;
+  String? _alternativesCountError;
 
   // Contador para gerar IDs únicos
   int _alternativeIdCounter = 0;
@@ -186,12 +188,30 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
     bool isValid = true;
 
     setState(() {
+      // Valida enunciado
+      if (_statementController.text.trim().isEmpty) {
+        _statementError = 'O enunciado é obrigatório';
+        isValid = false;
+      } else {
+        _statementError = null;
+      }
+
       // Valida pergunta
       if (_questionController.text.trim().isEmpty) {
         _questionError = 'A pergunta é obrigatória';
         isValid = false;
       } else {
         _questionError = null;
+      }
+
+      // Valida quantidade mínima de alternativas preenchidas
+      final filledAlternatives =
+          _alternatives.where((alt) => alt.text.trim().isNotEmpty).length;
+      if (filledAlternatives < 2) {
+        _alternativesCountError = 'Preencha pelo menos 2 alternativas';
+        isValid = false;
+      } else {
+        _alternativesCountError = null;
       }
 
       // Valida resposta correta
@@ -203,11 +223,11 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
         _correctAnswerError = null;
       }
 
-      // Valida se alternativas têm texto
+      // Valida se alternativas preenchidas têm texto completo
       final hasEmptyAlternative = _alternatives.any(
         (alt) => alt.text.trim().isEmpty,
       );
-      if (hasEmptyAlternative) {
+      if (hasEmptyAlternative && filledAlternatives >= 2) {
         _showMessage('Todas as alternativas devem ter texto');
         isValid = false;
       }
@@ -217,11 +237,11 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
   }
 
   /// Salva a questão
-  void _save() {
+  Future<void> _save() async {
     if (!_validate()) return;
 
     if (widget.onSave != null) {
-      widget.onSave!(
+      await widget.onSave!(
         question: _questionController.text.trim(),
         alternatives: _alternatives,
         supportingText: _supportingTextController.text.trim().isEmpty
@@ -232,8 +252,6 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
             : _statementController.text.trim(),
       );
     }
-
-    _showMessage('Questão salva com sucesso!');
   }
 
   /// Exibe mensagem ao usuário
@@ -282,8 +300,8 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
           ),
           const SizedBox(height: 32),
 
-          // Enunciado
-          _buildSectionTitle('Enunciado'),
+          // Enunciado (obrigatório)
+          _buildSectionTitle('Enunciado*'),
           const SizedBox(height: 8),
           const Text(
             'Descreva o enunciado principal da questão',
@@ -297,6 +315,7 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
             controller: _statementController,
             hintText: 'Digite o enunciado aqui...',
             maxLines: 4,
+            errorMessage: _statementError,
           ),
           const SizedBox(height: 32),
 
@@ -318,8 +337,8 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
           ),
           const SizedBox(height: 32),
 
-          // Alternativas
-          _buildSectionTitle('Alternativas'),
+          // Alternativas (obrigatório - mínimo 2)
+          _buildSectionTitle('Alternativas*'),
           const SizedBox(height: 8),
           const Text(
             'Adicione as opções de resposta e marque a correta',
@@ -340,31 +359,13 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
 
           const SizedBox(height: 16),
 
-          // Mensagem de erro de resposta correta
+          // Mensagens de erro de alternativas
+          if (_alternativesCountError != null) ...[
+            _buildErrorBanner(_alternativesCountError!),
+            const SizedBox(height: 8),
+          ],
           if (_correctAnswerError != null) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.shade300),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red.shade700),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _correctAnswerError!,
-                      style: TextStyle(
-                        color: Colors.red.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildErrorBanner(_correctAnswerError!),
             const SizedBox(height: 16),
           ],
 
@@ -393,31 +394,86 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
     );
   }
 
+  /// Constrói um banner de erro reutilizável
+  Widget _buildErrorBanner(String message) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.red.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade700),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: Colors.red.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Constrói um campo de texto multilinhas
   Widget _buildTextArea({
     required TextEditingController controller,
     required String hintText,
     int maxLines = 3,
+    String? errorMessage,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.webNeutral300),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: AppColors.webNeutral400,
-            fontSize: 14,
+    final hasError = errorMessage != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: hasError ? Colors.red.shade400 : AppColors.webNeutral300,
+              width: hasError ? 2 : 1,
+            ),
           ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            onChanged: (_) {
+              if (hasError) {
+                setState(() {
+                  _statementError = null;
+                });
+              }
+            },
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(
+                color: AppColors.webNeutral400,
+                fontSize: 14,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+          ),
         ),
-      ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Text(
+            errorMessage,
+            style: TextStyle(
+              color: Colors.red.shade700,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ],
     );
   }
 

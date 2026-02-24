@@ -148,6 +148,68 @@ class SupabaseTeacherRepository implements TeacherRepository {
   }
 
   @override
+  Future<QuestionDetail> fetchQuestionDetail(String questionId) async {
+    try {
+      final questionResponse = await _client
+          .from('question')
+          .select('id, enunciation, difficulty_level, points, id_course, id_category')
+          .eq('id', questionId)
+          .single();
+
+      final answerChoicesResponse = await _client
+          .from('answerchoice')
+          .select()
+          .eq('idquestion', questionId)
+          .order('letter');
+
+      final supportingTextsResponse = await _client
+          .from('supportingtext')
+          .select()
+          .eq('id_question', questionId)
+          .order('display_order');
+
+      final answerChoices = (answerChoicesResponse as List)
+          .map((json) =>
+              AnswerChoiceDetail.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      final supportingTexts = (supportingTextsResponse as List)
+          .map((json) =>
+              SupportingTextDetail.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      return QuestionDetail(
+        id: questionResponse['id'] as String,
+        enunciation: questionResponse['enunciation'] as String? ?? '',
+        difficultyLevel: questionResponse['difficulty_level'] as String?,
+        points: (questionResponse['points'] as num?)?.toDouble() ?? 1.0,
+        courseId: questionResponse['id_course'] as String,
+        categoryId: questionResponse['id_category'] as String?,
+        answerChoices: answerChoices,
+        supportingTexts: supportingTexts,
+      );
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao carregar detalhes da questao: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<void> updateQuestionFull(FullUpdateQuestionRequest request) async {
+    try {
+      await _client.rpc(
+        'update_teacher_question',
+        params: request.toRpcParams(),
+      );
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao atualizar questao: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
   Future<void> deleteQuestion(String questionId) async {
     try {
       await _client

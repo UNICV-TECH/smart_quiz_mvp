@@ -23,6 +23,7 @@ import '../views/reset_password_screen2.dart';
 import '../views/teacher/teacher_main_screen.dart';
 import '../views/teacher/teacher_create_question.dart';
 import '../views/teacher/teacher_question_list_screen.dart';
+import '../views/teacher/teacher_edit_question_screen.dart';
 import '../views/teacher/teacher_exam_templates_screen.dart';
 import '../views/teacher/teacher_stats_screen.dart';
 import '../widgets/protected_route.dart';
@@ -170,6 +171,21 @@ class AppRoutes {
           ),
       teacherQuestions: (context) => ProtectedRoute(
             builder: (innerContext) => const TeacherQuestionListScreen(),
+          ),
+      teacherQuestionEdit: (context) => ProtectedRoute(
+            builder: (innerContext) {
+              final args = ModalRoute.of(innerContext)!.settings.arguments
+                  as Map<String, dynamic>?;
+              final questionId = args?['questionId'] as String?;
+              if (questionId == null) {
+                return const Scaffold(
+                  body: Center(
+                    child: Text('ID da questao nao informado'),
+                  ),
+                );
+              }
+              return TeacherEditQuestionScreen(questionId: questionId);
+            },
           ),
       teacherTemplates: (context) => ProtectedRoute(
             builder: (innerContext) => const TeacherExamTemplatesScreen(),

@@ -6,56 +6,13 @@ import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_subject_card.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
 class _HomeScreenState extends State<HomeScreen> {
-// <<<<<<< feature/profile-improvements
-//   String? _selectedCourseId;
-
-//   final List<Map<String, dynamic>> _courses = [
-//     {
-//       'id': 'psicologia',
-//       'title': 'Psicologia',
-//       'icon': Icons.psychology_outlined
-//     },
-//     {
-//       'id': 'ciencias_sociais',
-//       'title': 'Ciências Sociais',
-//       'icon': Icons.groups_outlined
-//     },
-//     {
-//       'id': 'administracao',
-//       'title': 'Administração',
-//       'icon': Icons.business_center_outlined
-//     },
-//     {
-//       'id': 'gestao_financeira',
-//       'title': 'Gestão Finan.',
-//       'icon': Icons.monetization_on_outlined
-//     },
-//     {'id': 'pedagogia', 'title': 'Pedagogia', 'icon': Icons.school_outlined},
-//     {
-//       'id': 'design_grafico',
-//       'title': 'Design Gráfico',
-//       'icon': Icons.palette_outlined
-//     },
-//     {'id': 'direito', 'title': 'Direito', 'icon': Icons.gavel_outlined},
-//     {
-//       'id': 'ciencias_contabeis',
-//       'title': 'Ciências Contábeis',
-//       'icon': Icons.calculate_outlined
-//     },
-//   ];
-
-//   final String _logoUrl =
-//       'https://ibprddrdjzazqqaxhilj.supabase.co/storage/v1/object/public/test/LogoFundoClaro.png';
-// =======
   final String _logoAssetPath = 'assets/images/logo_color.png';
 
   final Map<String, IconData> _iconMap = {
@@ -70,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'gavel_outlined': Icons.gavel_outlined,
     'calculate_outlined': Icons.calculate_outlined,
   };
-
   @override
   void initState() {
     super.initState();
@@ -78,16 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<CourseSelectionViewModel>().loadCourses();
     });
   }
-// >>>>>>> main
-
   IconData _getIconData(String? iconKey) {
     if (iconKey == null) return Icons.school_outlined;
     return _iconMap[iconKey] ?? Icons.school_outlined;
   }
-
   void _onCourseSelected(Course course, CourseSelectionViewModel viewModel) {
     viewModel.selectCourse(course.id);
-
     Navigator.pushNamed(
       context,
       '/quiz/config',
@@ -101,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,58 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Image.asset('assets/images/FundoWhiteHome.png',
                 fit: BoxFit.cover),
           ),
-// <<<<<<< feature/profile-improvements
-//           Positioned.fill(
-//             child: SingleChildScrollView(
-//               physics: const BouncingScrollPhysics(),
-//               child: SafeArea(
-//                 child: Padding(
-//                   padding: const EdgeInsets.symmetric(horizontal: 33.0),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Center(
-//                         child: Padding(
-//                           padding:
-//                               const EdgeInsets.only(top: 12.0, bottom: 20.0),
-//                           child: AppLogoWidget.network(
-//                             size: AppLogoSize.small,
-//                             logoPath: _logoUrl,
-//                             semanticLabel: 'Logo UniCV',
-//                           ),
-//                         ),
-//                       ),
-//                       const AppText('Para qual prova',
-//                           style: AppTextStyle.titleSmall,
-//                           color: AppColors.primaryDark),
-//                       const SizedBox(height: 1),
-//                       AppText(
-//                         'gostaria de se preparar?',
-//                         style: AppTextStyle.subtitleMedium,
-//                         color: AppColors.secondaryDark
-//                             .withAlpha((0.8 * 255).round()),
-//                       ),
-//                       const SizedBox(height: 35),
-//                       Column(
-//                         children: _courses.map((course) {
-//                           return Padding(
-//                             padding: const EdgeInsets.only(bottom: 12.0),
-//                             child: SubjectCard(
-//                               icon: Icon(course['icon'] as IconData,
-//                                   color: AppColors.green, size: 30),
-//                               title: course['title'] as String,
-//                               isSelected: _selectedCourseId == course['id'],
-//                               onTap: () => _onCourseSelected(course),
-//                             ),
-//                           );
-//                         }).toList(),
-//                       ),
-//                       const SizedBox(height: 120), // Espaço para o navbar
-//                     ],
-//                   ),
-//                 ),
-//               ),
-// =======
           SafeArea(
             child: Column(
               children: [
@@ -178,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       }
-
                       if (viewModel.errorMessage != null) {
                         return Center(
                           child: Column(
@@ -207,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       }
-
                       return SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
                         child: Padding(
@@ -265,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ],
-// >>>>>>> main
             ),
           ),
         ],

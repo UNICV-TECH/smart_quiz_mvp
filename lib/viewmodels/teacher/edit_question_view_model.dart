@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../models/course.dart';
 import '../../models/question_category.dart';
 import '../../repositories/course_repository.dart';
@@ -7,15 +6,18 @@ import '../../repositories/course_repository_types.dart' as course_repo;
 import '../../repositories/teacher_repository.dart';
 import '../../repositories/teacher_repository_types.dart';
 
-class CreateQuestionViewModel extends ChangeNotifier {
-  CreateQuestionViewModel({
+class EditQuestionViewModel extends ChangeNotifier {
+  EditQuestionViewModel({
+    required String questionId,
     required String teacherId,
     required TeacherRepository teacherRepository,
     required CourseRepository courseRepository,
-  })  : _teacherId = teacherId,
+  })  : _questionId = questionId,
+        _teacherId = teacherId,
         _teacherRepository = teacherRepository,
         _courseRepository = courseRepository;
 
+  final String _questionId;
   final String _teacherId;
   final TeacherRepository _teacherRepository;
   final CourseRepository _courseRepository;
@@ -48,6 +50,7 @@ class CreateQuestionViewModel extends ChangeNotifier {
   ];
 
   // Getters
+  String get questionId => _questionId;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
@@ -103,9 +106,8 @@ class CreateQuestionViewModel extends ChangeNotifier {
     _clearMessages();
 
     try {
-      await Future.wait([
-        _loadCourses(),
-      ]);
+      await _loadCourses();
+      await _loadQuestionDetail();
     } catch (error) {
       _setError('Erro ao carregar dados: $error');
     } finally {
@@ -116,6 +118,42 @@ class CreateQuestionViewModel extends ChangeNotifier {
   Future<void> _loadCourses() async {
     final repoCourses = await _courseRepository.fetchActiveCourses();
     _courses = repoCourses.map(_mapRepoCourse).toList();
+  }
+
+  Future<void> _loadQuestionDetail() async {
+    final detail = await _teacherRepository.fetchQuestionDetail(_questionId);
+
+    _enunciation = detail.enunciation;
+    _difficultyLevel = detail.difficultyLevel ?? 'medium';
+    _points = detail.points;
+    _selectedCourseId = detail.courseId;
+    _selectedCategoryId = detail.categoryId;
+
+    // Load categories for the course
+    if (detail.courseId.isNotEmpty) {
+      _categories =
+          await _teacherRepository.fetchCategories(courseId: detail.courseId);
+    }
+
+    // Map answer choices
+    if (detail.answerChoices.isNotEmpty) {
+      _answerChoices = detail.answerChoices
+          .map((ac) => AnswerChoiceInput(
+                letter: ac.letter,
+                content: ac.content,
+                isCorrect: ac.isCorrect,
+              ))
+          .toList();
+    }
+
+    // Map supporting texts
+    _supportingTexts = detail.supportingTexts
+        .map((st) => SupportingTextInput(
+              contentType: st.contentType,
+              content: st.content,
+              displayOrder: st.displayOrder,
+            ))
+        .toList();
   }
 
   Future<void> loadCategories(String courseId) async {
@@ -256,9 +294,9 @@ class CreateQuestionViewModel extends ChangeNotifier {
           .where((c) => c.content.trim().isNotEmpty)
           .toList();
 
-      final request = CreateQuestionRequest(
+      final request = FullUpdateQuestionRequest(
+        questionId: _questionId,
         teacherId: _teacherId,
-        courseId: _selectedCourseId!,
         categoryId: _selectedCategoryId,
         enunciation: _enunciation.trim(),
         difficultyLevel: _difficultyLevel,
@@ -267,32 +305,16 @@ class CreateQuestionViewModel extends ChangeNotifier {
         answerChoices: filteredChoices,
       );
 
-      await _teacherRepository.createQuestion(request);
+      await _teacherRepository.updateQuestionFull(request);
 
-      _setSuccess('Questao criada com sucesso!');
-      _resetForm();
+      _setSuccess('Questao atualizada com sucesso!');
       return true;
     } catch (error) {
-      _setError('Erro ao salvar questao: $error');
+      _setError('Erro ao atualizar questao: $error');
       return false;
     } finally {
       _setSaving(false);
     }
-  }
-
-  void _resetForm() {
-    _enunciation = '';
-    _difficultyLevel = 'medium';
-    _points = 1.0;
-    _supportingTexts = [];
-    _answerChoices = [
-      const AnswerChoiceInput(letter: 'A', content: '', isCorrect: false),
-      const AnswerChoiceInput(letter: 'B', content: '', isCorrect: false),
-      const AnswerChoiceInput(letter: 'C', content: '', isCorrect: false),
-      const AnswerChoiceInput(letter: 'D', content: '', isCorrect: false),
-      const AnswerChoiceInput(letter: 'E', content: '', isCorrect: false),
-    ];
-    notifyListeners();
   }
 
   // Helper methods
