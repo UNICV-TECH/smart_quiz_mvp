@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/course.dart';
 import '../../models/question_category.dart';
+import '../../models/subject.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/course_repository_types.dart' as course_repo;
 import '../../repositories/teacher_repository.dart';
@@ -30,10 +31,12 @@ class EditQuestionViewModel extends ChangeNotifier {
 
   // Data
   List<Course> _courses = [];
+  List<Subject> _subjects = [];
   List<QuestionCategory> _categories = [];
 
   // Selected values
   String? _selectedCourseId;
+  String? _selectedSubjectId;
   String? _selectedCategoryId;
 
   // Form fields
@@ -57,9 +60,11 @@ class EditQuestionViewModel extends ChangeNotifier {
   String? get successMessage => _successMessage;
 
   List<Course> get courses => List.unmodifiable(_courses);
+  List<Subject> get subjects => List.unmodifiable(_subjects);
   List<QuestionCategory> get categories => List.unmodifiable(_categories);
 
   String? get selectedCourseId => _selectedCourseId;
+  String? get selectedSubjectId => _selectedSubjectId;
   String? get selectedCategoryId => _selectedCategoryId;
 
   String get enunciation => _enunciation;
@@ -127,10 +132,20 @@ class EditQuestionViewModel extends ChangeNotifier {
     _difficultyLevel = detail.difficultyLevel ?? 'medium';
     _points = detail.points;
     _selectedCourseId = detail.courseId;
+    _selectedSubjectId = detail.subjectId;
     _selectedCategoryId = detail.categoryId;
 
-    // Load categories for the course
+    // Load subjects for the course
     if (detail.courseId.isNotEmpty) {
+      _subjects =
+          await _teacherRepository.fetchSubjects(courseId: detail.courseId);
+    }
+
+    // Load categories for the subject (or course if no subject)
+    if (detail.subjectId != null) {
+      _categories =
+          await _teacherRepository.fetchCategories(subjectId: detail.subjectId);
+    } else if (detail.courseId.isNotEmpty) {
       _categories =
           await _teacherRepository.fetchCategories(courseId: detail.courseId);
     }
@@ -156,13 +171,28 @@ class EditQuestionViewModel extends ChangeNotifier {
         .toList();
   }
 
-  Future<void> loadCategories(String courseId) async {
+  Future<void> loadSubjects(String courseId) async {
+    _subjects = [];
+    notifyListeners();
+
+    try {
+      _subjects =
+          await _teacherRepository.fetchSubjects(courseId: courseId);
+      notifyListeners();
+    } catch (error) {
+      debugPrint('Erro ao carregar matérias: $error');
+      _subjects = [];
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadCategories({String? courseId, String? subjectId}) async {
     _categories = [];
     notifyListeners();
 
     try {
       _categories =
-          await _teacherRepository.fetchCategories(courseId: courseId);
+          await _teacherRepository.fetchCategories(courseId: courseId, subjectId: subjectId);
       notifyListeners();
     } catch (error) {
       debugPrint('Erro ao carregar categorias: $error');
@@ -175,13 +205,28 @@ class EditQuestionViewModel extends ChangeNotifier {
   void setCourse(String? courseId) {
     if (_selectedCourseId == courseId) return;
     _selectedCourseId = courseId;
+    _selectedSubjectId = null;
     _selectedCategoryId = null;
+    _subjects = [];
     _categories = [];
     _clearMessages();
     notifyListeners();
 
     if (courseId != null) {
-      loadCategories(courseId);
+      loadSubjects(courseId);
+    }
+  }
+
+  void setSubject(String? subjectId) {
+    if (_selectedSubjectId == subjectId) return;
+    _selectedSubjectId = subjectId;
+    _selectedCategoryId = null;
+    _categories = [];
+    _clearMessages();
+    notifyListeners();
+
+    if (subjectId != null) {
+      loadCategories(subjectId: subjectId);
     }
   }
 
@@ -297,6 +342,7 @@ class EditQuestionViewModel extends ChangeNotifier {
       final request = FullUpdateQuestionRequest(
         questionId: _questionId,
         teacherId: _teacherId,
+        subjectId: _selectedSubjectId,
         categoryId: _selectedCategoryId,
         enunciation: _enunciation.trim(),
         difficultyLevel: _difficultyLevel,

@@ -186,9 +186,13 @@ class _CreateQuestionContent extends StatelessWidget {
     List<SelectOption> courseOptions,
     List<SelectOption> categoryOptions,
   ) {
+    final subjectOptions = viewModel.subjects
+        .map((s) => SelectOption(value: s.id, label: s.name))
+        .toList();
+
     return Column(
       children: [
-        // Row 1: Course and Category
+        // Row 1: Course, Subject, Category
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -205,15 +209,29 @@ class _CreateQuestionContent extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: SelectPesquisa(
+                label: 'Matéria',
+                options: subjectOptions,
+                value: viewModel.selectedSubjectId,
+                required: false,
+                placeholder: viewModel.selectedCourseId != null
+                    ? 'Selecione a matéria'
+                    : 'Selecione um curso primeiro',
+                onChanged: viewModel.setSubject,
+                enabled: viewModel.selectedCourseId != null,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: SelectPesquisa(
                 label: 'Categoria',
                 options: categoryOptions,
                 value: viewModel.selectedCategoryId,
                 required: false,
-                placeholder: viewModel.selectedCourseId != null
+                placeholder: viewModel.selectedSubjectId != null
                     ? 'Selecione a categoria'
-                    : 'Selecione um curso primeiro',
+                    : 'Selecione uma matéria primeiro',
                 onChanged: viewModel.setCategory,
-                enabled: viewModel.selectedCourseId != null,
+                enabled: viewModel.selectedSubjectId != null,
               ),
             ),
           ],

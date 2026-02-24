@@ -145,6 +145,10 @@ class _EditQuestionContent extends StatelessWidget {
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
 
+    final subjectOptions = viewModel.subjects
+        .map((s) => SelectOption(value: s.id, label: s.name))
+        .toList();
+
     final categoryOptions = viewModel.categories
         .map((c) => SelectOption(value: c.id, label: c.name))
         .toList();
@@ -190,15 +194,29 @@ class _EditQuestionContent extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: SelectPesquisa(
+                        label: 'Matéria',
+                        options: subjectOptions,
+                        value: viewModel.selectedSubjectId,
+                        required: false,
+                        placeholder: viewModel.selectedCourseId != null
+                            ? 'Selecione a matéria'
+                            : 'Selecione um curso primeiro',
+                        onChanged: viewModel.setSubject,
+                        enabled: viewModel.selectedCourseId != null,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: SelectPesquisa(
                         label: 'Categoria',
                         options: categoryOptions,
                         value: viewModel.selectedCategoryId,
                         required: false,
-                        placeholder: viewModel.selectedCourseId != null
+                        placeholder: viewModel.selectedSubjectId != null
                             ? 'Selecione a categoria'
-                            : 'Selecione um curso primeiro',
+                            : 'Selecione uma matéria primeiro',
                         onChanged: viewModel.setCategory,
-                        enabled: viewModel.selectedCourseId != null,
+                        enabled: viewModel.selectedSubjectId != null,
                       ),
                     ),
                   ],

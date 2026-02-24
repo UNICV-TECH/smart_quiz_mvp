@@ -5,6 +5,7 @@
 CREATE OR REPLACE FUNCTION update_teacher_question(
   p_question_id uuid,
   p_teacher_id uuid,
+  p_subject_id uuid DEFAULT NULL,
   p_category_id uuid DEFAULT NULL,
   p_enunciation text DEFAULT NULL,
   p_difficulty_level text DEFAULT NULL,
@@ -35,6 +36,7 @@ BEGIN
   -- Update question fields (only non-null params)
   UPDATE public.question
   SET
+    id_subject = COALESCE(p_subject_id, id_subject),
     id_category = COALESCE(p_category_id, id_category),
     enunciation = COALESCE(p_enunciation, enunciation),
     difficulty_level = COALESCE(p_difficulty_level, difficulty_level),
