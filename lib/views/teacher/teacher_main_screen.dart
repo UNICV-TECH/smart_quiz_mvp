@@ -45,9 +45,9 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         const TeacherProfileScreen(), // 2: Perfil
         const TeacherQuestionListScreen(), // 3: Listar Questões
         const TeacherStatsScreen(), // 4: Dashboard
-        const TeacherSubjectListScreen(), // 5: Matérias
-        const TeacherCategoryListScreen(), // 6: Categorias
         const TeacherGamificationScreen(), // 5: Gamificação
+        const TeacherSubjectListScreen(), // 6: Matérias
+        const TeacherCategoryListScreen(), // 7: Categorias
       ];
 
   @override
@@ -329,11 +329,11 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
                   ),
                   _buildSubMenuItem(
                     title: 'Matérias',
-                    index: 5,
+                    index: 6,
                   ),
                   _buildSubMenuItem(
                     title: 'Categorias',
-                    index: 6,
+                    index: 7,
                   ),
                 ],
               ),
