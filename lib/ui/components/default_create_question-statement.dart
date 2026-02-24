@@ -29,7 +29,7 @@ Widget componenteCriarQuestaoPadraoPreview() {
         required List<AlternativeModel> alternatives,
         String? supportingText,
         String? statement,
-      }) {
+      }) async {
         debugPrint('Preview: Questão salva com sucesso!');
       },
     ),
@@ -58,7 +58,7 @@ class AlternativeModel {
 /// - Validação de campos obrigatórios
 class DefaultCreateQuestion extends StatefulWidget {
   /// Callback chamado ao salvar a questão com sucesso
-  final Function({
+  final Future<void> Function({
     required String question,
     required List<AlternativeModel> alternatives,
     String? supportingText,
@@ -237,11 +237,11 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
   }
 
   /// Salva a questão
-  void _save() {
+  Future<void> _save() async {
     if (!_validate()) return;
 
     if (widget.onSave != null) {
-      widget.onSave!(
+      await widget.onSave!(
         question: _questionController.text.trim(),
         alternatives: _alternatives,
         supportingText: _supportingTextController.text.trim().isEmpty
@@ -252,8 +252,6 @@ class _DefaultCreateQuestionState extends State<DefaultCreateQuestion> {
             : _statementController.text.trim(),
       );
     }
-
-    _showMessage('Questão salva com sucesso!');
   }
 
   /// Exibe mensagem ao usuário
