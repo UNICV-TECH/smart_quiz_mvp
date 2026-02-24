@@ -9,6 +9,8 @@ import '../../constants/app_strings.dart';
 import 'teacher_create_question.dart';
 import 'teacher_gamification_screen.dart';
 import 'teacher_question_list_screen.dart';
+import 'teacher_subject_list_screen.dart';
+import 'teacher_category_list_screen.dart';
 import 'teacher_exam_templates_screen.dart';
 import 'teacher_stats_screen.dart';
 
@@ -43,6 +45,8 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         const TeacherProfileScreen(), // 2: Perfil
         const TeacherQuestionListScreen(), // 3: Listar Questões
         const TeacherStatsScreen(), // 4: Dashboard
+        const TeacherSubjectListScreen(), // 5: Matérias
+        const TeacherCategoryListScreen(), // 6: Categorias
         const TeacherGamificationScreen(), // 5: Gamificação
       ];
 
@@ -322,6 +326,14 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
                   _buildSubMenuItem(
                     title: 'Listar Questões',
                     index: 3,
+                  ),
+                  _buildSubMenuItem(
+                    title: 'Matérias',
+                    index: 5,
+                  ),
+                  _buildSubMenuItem(
+                    title: 'Categorias',
+                    index: 6,
                   ),
                 ],
               ),

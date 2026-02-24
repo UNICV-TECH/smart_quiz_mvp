@@ -1,31 +1,28 @@
-class QuestionCategory {
+class Subject {
   final String id;
   final String name;
   final String? description;
   final String courseId;
-  final String? subjectId;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const QuestionCategory({
+  const Subject({
     required this.id,
     required this.name,
     this.description,
     required this.courseId,
-    this.subjectId,
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory QuestionCategory.fromJson(Map<String, dynamic> json) {
-    return QuestionCategory(
+  factory Subject.fromJson(Map<String, dynamic> json) {
+    return Subject(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
       courseId: json['id_course'] as String,
-      subjectId: json['id_subject'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -38,7 +35,6 @@ class QuestionCategory {
       'name': name,
       'description': description,
       'id_course': courseId,
-      'id_subject': subjectId,
       'is_active': isActive,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -50,27 +46,24 @@ class QuestionCategory {
       'name': name,
       'description': description,
       'id_course': courseId,
-      'id_subject': subjectId,
       'is_active': isActive,
     };
   }
 
-  QuestionCategory copyWith({
+  Subject copyWith({
     String? id,
     String? name,
     String? description,
     String? courseId,
-    String? subjectId,
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return QuestionCategory(
+    return Subject(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       courseId: courseId ?? this.courseId,
-      subjectId: subjectId ?? this.subjectId,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
