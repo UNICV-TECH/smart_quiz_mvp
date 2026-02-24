@@ -2,6 +2,7 @@ import '../models/exam_template.dart';
 import '../models/exam_template_category.dart';
 import '../models/exam_template_question.dart';
 import '../models/question_category.dart';
+import '../models/subject.dart';
 import '../models/teacher_question.dart';
 import '../models/teacher_stats.dart';
 import 'teacher_repository_types.dart';
@@ -9,11 +10,27 @@ import 'teacher_repository_types.dart';
 /// Repository interface for teacher-specific operations
 abstract class TeacherRepository {
   // ============================================
+  // Subjects (Matérias)
+  // ============================================
+
+  /// Fetch all subjects, optionally filtered by course
+  Future<List<Subject>> fetchSubjects({String? courseId});
+
+  /// Create a new subject
+  Future<Subject> createSubject(Subject subject);
+
+  /// Update an existing subject
+  Future<void> updateSubject(Subject subject);
+
+  /// Delete a subject (soft delete by setting is_active = false)
+  Future<void> deleteSubject(String subjectId);
+
+  // ============================================
   // Question Categories
   // ============================================
 
-  /// Fetch all categories, optionally filtered by course
-  Future<List<QuestionCategory>> fetchCategories({String? courseId});
+  /// Fetch all categories, optionally filtered by course and/or subject
+  Future<List<QuestionCategory>> fetchCategories({String? courseId, String? subjectId});
 
   /// Create a new question category
   Future<QuestionCategory> createCategory(QuestionCategory category);

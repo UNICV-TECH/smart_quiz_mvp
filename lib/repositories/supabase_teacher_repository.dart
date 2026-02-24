@@ -4,6 +4,7 @@ import '../models/exam_template.dart';
 import '../models/exam_template_category.dart';
 import '../models/exam_template_question.dart';
 import '../models/question_category.dart';
+import '../models/subject.dart';
 import '../models/teacher_question.dart';
 import '../models/teacher_stats.dart';
 import 'teacher_repository.dart';
@@ -15,16 +16,98 @@ class SupabaseTeacherRepository implements TeacherRepository {
   final SupabaseClient _client;
 
   // ============================================
+  // Subjects (Matérias)
+  // ============================================
+
+  @override
+  Future<List<Subject>> fetchSubjects({String? courseId}) async {
+    try {
+      var query = _client.from('subject').select();
+
+      if (courseId != null) {
+        query = query.eq('id_course', courseId);
+      }
+
+      final response = await query.eq('is_active', true).order('name');
+
+      return (response as List)
+          .map((json) => Subject.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao carregar matérias: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<Subject> createSubject(Subject subject) async {
+    try {
+      final response = await _client
+          .from('subject')
+          .insert(subject.toInsertJson())
+          .select()
+          .single();
+
+      return Subject.fromJson(response);
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao criar matéria: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<void> updateSubject(Subject subject) async {
+    try {
+      await _client
+          .from('subject')
+          .update({
+            'name': subject.name,
+            'description': subject.description,
+            'is_active': subject.isActive,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', subject.id);
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao atualizar matéria: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<void> deleteSubject(String subjectId) async {
+    try {
+      await _client
+          .from('subject')
+          .update({
+            'is_active': false,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', subjectId);
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao deletar matéria: ${error.toString()}',
+      );
+    }
+  }
+
+  // ============================================
   // Question Categories
   // ============================================
 
   @override
-  Future<List<QuestionCategory>> fetchCategories({String? courseId}) async {
+  Future<List<QuestionCategory>> fetchCategories({String? courseId, String? subjectId}) async {
     try {
       var query = _client.from('question_category').select();
 
       if (courseId != null) {
         query = query.eq('id_course', courseId);
+      }
+
+      if (subjectId != null) {
+        query = query.eq('id_subject', subjectId);
       }
 
       final response = await query.eq('is_active', true).order('name');
@@ -152,7 +235,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
     try {
       final questionResponse = await _client
           .from('question')
-          .select('id, enunciation, difficulty_level, points, id_course, id_category')
+          .select('id, enunciation, difficulty_level, points, id_course, id_subject, id_category')
           .eq('id', questionId)
           .single();
 
@@ -184,6 +267,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
         difficultyLevel: questionResponse['difficulty_level'] as String?,
         points: (questionResponse['points'] as num?)?.toDouble() ?? 1.0,
         courseId: questionResponse['id_course'] as String,
+        subjectId: questionResponse['id_subject'] as String?,
         categoryId: questionResponse['id_category'] as String?,
         answerChoices: answerChoices,
         supportingTexts: supportingTexts,

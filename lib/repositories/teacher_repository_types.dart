@@ -11,6 +11,7 @@ class TeacherRepositoryException implements Exception {
 class CreateQuestionRequest {
   final String teacherId;
   final String courseId;
+  final String? subjectId;
   final String? categoryId;
   final String enunciation;
   final String difficultyLevel;
@@ -21,6 +22,7 @@ class CreateQuestionRequest {
   const CreateQuestionRequest({
     required this.teacherId,
     required this.courseId,
+    this.subjectId,
     this.categoryId,
     required this.enunciation,
     this.difficultyLevel = 'medium',
@@ -33,6 +35,7 @@ class CreateQuestionRequest {
     return {
       'p_teacher_id': teacherId,
       'p_course_id': courseId,
+      'p_subject_id': subjectId,
       'p_category_id': categoryId,
       'p_enunciation': enunciation,
       'p_difficulty_level': difficultyLevel,
@@ -170,6 +173,7 @@ class QuestionDetail {
   final String? difficultyLevel;
   final double points;
   final String courseId;
+  final String? subjectId;
   final String? categoryId;
   final List<AnswerChoiceDetail> answerChoices;
   final List<SupportingTextDetail> supportingTexts;
@@ -180,6 +184,7 @@ class QuestionDetail {
     this.difficultyLevel,
     this.points = 1.0,
     required this.courseId,
+    this.subjectId,
     this.categoryId,
     this.answerChoices = const [],
     this.supportingTexts = const [],
@@ -190,6 +195,7 @@ class QuestionDetail {
 class FullUpdateQuestionRequest {
   final String questionId;
   final String teacherId;
+  final String? subjectId;
   final String? categoryId;
   final String enunciation;
   final String difficultyLevel;
@@ -200,6 +206,7 @@ class FullUpdateQuestionRequest {
   const FullUpdateQuestionRequest({
     required this.questionId,
     required this.teacherId,
+    this.subjectId,
     this.categoryId,
     required this.enunciation,
     this.difficultyLevel = 'medium',
@@ -212,6 +219,7 @@ class FullUpdateQuestionRequest {
     return {
       'p_question_id': questionId,
       'p_teacher_id': teacherId,
+      'p_subject_id': subjectId,
       'p_category_id': categoryId,
       'p_enunciation': enunciation,
       'p_difficulty_level': difficultyLevel,
