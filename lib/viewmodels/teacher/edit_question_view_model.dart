@@ -1,0 +1,364 @@
+import 'package:flutter/material.dart';
+import '../../models/course.dart';
+import '../../models/question_category.dart';
+import '../../repositories/course_repository.dart';
+import '../../repositories/course_repository_types.dart' as course_repo;
+import '../../repositories/teacher_repository.dart';
+import '../../repositories/teacher_repository_types.dart';
+
+class EditQuestionViewModel extends ChangeNotifier {
+  EditQuestionViewModel({
+    required String questionId,
+    required String teacherId,
+    required TeacherRepository teacherRepository,
+    required CourseRepository courseRepository,
+  })  : _questionId = questionId,
+        _teacherId = teacherId,
+        _teacherRepository = teacherRepository,
+        _courseRepository = courseRepository;
+
+  final String _questionId;
+  final String _teacherId;
+  final TeacherRepository _teacherRepository;
+  final CourseRepository _courseRepository;
+
+  // State
+  bool _isLoading = false;
+  bool _isSaving = false;
+  String? _errorMessage;
+  String? _successMessage;
+
+  // Data
+  List<Course> _courses = [];
+  List<QuestionCategory> _categories = [];
+
+  // Selected values
+  String? _selectedCourseId;
+  String? _selectedCategoryId;
+
+  // Form fields
+  String _enunciation = '';
+  String _difficultyLevel = 'medium';
+  double _points = 1.0;
+  List<SupportingTextInput> _supportingTexts = [];
+  List<AnswerChoiceInput> _answerChoices = [
+    const AnswerChoiceInput(letter: 'A', content: '', isCorrect: false),
+    const AnswerChoiceInput(letter: 'B', content: '', isCorrect: false),
+    const AnswerChoiceInput(letter: 'C', content: '', isCorrect: false),
+    const AnswerChoiceInput(letter: 'D', content: '', isCorrect: false),
+    const AnswerChoiceInput(letter: 'E', content: '', isCorrect: false),
+  ];
+
+  // Getters
+  String get questionId => _questionId;
+  bool get isLoading => _isLoading;
+  bool get isSaving => _isSaving;
+  String? get errorMessage => _errorMessage;
+  String? get successMessage => _successMessage;
+
+  List<Course> get courses => List.unmodifiable(_courses);
+  List<QuestionCategory> get categories => List.unmodifiable(_categories);
+
+  String? get selectedCourseId => _selectedCourseId;
+  String? get selectedCategoryId => _selectedCategoryId;
+
+  String get enunciation => _enunciation;
+  String get difficultyLevel => _difficultyLevel;
+  double get points => _points;
+  List<SupportingTextInput> get supportingTexts =>
+      List.unmodifiable(_supportingTexts);
+  List<AnswerChoiceInput> get answerChoices =>
+      List.unmodifiable(_answerChoices);
+
+  Course? get selectedCourse {
+    if (_selectedCourseId == null) return null;
+    try {
+      return _courses.firstWhere((c) => c.id == _selectedCourseId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  QuestionCategory? get selectedCategory {
+    if (_selectedCategoryId == null) return null;
+    try {
+      return _categories.firstWhere((c) => c.id == _selectedCategoryId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get hasCorrectAnswer =>
+      _answerChoices.any((choice) => choice.isCorrect);
+
+  bool get isFormValid {
+    return _selectedCourseId != null &&
+        _difficultyLevel.trim().isNotEmpty &&
+        _points > 0 &&
+        _enunciation.trim().isNotEmpty &&
+        _answerChoices.where((c) => c.content.trim().isNotEmpty).length >= 2 &&
+        hasCorrectAnswer;
+  }
+
+  // Load data
+  Future<void> loadInitialData() async {
+    _setLoading(true);
+    _clearMessages();
+
+    try {
+      await _loadCourses();
+      await _loadQuestionDetail();
+    } catch (error) {
+      _setError('Erro ao carregar dados: $error');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> _loadCourses() async {
+    final repoCourses = await _courseRepository.fetchActiveCourses();
+    _courses = repoCourses.map(_mapRepoCourse).toList();
+  }
+
+  Future<void> _loadQuestionDetail() async {
+    final detail = await _teacherRepository.fetchQuestionDetail(_questionId);
+
+    _enunciation = detail.enunciation;
+    _difficultyLevel = detail.difficultyLevel ?? 'medium';
+    _points = detail.points;
+    _selectedCourseId = detail.courseId;
+    _selectedCategoryId = detail.categoryId;
+
+    // Load categories for the course
+    if (detail.courseId.isNotEmpty) {
+      _categories =
+          await _teacherRepository.fetchCategories(courseId: detail.courseId);
+    }
+
+    // Map answer choices
+    if (detail.answerChoices.isNotEmpty) {
+      _answerChoices = detail.answerChoices
+          .map((ac) => AnswerChoiceInput(
+                letter: ac.letter,
+                content: ac.content,
+                isCorrect: ac.isCorrect,
+              ))
+          .toList();
+    }
+
+    // Map supporting texts
+    _supportingTexts = detail.supportingTexts
+        .map((st) => SupportingTextInput(
+              contentType: st.contentType,
+              content: st.content,
+              displayOrder: st.displayOrder,
+            ))
+        .toList();
+  }
+
+  Future<void> loadCategories(String courseId) async {
+    _categories = [];
+    notifyListeners();
+
+    try {
+      _categories =
+          await _teacherRepository.fetchCategories(courseId: courseId);
+      notifyListeners();
+    } catch (error) {
+      debugPrint('Erro ao carregar categorias: $error');
+      _categories = [];
+      notifyListeners();
+    }
+  }
+
+  // Setters
+  void setCourse(String? courseId) {
+    if (_selectedCourseId == courseId) return;
+    _selectedCourseId = courseId;
+    _selectedCategoryId = null;
+    _categories = [];
+    _clearMessages();
+    notifyListeners();
+
+    if (courseId != null) {
+      loadCategories(courseId);
+    }
+  }
+
+  void setCategory(String? categoryId) {
+    if (_selectedCategoryId == categoryId) return;
+    _selectedCategoryId = categoryId;
+    _clearMessages();
+    notifyListeners();
+  }
+
+  void setEnunciation(String value) {
+    _enunciation = value;
+    notifyListeners();
+  }
+
+  void setDifficultyLevel(String value) {
+    _difficultyLevel = value;
+    notifyListeners();
+  }
+
+  void setPoints(double value) {
+    _points = value;
+    notifyListeners();
+  }
+
+  void addSupportingText(SupportingTextInput text) {
+    _supportingTexts = [..._supportingTexts, text];
+    notifyListeners();
+  }
+
+  void removeSupportingText(int index) {
+    if (index < 0 || index >= _supportingTexts.length) return;
+    _supportingTexts = [
+      ..._supportingTexts.sublist(0, index),
+      ..._supportingTexts.sublist(index + 1),
+    ];
+    notifyListeners();
+  }
+
+  void updateSupportingText(int index, SupportingTextInput text) {
+    if (index < 0 || index >= _supportingTexts.length) return;
+    _supportingTexts = [
+      ..._supportingTexts.sublist(0, index),
+      text,
+      ..._supportingTexts.sublist(index + 1),
+    ];
+    notifyListeners();
+  }
+
+  void updateAnswerChoice(int index, AnswerChoiceInput choice) {
+    if (index < 0 || index >= _answerChoices.length) return;
+    _answerChoices = [
+      ..._answerChoices.sublist(0, index),
+      choice,
+      ..._answerChoices.sublist(index + 1),
+    ];
+    notifyListeners();
+  }
+
+  void setCorrectAnswer(int index) {
+    _answerChoices = _answerChoices.asMap().entries.map((entry) {
+      final current = entry.value;
+      return AnswerChoiceInput(
+        letter: current.letter,
+        content: current.content,
+        isCorrect: entry.key == index,
+      );
+    }).toList();
+    notifyListeners();
+  }
+
+  // Validation
+  String? validate() {
+    if (_selectedCourseId == null) {
+      return 'Selecione um curso';
+    }
+    if (_difficultyLevel.trim().isEmpty) {
+      return 'Selecione a dificuldade';
+    }
+    if (_points <= 0) {
+      return 'Selecione os pontos';
+    }
+    if (_enunciation.trim().isEmpty) {
+      return 'Digite o enunciado da questao';
+    }
+    final filledChoices =
+        _answerChoices.where((c) => c.content.trim().isNotEmpty).length;
+    if (filledChoices < 2) {
+      return 'Preencha pelo menos 2 alternativas';
+    }
+    if (!hasCorrectAnswer) {
+      return 'Selecione a alternativa correta';
+    }
+    return null;
+  }
+
+  // Save
+  Future<bool> saveQuestion() async {
+    final validationError = validate();
+    if (validationError != null) {
+      _setError(validationError);
+      return false;
+    }
+
+    _setSaving(true);
+    _clearMessages();
+
+    try {
+      final filteredChoices = _answerChoices
+          .where((c) => c.content.trim().isNotEmpty)
+          .toList();
+
+      final request = FullUpdateQuestionRequest(
+        questionId: _questionId,
+        teacherId: _teacherId,
+        categoryId: _selectedCategoryId,
+        enunciation: _enunciation.trim(),
+        difficultyLevel: _difficultyLevel,
+        points: _points,
+        supportingTexts: _supportingTexts,
+        answerChoices: filteredChoices,
+      );
+
+      await _teacherRepository.updateQuestionFull(request);
+
+      _setSuccess('Questao atualizada com sucesso!');
+      return true;
+    } catch (error) {
+      _setError('Erro ao atualizar questao: $error');
+      return false;
+    } finally {
+      _setSaving(false);
+    }
+  }
+
+  // Helper methods
+  void _setLoading(bool value) {
+    if (_isLoading == value) return;
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setSaving(bool value) {
+    if (_isSaving == value) return;
+    _isSaving = value;
+    notifyListeners();
+  }
+
+  void _setError(String message) {
+    _errorMessage = message;
+    _successMessage = null;
+    notifyListeners();
+  }
+
+  void _setSuccess(String message) {
+    _successMessage = message;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void _clearMessages() {
+    if (_errorMessage == null && _successMessage == null) return;
+    _errorMessage = null;
+    _successMessage = null;
+    notifyListeners();
+  }
+
+  void clearMessages() => _clearMessages();
+
+  Course _mapRepoCourse(course_repo.Course repo) {
+    return Course(
+      id: repo.id,
+      courseKey: repo.courseKey,
+      title: repo.title,
+      description: repo.description.isNotEmpty ? repo.description : null,
+      iconKey: repo.iconKey,
+      createdAt: repo.createdAt,
+    );
+  }
+}

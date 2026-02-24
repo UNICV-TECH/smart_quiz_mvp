@@ -35,8 +35,14 @@ abstract class TeacherRepository {
   /// Create a new question with supporting texts and answer choices
   Future<String> createQuestion(CreateQuestionRequest request);
 
-  /// Update an existing question
+  /// Update an existing question (basic fields only)
   Future<void> updateQuestion(UpdateQuestionRequest request);
+
+  /// Fetch complete question detail (with answer choices and supporting texts)
+  Future<QuestionDetail> fetchQuestionDetail(String questionId);
+
+  /// Update a complete question (enunciation + answer choices + supporting texts)
+  Future<void> updateQuestionFull(FullUpdateQuestionRequest request);
 
   /// Delete a question (soft delete by setting is_active = false)
   Future<void> deleteQuestion(String questionId);
