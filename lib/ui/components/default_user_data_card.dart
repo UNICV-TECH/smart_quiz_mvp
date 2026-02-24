@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_color.dart';
+import 'avatar_with_medal.dart';
 
 class UserDataCard extends StatefulWidget {
   final String userName;
   final String userEmail;
+  final String? avatarUrl;
+  final String? medalAsset;
   final Future<bool> Function(String newName)? onNameUpdate;
   final void Function(String message, {bool isError})? onShowFeedback;
 
@@ -11,6 +14,8 @@ class UserDataCard extends StatefulWidget {
     super.key,
     required this.userName,
     required this.userEmail,
+    this.avatarUrl,
+    this.medalAsset,
     this.onNameUpdate,
     this.onShowFeedback,
   });
@@ -140,19 +145,11 @@ class _UserDataCardState extends State<UserDataCard> {
       ),
       child: Row(
         children: [
-          // Avatar/Ícone de perfil
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: AppColors.green,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: AppColors.white,
-            ),
+          // Avatar/Ícone de perfil com medalha
+          AvatarWithMedal(
+            avatarUrl: widget.avatarUrl,
+            medalAsset: widget.medalAsset,
+            size: 70,
           ),
 
           const SizedBox(width: 16),

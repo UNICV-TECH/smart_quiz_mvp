@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
 
+import '../services/gamification_calculator.dart';
 import '../services/session_manager.dart';
 
 class ExamViewModel extends ChangeNotifier {
@@ -413,6 +414,13 @@ class ExamViewModel extends ChangeNotifier {
       debugPrint('PercentageScore: $percentageScore');
       debugPrint('PassingScorePercentage: 70.0');
 
+      // Gamification calculation
+      final gamResult = GamificationCalculator.calculate(
+        questionCount: _examQuestions.length,
+        correctCount: correctCount,
+        durationSeconds: durationSeconds,
+      );
+
       _error = null;
       return {
         'attemptId': _attemptId,
@@ -430,7 +438,11 @@ class ExamViewModel extends ChangeNotifier {
         'questionsBreakdown': questionsBreakdown,
         'questionIds': _examQuestions
             .map((eq) => eq.question.id)
-            .toList(), // Salvar IDs das questões usadas
+            .toList(),
+        'gamificationBasePoints': gamResult.basePoints,
+        'gamificationTimeBonus': gamResult.timeBonus,
+        'gamificationTotalPoints': gamResult.totalPoints,
+        'gamificationHasTimeBonus': gamResult.hasTimeBonus,
       };
     } catch (err, stack) {
       _error = err.toString();
