@@ -212,6 +212,9 @@ class ExamViewModel extends ChangeNotifier {
       if (isRetake) {
         debugPrint('Finalizando prova REFEITA - criando nova tentativa agora');
         await _createAttempt();
+        if (_attemptId == null) {
+          throw Exception('Failed to create attempt for retake');
+        }
       } else {
         throw Exception('No attempt ID available');
       }

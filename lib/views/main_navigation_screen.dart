@@ -22,17 +22,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   GamificationViewModel? _gamificationVm;
 
   @override
-  void initState() {
-    super.initState();
-    // Create ViewModel once in initState to avoid recreation on setState
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_gamificationVm == null) {
       final gamRepo = context.read<GamificationRepository?>();
       if (gamRepo != null) {
-        setState(() {
-          _gamificationVm = GamificationViewModel(repository: gamRepo);
-        });
+        _gamificationVm = GamificationViewModel(repository: gamRepo);
       }
-    });
+    }
   }
 
   @override

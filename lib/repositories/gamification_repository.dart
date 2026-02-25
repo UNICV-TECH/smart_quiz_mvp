@@ -60,6 +60,11 @@ abstract class GamificationRepository {
     required String templateId,
   });
 
+  Future<Set<String>> getAttemptedTemplateIds({
+    required String userId,
+    required List<String> templateIds,
+  });
+
   // Season history
   Future<List<SeasonHistoryEntry>> getUserSeasonHistory({
     required String userId,

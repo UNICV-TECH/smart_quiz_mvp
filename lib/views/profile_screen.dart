@@ -10,31 +10,53 @@ import '../viewmodels/gamification_view_model.dart';
 import '../viewmodels/profile_view_model.dart';
 import '../services/auth_service.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final gamRepo = context.read<GamificationRepository?>();
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final ProfileViewModel _profileVm;
+  GamificationViewModel? _gamVm;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileVm = ProfileViewModel()..loadUserProfile();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_gamVm == null) {
+      final gamRepo = context.read<GamificationRepository?>();
+      if (gamRepo != null) {
+        final userId = context.read<SessionManager>().currentUser?.id;
+        _gamVm = GamificationViewModel(repository: gamRepo);
+        if (userId != null) {
+          _gamVm!.loadUserGamification(userId);
+          _gamVm!.loadSeasonHistory(userId);
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _profileVm.dispose();
+    _gamVm?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => ProfileViewModel()..loadUserProfile(),
-        ),
-        if (gamRepo != null)
-          ChangeNotifierProvider(
-            create: (_) {
-              final userId =
-                  context.read<SessionManager>().currentUser?.id;
-              final vm = GamificationViewModel(repository: gamRepo);
-              if (userId != null) {
-                vm.loadUserGamification(userId);
-                vm.loadSeasonHistory(userId);
-              }
-              return vm;
-            },
-          ),
+        ChangeNotifierProvider<ProfileViewModel>.value(value: _profileVm),
+        if (_gamVm != null)
+          ChangeNotifierProvider<GamificationViewModel>.value(value: _gamVm!),
       ],
       child: const _ProfileViewBody(),
     );
@@ -163,7 +185,9 @@ class _ProfileViewBody extends StatelessWidget {
                               const SizedBox(height: 20),
 
                               // Gamification card
-                              _buildGamificationCard(context),
+                              Builder(
+                                builder: (ctx) => _buildGamificationCard(ctx),
+                              ),
 
                               const SizedBox(height: 20),
 
@@ -234,11 +258,11 @@ class _ProfileViewBody extends StatelessWidget {
                 children: [
                   Image.asset(
                     level.medalAsset,
-                    width: 48,
-                    height: 48,
+                    width: 64,
+                    height: 64,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.military_tech,
-                      size: 48,
+                      size: 64,
                       color: Color(0xFF4CAF50),
                     ),
                   ),
@@ -327,11 +351,11 @@ class _ProfileViewBody extends StatelessWidget {
                 children: [
                   Image.asset(
                     entryLevel.medalAsset,
-                    width: 28,
-                    height: 28,
+                    width: 36,
+                    height: 36,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.military_tech,
-                      size: 28,
+                      size: 36,
                       color: Color(0xFF4CAF50),
                     ),
                   ),

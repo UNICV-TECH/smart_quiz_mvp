@@ -12,8 +12,8 @@ class GamificationViewModel extends ChangeNotifier {
 
   final GamificationRepository _repository;
 
-  // State
-  bool _loading = false;
+  // State — use counter so concurrent operations don't clobber each other
+  int _loadingCount = 0;
   String? _error;
   GamificationSeason? _activeSeason;
   double _userPoints = 0;
@@ -33,7 +33,7 @@ class GamificationViewModel extends ChangeNotifier {
   List<SeasonHistoryEntry> _seasonHistory = [];
 
   // Getters
-  bool get loading => _loading;
+  bool get loading => _loadingCount > 0;
   String? get error => _error;
   GamificationSeason? get activeSeason => _activeSeason;
   double get userPoints => _userPoints;
@@ -49,7 +49,7 @@ class GamificationViewModel extends ChangeNotifier {
   // ── Load user gamification data ─────────────────────────
 
   Future<void> loadUserGamification(String userId) async {
-    _loading = true;
+    _loadingCount++;
     _error = null;
     notifyListeners();
 
@@ -68,7 +68,7 @@ class GamificationViewModel extends ChangeNotifier {
       _error = e.toString();
       debugPrint('Failed to load user gamification: $e');
     } finally {
-      _loading = false;
+      _loadingCount--;
       notifyListeners();
     }
   }
@@ -81,7 +81,7 @@ class GamificationViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    _loading = true;
+    _loadingCount++;
     _error = null;
     notifyListeners();
 
@@ -93,7 +93,7 @@ class GamificationViewModel extends ChangeNotifier {
       _error = e.toString();
       debugPrint('Failed to load global ranking: $e');
     } finally {
-      _loading = false;
+      _loadingCount--;
       notifyListeners();
     }
   }
@@ -104,7 +104,7 @@ class GamificationViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    _loading = true;
+    _loadingCount++;
     _error = null;
     notifyListeners();
 
@@ -117,7 +117,7 @@ class GamificationViewModel extends ChangeNotifier {
       _error = e.toString();
       debugPrint('Failed to load course ranking: $e');
     } finally {
-      _loading = false;
+      _loadingCount--;
       notifyListeners();
     }
   }
@@ -128,7 +128,7 @@ class GamificationViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    _loading = true;
+    _loadingCount++;
     _error = null;
     notifyListeners();
 
@@ -141,7 +141,7 @@ class GamificationViewModel extends ChangeNotifier {
       _error = e.toString();
       debugPrint('Failed to load template ranking: $e');
     } finally {
-      _loading = false;
+      _loadingCount--;
       notifyListeners();
     }
   }
@@ -149,24 +149,25 @@ class GamificationViewModel extends ChangeNotifier {
   // ── Templates ───────────────────────────────────────────
 
   Future<void> loadPublishedTemplates(String userId) async {
+    _loadingCount++;
+    notifyListeners();
+
     try {
       _publishedTemplates = await _repository.getPublishedTemplates();
 
-      // Check which templates the user attempted
-      _attemptedTemplateIds = {};
-      for (final template in _publishedTemplates) {
-        final attempted = await _repository.hasUserAttemptedTemplate(
-          userId: userId,
-          templateId: template.id,
-        );
-        if (attempted) {
-          _attemptedTemplateIds.add(template.id);
-        }
-      }
+      // Batch query instead of N+1
+      final ids = _publishedTemplates.map((t) => t.id).toList();
+      _attemptedTemplateIds = await _repository.getAttemptedTemplateIds(
+        userId: userId,
+        templateIds: ids,
+      );
       notifyListeners();
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to load published templates: $e');
+      notifyListeners();
+    } finally {
+      _loadingCount--;
       notifyListeners();
     }
   }
@@ -174,12 +175,16 @@ class GamificationViewModel extends ChangeNotifier {
   // ── Season History ──────────────────────────────────────
 
   Future<void> loadSeasonHistory(String userId) async {
+    _loadingCount++;
+    notifyListeners();
+
     try {
       _seasonHistory = await _repository.getUserSeasonHistory(userId: userId);
-      notifyListeners();
     } catch (e) {
       _error = e.toString();
       debugPrint('Failed to load season history: $e');
+    } finally {
+      _loadingCount--;
       notifyListeners();
     }
   }

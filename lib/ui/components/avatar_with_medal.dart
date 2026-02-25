@@ -14,8 +14,9 @@ class AvatarWithMedal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Add extra padding to accommodate medal overflow
-    final totalSize = medalAsset != null ? size + 4 : size;
+    final medalSize = size * 0.65;
+    // Extra space so the medal overlay is not clipped by parent
+    final totalSize = medalAsset != null ? size + medalSize * 0.25 : size;
     return SizedBox(
       width: totalSize,
       height: totalSize,
@@ -52,11 +53,11 @@ class AvatarWithMedal extends StatelessWidget {
               right: -2,
               child: Image.asset(
                 medalAsset!,
-                width: size * 0.5,
-                height: size * 0.5,
+                width: medalSize,
+                height: medalSize,
                 errorBuilder: (_, __, ___) => Icon(
                   Icons.military_tech,
-                  size: size * 0.45,
+                  size: medalSize * 0.85,
                   color: const Color(0xFFFFA000),
                 ),
               ),

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/gamification_season.dart';
@@ -38,70 +37,60 @@ class SupabaseGamificationRepository implements GamificationRepository {
     required double timeBonus,
     required double totalPoints,
   }) async {
-    // 1. Resolve exam_template_id from exam table
+    // 1. Resolve exam_template_id from exam table (do NOT catch — wrong
+    //    comparison scope is worse than a visible error)
     String? examTemplateId;
-    try {
-      final examRow = await _client
-          .from('exam')
-          .select('id_exam_template')
-          .eq('id', examId)
-          .maybeSingle();
-      examTemplateId = examRow?['id_exam_template'] as String?;
-    } catch (e) {
-      debugPrint('Could not resolve exam_template_id: $e');
+    final examRow = await _client
+        .from('exam')
+        .select('id_exam_template')
+        .eq('id', examId)
+        .maybeSingle();
+    examTemplateId = examRow?['id_exam_template'] as String?;
+
+    // 2. Check previous BEST score for retake comparison
+    double previousBest = 0;
+    List<dynamic> previousRecords;
+    if (examTemplateId != null) {
+      previousRecords = await _client
+          .from('user_gamification_points')
+          .select('total_points')
+          .eq('user_id', userId)
+          .eq('season_id', seasonId)
+          .eq('exam_template_id', examTemplateId);
+    } else {
+      previousRecords = await _client
+          .from('user_gamification_points')
+          .select('total_points')
+          .eq('user_id', userId)
+          .eq('season_id', seasonId)
+          .eq('exam_id', examId);
     }
 
-    // 2. Check previous points for retake comparison
+    // Sum all previous records (each stores only the delta that was awarded)
     double previousSum = 0;
-    try {
-      List<dynamic> previousRecords;
-      if (examTemplateId != null) {
-        // Template exam: compare by exam_template_id
-        previousRecords = await _client
-            .from('user_gamification_points')
-            .select('total_points')
-            .eq('user_id', userId)
-            .eq('season_id', seasonId)
-            .eq('exam_template_id', examTemplateId);
-      } else {
-        // Regular exam: compare by exam_id
-        previousRecords = await _client
-            .from('user_gamification_points')
-            .select('total_points')
-            .eq('user_id', userId)
-            .eq('season_id', seasonId)
-            .eq('exam_id', examId);
-      }
-
-      for (final record in previousRecords) {
-        previousSum +=
-            (record['total_points'] as num?)?.toDouble() ?? 0;
-      }
-    } catch (e) {
-      debugPrint('Could not fetch previous points: $e');
+    for (final record in previousRecords) {
+      previousSum += (record['total_points'] as num?)?.toDouble() ?? 0;
     }
+    previousBest = previousSum;
 
     // 3. Compare: only save if improved
-    final previousPoints = previousSum;
-    if (totalPoints <= previousSum) {
-      // Did not improve — do not save new record
+    if (totalPoints <= previousBest) {
       return SavePointsResult(
-        accumulatedPoints: previousSum,
-        previousPoints: previousSum,
+        accumulatedPoints: previousBest,
+        previousPoints: previousBest,
         didImprove: false,
         pointsSaved: 0,
       );
     }
 
-    // 4. Save only the difference
-    final difference = totalPoints - previousSum;
-    await _client.from('user_gamification_points').insert({
+    // 4. Save only the difference, but store original attempt values for audit
+    final difference = totalPoints - previousBest;
+    final insertData = <String, dynamic>{
       'user_id': userId,
       'season_id': seasonId,
       'attempt_id': attemptId,
       'exam_id': examId,
       'course_id': courseId,
-      'exam_template_id': examTemplateId,
       'question_count': questionCount,
       'correct_count': correctCount,
       'percentage_score': percentageScore,
@@ -109,12 +98,16 @@ class SupabaseGamificationRepository implements GamificationRepository {
       'base_points': basePoints,
       'time_bonus': timeBonus,
       'total_points': difference,
-    });
+    };
+    if (examTemplateId != null) {
+      insertData['exam_template_id'] = examTemplateId;
+    }
+    await _client.from('user_gamification_points').insert(insertData);
 
-    final accumulatedPoints = previousSum + difference;
+    final accumulatedPoints = previousBest + difference;
     return SavePointsResult(
       accumulatedPoints: accumulatedPoints,
-      previousPoints: previousPoints,
+      previousPoints: previousBest,
       didImprove: true,
       pointsSaved: difference,
     );
@@ -243,6 +236,22 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .maybeSingle();
 
     return row != null;
+  }
+
+  @override
+  Future<Set<String>> getAttemptedTemplateIds({
+    required String userId,
+    required List<String> templateIds,
+  }) async {
+    if (templateIds.isEmpty) return {};
+    final rows = await _client
+        .from('user_gamification_points')
+        .select('exam_template_id')
+        .eq('user_id', userId)
+        .inFilter('exam_template_id', templateIds);
+    return rows
+        .map((r) => r['exam_template_id'] as String)
+        .toSet();
   }
 
   // ── Season History ──────────────────────────────────────

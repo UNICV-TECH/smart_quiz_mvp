@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS public.gamification_season (
   ends_at timestamp without time zone NOT NULL,
   is_active boolean NOT NULL DEFAULT false,
   created_at timestamp without time zone NOT NULL DEFAULT NOW(),
-  CONSTRAINT gs_name_unique UNIQUE (name)
+  CONSTRAINT gs_name_unique UNIQUE (name),
+  CONSTRAINT gs_ends_after_starts CHECK (ends_at > starts_at)
 );
 
 -- 2. User Gamification Points
@@ -23,15 +24,16 @@ CREATE TABLE IF NOT EXISTS public.user_gamification_points (
   exam_id uuid NOT NULL,
   course_id uuid NOT NULL,
   exam_template_id uuid,
-  question_count integer NOT NULL,
-  correct_count integer NOT NULL,
-  percentage_score numeric(5,2) NOT NULL,
-  duration_seconds integer NOT NULL,
-  base_points numeric(6,2) NOT NULL DEFAULT 0,
-  time_bonus numeric(6,2) NOT NULL DEFAULT 0,
-  total_points numeric(6,2) NOT NULL DEFAULT 0,
+  question_count integer NOT NULL CHECK (question_count > 0),
+  correct_count integer NOT NULL CHECK (correct_count >= 0),
+  percentage_score numeric(5,2) NOT NULL CHECK (percentage_score >= 0 AND percentage_score <= 100),
+  duration_seconds integer NOT NULL CHECK (duration_seconds >= 0),
+  base_points numeric(6,2) NOT NULL DEFAULT 0 CHECK (base_points >= 0),
+  time_bonus numeric(6,2) NOT NULL DEFAULT 0 CHECK (time_bonus >= 0),
+  total_points numeric(6,2) NOT NULL DEFAULT 0 CHECK (total_points >= 0),
   created_at timestamp without time zone NOT NULL DEFAULT NOW(),
-  CONSTRAINT ugp_attempt_unique UNIQUE (attempt_id)
+  CONSTRAINT ugp_attempt_unique UNIQUE (attempt_id),
+  CONSTRAINT ugp_correct_le_count CHECK (correct_count <= question_count)
 );
 
 -- 3. Indexes
@@ -44,9 +46,13 @@ CREATE INDEX IF NOT EXISTS idx_ugp_user_season ON public.user_gamification_point
 CREATE INDEX IF NOT EXISTS idx_ugp_user_exam ON public.user_gamification_points(user_id, exam_id, season_id);
 CREATE INDEX IF NOT EXISTS idx_ugp_user_template ON public.user_gamification_points(user_id, exam_template_id, season_id);
 
--- 4. RPC: get_or_create_active_season
+-- 4. RPC: get_or_create_active_season (with search_path + advisory lock)
 CREATE OR REPLACE FUNCTION public.get_or_create_active_season()
-RETURNS public.gamification_season AS $$
+RETURNS public.gamification_season
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
   v_season public.gamification_season;
   v_now timestamp := NOW();
@@ -57,19 +63,27 @@ DECLARE
   v_starts_at timestamp;
   v_ends_at timestamp;
 BEGIN
+  -- Advisory lock to prevent concurrent creation
+  PERFORM pg_advisory_xact_lock(hashtext('gamification_season_create'));
+
   -- Try to find active season
   SELECT * INTO v_season FROM public.gamification_season WHERE is_active = true LIMIT 1;
   IF FOUND THEN RETURN v_season; END IF;
 
-  -- Determine current semester
+  -- Determine current semester (January belongs to previous year's sem 2)
   IF v_month BETWEEN 2 AND 7 THEN
     v_semester := 1;
     v_starts_at := make_date(v_year, 2, 1);
-    v_ends_at := make_date(v_year, 7, 31) + interval '23:59:59';
+    v_ends_at := make_date(v_year, 8, 1) - interval '1 second';
+  ELSIF v_month = 1 THEN
+    v_semester := 2;
+    v_year := v_year - 1;
+    v_starts_at := make_date(v_year, 8, 1);
+    v_ends_at := make_date(v_year + 1, 1, 1) - interval '1 second';
   ELSE
     v_semester := 2;
     v_starts_at := make_date(v_year, 8, 1);
-    v_ends_at := make_date(v_year, 12, 31) + interval '23:59:59';
+    v_ends_at := make_date(v_year + 1, 1, 1) - interval '1 second';
   END IF;
   v_name := v_year || '.' || v_semester;
 
@@ -84,7 +98,7 @@ BEGIN
 
   RETURN v_season;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- 5. Views
 
@@ -125,13 +139,13 @@ JOIN public."user" u ON u.id = ugp.user_id
 JOIN public.course c ON c.id = ugp.course_id
 GROUP BY ugp.user_id, ugp.season_id, ugp.course_id, u.first_name, u.avatar_url, c.name;
 
--- Template ranking view
+-- Template ranking view (LEFT JOIN so deleted templates still show)
 CREATE OR REPLACE VIEW public.ranking_template_view AS
 SELECT
   ugp.user_id,
   ugp.season_id,
   ugp.exam_template_id,
-  et.name AS template_name,
+  COALESCE(et.name, 'Template removido') AS template_name,
   COALESCE(u.first_name, 'Aluno') AS user_name,
   u.avatar_url,
   SUM(ugp.total_points)::numeric(8,2) AS season_points,
@@ -142,7 +156,7 @@ SELECT
   )::int AS rank_position
 FROM public.user_gamification_points ugp
 JOIN public."user" u ON u.id = ugp.user_id
-JOIN public.exam_template et ON et.id = ugp.exam_template_id
+LEFT JOIN public.exam_template et ON et.id = ugp.exam_template_id
 WHERE ugp.exam_template_id IS NOT NULL
 GROUP BY ugp.user_id, ugp.season_id, ugp.exam_template_id, et.name, u.first_name, u.avatar_url;
 
@@ -150,6 +164,13 @@ GROUP BY ugp.user_id, ugp.season_id, ugp.exam_template_id, et.name, u.first_name
 
 ALTER TABLE public.gamification_season ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_gamification_points ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies before recreating (idempotent)
+DROP POLICY IF EXISTS "gamification_season_select" ON public.gamification_season;
+DROP POLICY IF EXISTS "ugp_select" ON public.user_gamification_points;
+DROP POLICY IF EXISTS "ugp_insert" ON public.user_gamification_points;
+DROP POLICY IF EXISTS "ugp_deny_update" ON public.user_gamification_points;
+DROP POLICY IF EXISTS "ugp_deny_delete" ON public.user_gamification_points;
 
 -- Season: readable by all authenticated users
 CREATE POLICY "gamification_season_select" ON public.gamification_season
@@ -164,6 +185,13 @@ CREATE POLICY "ugp_insert" ON public.user_gamification_points
   FOR INSERT TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+-- Points: deny update and delete (immutable records)
+CREATE POLICY "ugp_deny_update" ON public.user_gamification_points
+  FOR UPDATE TO authenticated USING (false);
+
+CREATE POLICY "ugp_deny_delete" ON public.user_gamification_points
+  FOR DELETE TO authenticated USING (false);
+
 -- Grant execute on RPC to authenticated users
 GRANT EXECUTE ON FUNCTION public.get_or_create_active_season() TO authenticated;
 
@@ -174,5 +202,5 @@ GRANT SELECT ON public.ranking_template_view TO authenticated;
 
 -- 7. Seed: Season 2026.1
 INSERT INTO public.gamification_season (name, starts_at, ends_at, is_active)
-VALUES ('2026.1', '2026-02-01 00:00:00', '2026-07-31 23:59:59', true)
+VALUES ('2026.1', '2026-02-01 00:00:00', '2026-08-01 00:00:00'::timestamp - interval '1 second', true)
 ON CONFLICT (name) DO NOTHING;

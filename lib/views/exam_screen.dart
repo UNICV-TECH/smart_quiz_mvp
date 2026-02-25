@@ -609,6 +609,15 @@ class _ExamScreenState extends State<ExamScreen> {
       if (gamRepo != null) {
         try {
           final season = await gamRepo.getOrCreateActiveSeason();
+          if (!mounted) return;
+
+          final rawDuration = results['durationSeconds'];
+          final safeDuration = rawDuration is int
+              ? rawDuration
+              : rawDuration is num
+                  ? rawDuration.toInt()
+                  : 0;
+
           final saveResult = await gamRepo.saveAttemptPoints(
             userId: results['userId'] as String,
             seasonId: season.id,
@@ -619,7 +628,7 @@ class _ExamScreenState extends State<ExamScreen> {
             correctCount: results['correctCount'] as int,
             percentageScore:
                 (results['percentageScore'] as num).toDouble(),
-            durationSeconds: results['durationSeconds'] as int,
+            durationSeconds: safeDuration,
             basePoints:
                 (results['gamificationBasePoints'] as num).toDouble(),
             timeBonus:
@@ -627,6 +636,8 @@ class _ExamScreenState extends State<ExamScreen> {
             totalPoints:
                 (results['gamificationTotalPoints'] as num).toDouble(),
           );
+          if (!mounted) return;
+
           results['gamificationAccumulatedPoints'] =
               saveResult.accumulatedPoints;
           results['gamificationPreviousPoints'] =

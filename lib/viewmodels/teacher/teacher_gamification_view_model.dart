@@ -61,7 +61,11 @@ class TeacherGamificationViewModel extends ChangeNotifier {
   }
 
   Future<void> selectTemplate(ExamTemplate template) async {
-    if (_activeSeason == null) return;
+    if (_activeSeason == null) {
+      _error = 'Temporada não disponível. Recarregue a página.';
+      notifyListeners();
+      return;
+    }
 
     _selectedTemplate = template;
     _loading = true;

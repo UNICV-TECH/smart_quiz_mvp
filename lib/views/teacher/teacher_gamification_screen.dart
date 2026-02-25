@@ -277,7 +277,7 @@ class _TeacherGamificationBody extends StatelessWidget {
 
   Widget _buildRankingItem(RankingEntry entry) {
     final level = GamificationLevel.fromPoints(entry.seasonPoints);
-    final isTop3 = entry.rankPosition <= 3;
+    final isTop3 = entry.rankPosition >= 1 && entry.rankPosition <= 3;
 
     Color? positionColor;
     if (entry.rankPosition == 1) positionColor = const Color(0xFFFFD700);
@@ -302,8 +302,9 @@ class _TeacherGamificationBody extends StatelessWidget {
                   ? positionColor?.withAlpha(40)
                   : const Color(0xFFF5F5F5),
               shape: BoxShape.circle,
-              border:
-                  isTop3 ? Border.all(color: positionColor!, width: 2) : null,
+              border: isTop3 && positionColor != null
+                  ? Border.all(color: positionColor, width: 2)
+                  : null,
             ),
             alignment: Alignment.center,
             child: Text(
@@ -322,7 +323,7 @@ class _TeacherGamificationBody extends StatelessWidget {
           AvatarWithMedal(
             avatarUrl: entry.avatarUrl,
             medalAsset: level.medalAsset,
-            size: 36,
+            size: 40,
           ),
           const SizedBox(width: 12),
 

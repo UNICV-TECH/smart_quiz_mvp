@@ -18,11 +18,14 @@ class GamificationSeason {
   factory GamificationSeason.fromJson(Map<String, dynamic> json) {
     return GamificationSeason(
       id: json['id'] as String,
-      name: json['name'] as String,
-      startsAt: DateTime.parse(json['starts_at'] as String),
-      endsAt: DateTime.parse(json['ends_at'] as String),
-      isActive: json['is_active'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      name: json['name'] as String? ?? '',
+      startsAt: DateTime.parse(_normalizeTimestamp(json['starts_at'] as String)),
+      endsAt: DateTime.parse(_normalizeTimestamp(json['ends_at'] as String)),
+      isActive: json['is_active'] as bool? ?? false,
+      createdAt: DateTime.parse(_normalizeTimestamp(json['created_at'] as String)),
     );
   }
+
+  /// Normalizes Postgres-style timestamps (space separator) to ISO 8601.
+  static String _normalizeTimestamp(String ts) => ts.replaceFirst(' ', 'T');
 }
