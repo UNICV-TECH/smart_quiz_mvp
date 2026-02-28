@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
+
+import '../viewmodels/reset_password_viewmodel.dart';
+import '../routes/app_routes.dart';
+import '../services/session_manager.dart';
+
 import '../ui/components/default_button_orange.dart';
+import '../ui/components/default_inline_message.dart';
 import '../ui/components/default_password_input_47.dart';
+import '../ui/components/feedback_severity.dart';
 import '../ui/theme/app_color.dart';
 
 class ResetPasswordScreen2 extends StatefulWidget {
@@ -14,106 +20,55 @@ class ResetPasswordScreen2 extends StatefulWidget {
 
 class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-  bool _isLoading = false;
-  String? _passwordError;
-  String? _confirmError;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     _passwordController.dispose();
-    _confirmController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  bool _meetsCriteria(String pwd) {
-    if (pwd.length < 8) return false;
-    if (!RegExp(r'[A-Z]').hasMatch(pwd)) return false;
-    if (!RegExp(r'\d').hasMatch(pwd)) return false;
-    return true;
-  }
+  Future<void> _handleUpdate() async {
+    final vm = context.read<ResetPasswordViewModel>();
+    final sessionManager = context.read<SessionManager>();
 
-  void _validateRealtime() {
-    final p = _passwordController.text;
-    final c = _confirmController.text;
+    vm.clear();
 
-    setState(() {
-      _passwordError = null;
-      _confirmError = null;
-
-      if (p.isNotEmpty && !_meetsCriteria(p)) {
-        _passwordError = 'Senha deve ter ≥8 caracteres, 1 maiúscula e 1 número';
-      }
-
-      if (c.isNotEmpty && p != c) {
-        _confirmError = 'As senhas não coincidem';
-      }
-    });
-  }
-
-  bool get _canSubmit {
-    final p = _passwordController.text;
-    final c = _confirmController.text;
-    return p.isNotEmpty &&
-        c.isNotEmpty &&
-        p == c &&
-        _meetsCriteria(p) &&
-        !_isLoading;
-  }
-
-  Future<void> _submit() async {
-    _validateRealtime();
-    if (!_canSubmit) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final result = await authService.updatePassword(_passwordController.text);
-
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (!result.success) {
-      setState(() {
-        _passwordError = result.message;
-      });
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Mostra dialog de sucesso com botão OK que redireciona para login
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Senha alterada'),
-        content: const Text('Senha alterada com sucesso!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+    await vm.updatePassword(
+      _passwordController.text.trim(),
     );
+
+    if (!mounted) return;
+
+    if (vm.isSuccess) {
+      // Faz logoff para garantir que a nova sessão exija o login novo
+      await sessionManager.signOut(redirect: false);
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (_) => false,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<ResetPasswordViewModel>();
+    final sessionManager = context.read<SessionManager>();
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Imagem de fundo (igual ao layout do login/reset1)
+          // Fundo com imagem
           Container(
             width: size.width,
             height: size.height,
@@ -136,10 +91,9 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      // Espaço superior
                       const SizedBox(height: 42),
 
-                      // Logo centralizado
+                      // Logo
                       Center(
                         child: Image.asset(
                           'assets/images/logo.webp',
@@ -151,93 +105,119 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
 
                       const Spacer(),
 
-                      // Container branco com formulário
+                      // Card Branco de Input
                       Container(
                         width: size.width,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 26.0, vertical: 40.0),
+                          horizontal: 26,
+                          vertical: 40,
+                        ),
                         decoration: const BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(207),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Título com ícone de voltar
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.chevron_left,
-                                      color: AppColors.green,
-                                      size: 40,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: BoxConstraints(),
-                                  ),
-                                ),
-                                Text(
-                                  'Nova Senha',
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Center(
+                                child: Text(
+                                  'Criar nova senha',
                                   style: TextStyle(
                                     color: AppColors.green,
-                                    fontSize: 40,
+                                    fontSize: 32,
                                     fontFamily: 'Open Sans',
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            Text(
-                              'Crie sua nova senha. Ela deve ter ao menos 8 caracteres, incluir uma letra maiúscula e um número.',
-                              style: TextStyle(
-                                color: AppColors.secondaryDark,
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
                               ),
-                            ),
 
-                            const SizedBox(height: 24),
+                              const SizedBox(height: 30),
 
-                            // Campos de senha
-                            ComponentePasswordInput(
-                              controller: _passwordController,
-                              labelText: 'Nova senha',
-                              hintText: 'Digite a nova senha',
-                              errorMessage: _passwordError,
-                              onChanged: (_) => _validateRealtime(),
-                            ),
+                              // Campo: Nova Senha
+                              ComponentePasswordInput(
+                                controller: _passwordController,
+                                labelText: 'Nova senha',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Informe a nova senha';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Mínimo 6 caracteres';
+                                  }
+                                  return null;
+                                },
+                              ),
 
-                            const SizedBox(height: 20),
+                              const SizedBox(height: 20),
 
-                            ComponentePasswordInput(
-                              controller: _confirmController,
-                              labelText: 'Confirmar nova senha',
-                              hintText: 'Repita a nova senha',
-                              errorMessage: _confirmError,
-                              onChanged: (_) => _validateRealtime(),
-                            ),
+                              // Campo: Confirmar Nova Senha
+                              ComponentePasswordInput(
+                                controller: _confirmPasswordController,
+                                labelText: 'Confirmar nova senha',
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Confirme sua senha';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'As senhas não coincidem';
+                                  }
+                                  return null;
+                                },
+                              ),
 
-                            const SizedBox(height: 30),
+                              const SizedBox(height: 30),
 
-                            DefaultButtonOrange(
-                              texto: _isLoading ? 'Aguarde...' : 'Cadastrar',
-                              onPressed: _canSubmit ? _submit : null,
-                            ),
-                          ],
+                              // Botão de Salvar
+                              DefaultButtonOrange(
+                                texto: vm.isLoading
+                                    ? 'Salvando...'
+                                    : 'Salvar nova senha',
+                                onPressed: vm.isLoading ? null : _handleUpdate,
+                                tipo: vm.isLoading
+                                    ? BotaoTipo.desabilitado
+                                    : BotaoTipo.primario,
+                              ),
+
+                              // Mensagens de Erro/Sucesso
+                              if (vm.message != null) ...[
+                                const SizedBox(height: 16),
+                                DefaultInlineMessage(
+                                  message: vm.message!,
+                                  severity: vm.isSuccess
+                                      ? FeedbackSeverity.success
+                                      : FeedbackSeverity.error,
+                                  onDismissed: vm.clear,
+                                ),
+                              ],
+
+                              const SizedBox(height: 20),
+
+                              // Botão Voltar
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    await sessionManager.signOut(redirect: false);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      AppRoutes.login,
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Voltar para login',
+                                    style: TextStyle(
+                                      color: AppColors.orange,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

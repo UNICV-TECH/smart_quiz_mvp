@@ -5,10 +5,14 @@ import 'auth_repository.dart';
 import 'auth_repository_types.dart';
 
 class SupabaseAuthRepository implements AuthRepository {
-  SupabaseAuthRepository({required SupabaseClient client}) : _client = client;
+  SupabaseAuthRepository({required SupabaseClient client})
+      : _client = client;
 
   final SupabaseClient _client;
 
+  // =============================
+  // SIGN UP
+  // =============================
   @override
   Future<AuthRepositorySignUpResponse> signUp({
     required String email,
@@ -22,15 +26,16 @@ class SupabaseAuthRepository implements AuthRepository {
         data: {'full_name': name},
       );
 
-      // Criar registro na tabela user após signup bem-sucedido
       final user = response.user;
+
       if (user != null) {
         try {
-          // Separar nome em primeiro nome e sobrenome (se possível)
           final nameParts = name.trim().split(' ');
-          final firstName = nameParts.isNotEmpty ? nameParts.first : name;
-          final surname =
-              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+          final firstName =
+              nameParts.isNotEmpty ? nameParts.first : name;
+          final surname = nameParts.length > 1
+              ? nameParts.sublist(1).join(' ')
+              : null;
 
           await _client.from('user').upsert({
             'id': user.id,
@@ -41,9 +46,9 @@ class SupabaseAuthRepository implements AuthRepository {
             'updated_at': DateTime.now().toIso8601String(),
           });
 
-          debugPrint('Registro do usuário criado na tabela user: ${user.id}');
+          debugPrint(
+              'Registro do usuário criado na tabela user: ${user.id}');
         } catch (e) {
-          // Log do erro mas não falha o signup se não conseguir criar na tabela user
           debugPrint(
             'Erro ao criar registro na tabela user após signup: $e',
           );
@@ -66,10 +71,12 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 
+  // =============================
+  // RESET PASSWORD EMAIL (Versão com Hash #)
+  // =============================
   @override
   Future<void> resetPasswordForEmail(String email) async {
     try {
-      // Verificar se o e-mail existe na tabela user antes de enviar
       final existing = await _client
           .from('user')
           .select('id')
@@ -82,10 +89,23 @@ class SupabaseAuthRepository implements AuthRepository {
         );
       }
 
+      // Monta a URL base (localhost ou produção)
+      final String baseUrl = kIsWeb 
+          ? '${Uri.base.scheme}://${Uri.base.host}${Uri.base.hasPort ? ':${Uri.base.port}' : ''}'
+          : 'http://localhost:60377';
+
+      // 🔥 IMPORTANTE: Adicionamos /#/ antes da rota para o Flutter Web 
+      // conseguir processar a rota corretamente junto com os tokens do Supabase.
+      final String redirectUrl = '$baseUrl/#/reset_password2';
+      
+
       await _client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://smart-quiz-mvp.vercel.app/',
+        redirectTo: redirectUrl,
       );
+      
+      debugPrint('📧 E-mail enviado. Redirect configurado para: $redirectUrl');
+
     } on AuthRepositoryException {
       rethrow;
     } on AuthException catch (error) {
@@ -100,7 +120,9 @@ class SupabaseAuthRepository implements AuthRepository {
       );
     }
   }
-
+  // =============================
+  // UPDATE PASSWORD
+  // =============================
   @override
   Future<void> updatePassword(String newPassword) async {
     try {
@@ -120,6 +142,9 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 
+  // =============================
+  // SIGN IN
+  // =============================
   @override
   Future<AuthRepositorySignInResponse> signIn({
     required String email,
@@ -139,16 +164,9 @@ class SupabaseAuthRepository implements AuthRepository {
       }
 
       final rawFullName = user.userMetadata?['full_name'];
-      final fullName = rawFullName is String ? rawFullName : null;
+      final fullName =
+          rawFullName is String ? rawFullName : null;
 
-      if (rawFullName != null && fullName == null) {
-        debugPrint(
-          'SupabaseAuthRepository: unexpected full_name type '
-          '(${rawFullName.runtimeType}). Ignorando valor.',
-        );
-      }
-
-      // Garantir que o usuário existe na tabela user
       try {
         final existing = await _client
             .from('user')
@@ -157,11 +175,12 @@ class SupabaseAuthRepository implements AuthRepository {
             .maybeSingle();
 
         if (existing == null) {
-          // Separar nome em primeiro nome e sobrenome (se possível)
           final nameParts = (fullName ?? '').trim().split(' ');
-          final firstName = nameParts.isNotEmpty ? nameParts.first : fullName;
-          final surname =
-              nameParts.length > 1 ? nameParts.sublist(1).join(' ') : null;
+          final firstName =
+              nameParts.isNotEmpty ? nameParts.first : fullName;
+          final surname = nameParts.length > 1
+              ? nameParts.sublist(1).join(' ')
+              : null;
 
           await _client.from('user').upsert({
             'id': user.id,
@@ -177,7 +196,6 @@ class SupabaseAuthRepository implements AuthRepository {
           );
         }
       } catch (e) {
-        // Log do erro mas não falha o login se não conseguir criar na tabela user
         debugPrint(
           'Erro ao garantir registro na tabela user durante login: $e',
         );
@@ -191,13 +209,19 @@ class SupabaseAuthRepository implements AuthRepository {
         ),
       );
     } on AuthException catch (error) {
-      final normalizedMessage = error.message.toLowerCase();
+      final normalizedMessage =
+          error.message.toLowerCase();
       final errorCode = (error.code ?? '').toLowerCase();
       final statusCodeRaw = error.statusCode;
-      final statusCode =
-          statusCodeRaw != null ? int.tryParse(statusCodeRaw) : null;
-      final isInvalidCredentialsStatusCode =
-          statusCode == 400 || statusCode == 401;
+      final statusCode = statusCodeRaw != null
+          ? int.tryParse(statusCodeRaw)
+          : null;
+
+      final isInvalidCredentials =
+          statusCode == 400 ||
+              statusCode == 401 ||
+              errorCode == 'invalid_credentials' ||
+              normalizedMessage.contains('invalid login');
 
       if (errorCode == 'email_not_confirmed' ||
           normalizedMessage.contains('email not confirmed')) {
@@ -207,10 +231,7 @@ class SupabaseAuthRepository implements AuthRepository {
         );
       }
 
-      if (errorCode == 'invalid_credentials' ||
-          isInvalidCredentialsStatusCode ||
-          normalizedMessage.contains('invalid login credentials') ||
-          normalizedMessage.contains('invalid login')) {
+      if (isInvalidCredentials) {
         throw const AuthRepositoryException(
           'Credenciais inválidas. Verifique e tente novamente.',
           code: AuthRepositoryErrorCode.invalidCredentials,

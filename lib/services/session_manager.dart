@@ -1,117 +1,150 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../models/auth_user.dart' as local;
-import '../models/user_model.dart';
+import '../routes/app_routes.dart';
 
 class SessionManager extends ChangeNotifier {
-  SessionManager._({
-    required SupabaseClient? client,
-    required this.navigatorKey,
-  }) : _client = client;
-
-  factory SessionManager.enabled({
+  SessionManager.enabled({
     required SupabaseClient client,
     required GlobalKey<NavigatorState> navigatorKey,
-  }) {
-    final manager = SessionManager._(
-      client: client,
-      navigatorKey: navigatorKey,
-    );
-    manager._listenToAuthChanges();
-    return manager;
+  })  : _client = client,
+        _navigatorKey = navigatorKey,
+        _isEnabled = true {
+    _init();
   }
 
-  factory SessionManager.disabled({
+  SessionManager.disabled({
     required GlobalKey<NavigatorState> navigatorKey,
-  }) {
-    return SessionManager._(
-      client: null,
-      navigatorKey: navigatorKey,
-    );
+  })  : _client = null,
+        _navigatorKey = navigatorKey,
+        _isEnabled = false {
+    _isInitialized = true; // Se desabilitado, já nasce inicializado
   }
 
   final SupabaseClient? _client;
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState> _navigatorKey;
+  final bool _isEnabled;
 
-  local.AuthUser? _currentUser;
-  bool _initialized = false;
-  bool _handlingUnauthorized = false;
+  Session? _currentSession;
+  bool _isInPasswordRecovery = false;
+  bool _isInitialized = false; // 🔥 Adicionado para o ProtectedRoute
   StreamSubscription<AuthState>? _authSubscription;
 
-  local.AuthUser? get currentUser => _currentUser;
-  bool get isAuthenticated => _currentUser != null;
-  bool get initialized => _initialized;
+  // --- Getters de Estado ---
+  bool get isAuthenticated => _currentSession != null && !_isInPasswordRecovery;
+  bool get isInPasswordRecovery => _isInPasswordRecovery;
+  bool get initialized => _isInitialized; // 🔥 Resolve o erro do ProtectedRoute
+  Session? get currentSession => _currentSession;
 
-  /// Returns the user's role (student, teacher, or admin)
-  UserRole get userRole => _currentUser?.role ?? UserRole.student;
+  // --- Getters de Compatibilidade ---
+  
+  /// Retorna o usuário logado (Resolve erro: sessionManager.currentUser)
+  User? get currentUser => _currentSession?.user;
+  User? get user => _currentSession?.user;
 
-  /// Checks if the current user is a teacher or admin
-  bool get isTeacher => _currentUser?.isTeacher ?? false;
+  /// Atalho para o ID do usuário
+  String? get userId => _currentSession?.user.id;
 
-  /// Checks if the current user is an admin
-  bool get isAdmin => _currentUser?.isAdmin ?? false;
+  // --- Métodos de Inicialização ---
 
+  /// 🔥 CORREÇÃO PARA splash_screen e ProtectedRoute
   Future<void> initialize() async {
-    if (_initialized) return;
-    if (_client != null) {
-      final session = _client!.auth.currentSession;
-      _updateFromSession(session);
-    } else {
-      _currentUser = null;
-    }
-    _initialized = true;
+    if (!_isEnabled) return;
+    _currentSession = _client?.auth.currentSession;
+    _isInitialized = true;
     notifyListeners();
+    await Future.delayed(Duration.zero);
   }
 
-  void setAuthenticatedUser(local.AuthUser user) {
-    _currentUser = user;
-    notifyListeners();
-  }
-
-  Future<void> signOut({bool redirect = true}) async {
-    if (_client != null) {
-      try {
-        await _client!.auth.signOut();
-      } catch (error) {
-        debugPrint('SessionManager: erro ao fazer signOut: $error');
-      }
-    }
-    _updateFromSession(null);
-    notifyListeners();
-    if (redirect) {
-      _redirectToLogin();
-    }
-  }
-
-  Future<void> handleUnauthorized({String? reason}) async {
-    if (_client == null) {
-      if (isAuthenticated) {
-        await signOut();
-      }
+  void _init() {
+    if (!_isEnabled) {
+      _isInitialized = true;
+      notifyListeners();
       return;
     }
-    if (_handlingUnauthorized) return;
-    _handlingUnauthorized = true;
-    debugPrint(
-        'SessionManager: sessão inválida detectada${reason != null ? " ($reason)" : ""}. Executando signOut.');
-    try {
-      await signOut();
-    } finally {
-      _handlingUnauthorized = false;
-    }
+    _currentSession = _client?.auth.currentSession;
+    _isInitialized = true; // 🔥 Marca como carregado logo no início
+    _listenToAuthChanges();
+    notifyListeners();
   }
 
-  bool handleSupabaseError(Object error) {
-    final isUnauthorized = _isUnauthorizedError(error);
-    if (isUnauthorized) {
-      unawaited(handleUnauthorized(
-        reason: error.runtimeType.toString(),
-      ));
+  /// 🔥 CORREÇÃO PARA ViewModels (Tratamento de erros)
+  String handleSupabaseError(dynamic error) {
+    if (error is AuthException) {
+      switch (error.code) {
+        case 'invalid_credentials':
+          return 'E-mail ou senha inválidos.';
+        case 'user_not_found':
+          return 'Usuário não encontrado.';
+        default:
+          return error.message;
+      }
     }
-    return isUnauthorized;
+    return error.toString();
+  }
+
+  // --- Listener de Mudanças de Autenticação ---
+
+  void _listenToAuthChanges() {
+    _authSubscription = _client?.auth.onAuthStateChange.listen((data) {
+      final authEvent = data.event;
+      
+      debugPrint('🔔 Supabase Auth Event: $authEvent');
+
+      if (authEvent == AuthChangeEvent.signedOut) {
+        _isInPasswordRecovery = false;
+        _currentSession = null;
+        notifyListeners();
+        _redirectToLogin();
+        return;
+      }
+
+      if (authEvent == AuthChangeEvent.passwordRecovery) {
+        _isInPasswordRecovery = true;
+        _currentSession = data.session;
+        notifyListeners();
+        _redirectToResetPassword(); 
+        return;
+      }
+
+      if (authEvent == AuthChangeEvent.signedIn || 
+          authEvent == AuthChangeEvent.tokenRefreshed ||
+          authEvent == AuthChangeEvent.userUpdated) {
+        _currentSession = data.session;
+        _isInPasswordRecovery = false;
+        notifyListeners();
+      }
+    });
+  }
+
+  // --- Navegação Global ---
+
+  void _redirectToLogin() {
+    _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppRoutes.login,
+      (route) => false,
+    );
+  }
+
+  void _redirectToResetPassword() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.resetPassword2,
+        (route) => false,
+      );
+    });
+  }
+
+  // --- Ações ---
+
+  Future<void> signOut({bool redirect = true}) async {
+    await _client?.auth.signOut();
+    if (redirect) {
+      _isInPasswordRecovery = false;
+      _currentSession = null;
+      notifyListeners();
+      _redirectToLogin();
+    }
   }
 
   @override
@@ -119,141 +152,13 @@ class SessionManager extends ChangeNotifier {
     _authSubscription?.cancel();
     super.dispose();
   }
+}
 
-  void _listenToAuthChanges() {
-    _authSubscription = _client?.auth.onAuthStateChange.listen((event) {
-      final authEvent = event.event;
-      if (authEvent == AuthChangeEvent.signedOut) {
-        _updateFromSession(null);
-        notifyListeners();
-        _redirectToLogin();
-        return;
-      }
+// --- Extensão para as Views ---
 
-      if (authEvent == AuthChangeEvent.passwordRecovery) {
-        _updateFromSession(event.session);
-        notifyListeners();
-        _navigateTo('/reset_password2');
-        return;
-      }
-
-      if (authEvent == AuthChangeEvent.signedIn ||
-          authEvent == AuthChangeEvent.tokenRefreshed ||
-          authEvent == AuthChangeEvent.userUpdated) {
-        _updateFromSession(event.session);
-        notifyListeners();
-      }
-    });
-  }
-
-  void _updateFromSession(Session? session) {
-    if (session == null) {
-      _currentUser = null;
-      return;
-    }
-
-    final supabaseUser = session.user;
-    final email = supabaseUser.email ?? '';
-    final metadata = supabaseUser.userMetadata ?? {};
-    final name = _extractFullName(metadata);
-
-    _currentUser = local.AuthUser(
-      id: supabaseUser.id,
-      email: email,
-      name: name,
-    );
-
-    // Fetch user role from database asynchronously
-    _fetchUserRole(supabaseUser.id);
-  }
-
-  Future<void> _fetchUserRole(String userId) async {
-    if (_client == null) return;
-
-    try {
-      final response = await _client!
-          .from('user')
-          .select('role')
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (response != null && _currentUser != null) {
-        final role = UserRole.fromString(response['role'] as String?);
-        _currentUser = _currentUser!.copyWith(role: role);
-        notifyListeners();
-      }
-    } catch (error) {
-      debugPrint('SessionManager: erro ao buscar role do usuario: $error');
-    }
-  }
-
-  String? _extractFullName(Map<String, dynamic> metadata) {
-    final fullName = metadata['full_name'];
-    if (fullName is String && fullName.trim().isNotEmpty) {
-      return fullName.trim();
-    }
-    final firstName = metadata['first_name'];
-    final lastName = metadata['last_name'];
-    if (firstName is String && lastName is String) {
-      return '${firstName.trim()} ${lastName.trim()}'.trim();
-    }
-    if (firstName is String && firstName.trim().isNotEmpty) {
-      return firstName.trim();
-    }
-    return null;
-  }
-
-  void _navigateTo(String route) {
-    final navigator = navigatorKey.currentState;
-    if (navigator == null) return;
-    navigator.pushNamedAndRemoveUntil(route, (route) => false);
-  }
-
-  void _redirectToLogin() {
-    final navigator = navigatorKey.currentState;
-    final context = navigatorKey.currentContext;
-
-    String? currentRoute;
-    if (context != null) {
-      final route = ModalRoute.of(context);
-      currentRoute = route?.settings.name;
-    }
-
-    if (navigator == null) {
-      return;
-    }
-
-    if (currentRoute == '/login') {
-      return;
-    }
-
-    navigator.pushNamedAndRemoveUntil('/login', (route) => false);
-  }
-
-  bool _isUnauthorizedError(Object error) {
-    if (error is PostgrestException) {
-      final code = error.code?.trim();
-      final message = error.message.toLowerCase();
-      if (code == '401' || code == '403') {
-        return true;
-      }
-      if (message.contains('jwt expired') ||
-          message.contains('invalid token') ||
-          message.contains('invalid jwt')) {
-        return true;
-      }
-    } else if (error is AuthException) {
-      final statusCode = error.statusCode?.trim();
-      final message = error.message.toLowerCase();
-      if (statusCode == '401' || statusCode == '403') {
-        return true;
-      }
-      if (message.contains('jwt expired') ||
-          message.contains('invalid token') ||
-          message.contains('invalid jwt')) {
-        return true;
-      }
-    }
-    return false;
-  }
+/// 🔥 CORREÇÃO PARA VIEWS (Resolve erro: user?.name)
+extension UserExt on User {
+  String? get name => userMetadata?['display_name'] ?? 
+                      userMetadata?['full_name'] ?? 
+                      userMetadata?['name'];
 }

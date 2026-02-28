@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
-import '../ui/components/default_input.dart';
+
+import '../viewmodels/forgot_password_viewmodel.dart';
+import '../routes/app_routes.dart';
+
 import '../ui/components/default_button_orange.dart';
+import '../ui/components/default_inline_message.dart';
+import '../ui/components/default_input.dart';
+import '../ui/components/feedback_severity.dart';
 import '../ui/theme/app_color.dart';
-import '../constants/app_strings.dart';
 
 class ResetPasswordScreen1 extends StatefulWidget {
   const ResetPasswordScreen1({super.key});
 
   @override
-  State<ResetPasswordScreen1> createState() => _ResetPasswordScreen1State();
+  State<ResetPasswordScreen1> createState() =>
+      _ResetPasswordScreen1State();
 }
 
-class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
-  final TextEditingController _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  final Map<String, List<DateTime>> _attempts = {};
+class _ResetPasswordScreen1State
+    extends State<ResetPasswordScreen1> {
+  final TextEditingController _emailController =
+      TextEditingController();
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -27,91 +31,39 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    final regex = RegExp(r"^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}");
-    return regex.hasMatch(email);
-  }
+  Future<void> _handleSend() async {
+    final vm = context.read<ForgotPasswordViewModel>();
+    vm.clear();
 
-  Future<void> _sendRecoveryEmail() async {
-    final email = _emailController.text.trim();
-
-    setState(() {
-      _errorMessage = null;
-    });
-
-    if (email.isEmpty || !_isValidEmail(email)) {
-      setState(() {
-        _errorMessage = 'Formato de e-mail inválido';
-      });
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Limite local de tentativas: 3 tentativas por hora por e-mail
-    final now = DateTime.now();
-    _attempts.putIfAbsent(email, () => []);
-    _attempts[email] = _attempts[email]!
-        .where((t) => now.difference(t).inHours < 1)
-        .toList();
-
-    if (_attempts[email]!.length >= 3) {
-      setState(() {
-        _errorMessage = 'Muitas tentativas. Tente novamente em uma hora.';
-      });
-      return;
-    }
-
-    _attempts[email]!.add(now);
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final result = await authService.resetPasswordForEmail(email);
-
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (!result.success) {
-      setState(() {
-        _errorMessage = result.message;
-      });
-      return;
-    }
-
-    // Sucesso: mostra dialog informando que o email foi enviado
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('E-mail enviado'),
-        content: const Text(
-          'Se o e-mail estiver cadastrado, você receberá um link de recuperação. Verifique sua caixa de entrada.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+    await vm.sendRecoveryEmail(
+      _emailController.text.trim(),
     );
+
+    if (vm.isSuccess && mounted) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            AppRoutes.login,
+          );
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<ForgotPasswordViewModel>();
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Imagem de fundo (igual ao layout do login)
+          // 🔥 Fundo igual login
           Container(
             width: size.width,
             height: size.height,
@@ -124,21 +76,20 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
             ),
           ),
 
-          // Conteúdo com scroll seguindo padrão do login
           SafeArea(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: size.height - MediaQuery.of(context).padding.top,
+                  minHeight: size.height -
+                      MediaQuery.of(context).padding.top,
                 ),
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      // Espaço superior igual ao login
                       const SizedBox(height: 42),
 
-                      // Logo centralizado
+                      // 🔥 Logo igual login
                       Center(
                         child: Image.asset(
                           'assets/images/logo.webp',
@@ -150,100 +101,146 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
 
                       const Spacer(),
 
-                      // Container branco com formulário seguindo o login
+                      // 🔥 Container branco igual login
                       Container(
                         width: size.width,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 26.0, vertical: 40.0),
-                        decoration: const BoxDecoration(
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 26,
+                          vertical: 40,
+                        ),
+                        decoration:
+                            const BoxDecoration(
                           color: AppColors.white,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(207),
+                          borderRadius:
+                              BorderRadius.only(
+                            topRight:
+                                Radius.circular(207),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Título com ícone de voltar
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.chevron_left,
-                                      color: AppColors.green,
-                                      size: 40,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: BoxConstraints(),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              // Título
+                              Center(
+                                child: Text(
+                                  'Recuperar senha',
+                                  style: TextStyle(
+                                    color:
+                                        AppColors.green,
+                                    fontSize: 36,
+                                    fontFamily:
+                                        'Open Sans',
+                                    fontWeight:
+                                        FontWeight.bold,
                                   ),
                                 ),
-                                Text(
-                                  'Recuperar\nSenha',
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    color: AppColors.green,
-                                    fontSize: 40,
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              ),
+
+                              const SizedBox(height: 30),
+
+                              // Campo Email
+                              ComponenteInput(
+                                controller:
+                                    _emailController,
+                                labelText: 'E-mail',
+                                keyboardType:
+                                    TextInputType
+                                        .emailAddress,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.isEmpty) {
+                                    return 'Informe seu e-mail';
+                                  }
+                                  final emailRegex =
+                                      RegExp(
+                                          r'^[^@]+@[^@]+\.[^@]+$');
+                                  if (!emailRegex
+                                      .hasMatch(
+                                          value)) {
+                                    return 'Informe um e-mail válido';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              const Text(
+                                'Você receberá um link para redefinir sua senha.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color:
+                                      AppColors.secondaryDark,
+                                ),
+                              ),
+
+                              const SizedBox(height: 30),
+
+                              // Botão
+                              DefaultButtonOrange(
+                                texto: vm.isLoading
+                                    ? 'Enviando...'
+                                    : 'Enviar link',
+                                onPressed:
+                                    vm.isLoading
+                                        ? null
+                                        : _handleSend,
+                                tipo: vm.isLoading
+                                    ? BotaoTipo
+                                        .desabilitado
+                                    : BotaoTipo
+                                        .primario,
+                              ),
+
+                              if (vm.message !=
+                                  null) ...[
+                                const SizedBox(
+                                    height: 16),
+                                DefaultInlineMessage(
+                                  message:
+                                      vm.message!,
+                                  severity: vm
+                                          .isSuccess
+                                      ? FeedbackSeverity
+                                          .success
+                                      : FeedbackSeverity
+                                          .error,
+                                  onDismissed:
+                                      vm.clear,
                                 ),
                               ],
-                            ),
 
-                            const SizedBox(height: 30),
+                              const SizedBox(height: 20),
 
-                            // Formulário com o campo de e-mail
-                            Form(
-                              key: _formKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ComponenteInput(
-                                    controller: _emailController,
-                                    labelText: AppStrings.emailLabel,
-                                    hintText: AppStrings.emailPlaceholder,
-                                    keyboardType: TextInputType.emailAddress,
-                                    errorMessage: _errorMessage,
-                                  ),
-
-                                  const SizedBox(height: 20),
-
-                                  // Mensagem de erro abaixo do campo
-                                  if (_errorMessage != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        _errorMessage!,
-                                        style: TextStyle(
-                                          color: AppColors.error,
-                                          fontSize: 13,
-                                        ),
-                                      ),
+                              // Voltar para login
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      AppRoutes
+                                          .login,
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Voltar para login',
+                                    style: TextStyle(
+                                      color: AppColors
+                                          .orange,
+                                      fontSize: 14,
+                                      fontWeight:
+                                          FontWeight
+                                              .bold,
                                     ),
-
-                                  const SizedBox(height: 20),
-
-                                  // Botão Enviar
-                                  DefaultButtonOrange(
-                                    texto:
-                                        _isLoading ? 'Enviando...' : 'Enviar',
-                                    onPressed:
-                                        _isLoading ? null : _sendRecoveryEmail,
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-
-                            const SizedBox(height: 20),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],

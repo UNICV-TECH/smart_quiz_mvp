@@ -43,9 +43,9 @@ class CourseSelectionViewModel extends ChangeNotifier {
       }
 
       if (_courseRepository != null) {
-        final repositoryCourses = await _courseRepository!.fetchActiveCourses();
+        final repositoryCourses = await _courseRepository?.fetchActiveCourses();
         _courses = repositoryCourses
-            .map(_mapRepositoryCourseToModel)
+            !.map(_mapRepositoryCourseToModel)
             .toList();
       } else {
         _courses = _getMockCourses();

@@ -18,6 +18,9 @@ class AuthService {
   AuthUser? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
 
+  // =============================
+  // SIGN UP
+  // =============================
   Future<SignUpResult> signUp({
     required String email,
     required String password,
@@ -52,6 +55,9 @@ class AuthService {
     }
   }
 
+  // =============================
+  // SIGN IN
+  // =============================
   Future<SignInResult> signIn({
     required String email,
     required String password,
@@ -71,12 +77,15 @@ class AuthService {
       );
 
       _currentUser = user;
-      _sessionManager?.setAuthenticatedUser(user);
+
+      // 🔥 Delegar controle da sessão ao SessionManager
+      //_sessionManager?.setAuthenticatedUser(user);
 
       final trimmedName = user.name?.trim();
-      final greetingMessage = (trimmedName != null && trimmedName.isNotEmpty)
-          ? 'Bem-vindo de volta, $trimmedName!'
-          : 'Bem-vindo de volta!';
+      final greetingMessage =
+          (trimmedName != null && trimmedName.isNotEmpty)
+              ? 'Bem-vindo de volta, $trimmedName!'
+              : 'Bem-vindo de volta!';
 
       return SignInResult(
         success: true,
@@ -104,9 +113,13 @@ class AuthService {
     }
   }
 
+  // =============================
+  // RESET PASSWORD EMAIL
+  // =============================
   Future<ResetPasswordResult> resetPasswordForEmail(String email) async {
     try {
       await _repository.resetPasswordForEmail(email);
+
       return const ResetPasswordResult(
         success: true,
         message: 'E-mail de recuperação enviado com sucesso.',
@@ -119,14 +132,24 @@ class AuthService {
     } catch (_) {
       return const ResetPasswordResult(
         success: false,
-        message: 'Não foi possível enviar o e-mail de recuperação. Tente novamente.',
+        message:
+            'Não foi possível enviar o e-mail de recuperação. Tente novamente.',
       );
     }
   }
 
-  Future<ResetPasswordResult> updatePassword(String newPassword) async {
+  // =============================
+  // UPDATE PASSWORD
+  // =============================
+  Future<ResetPasswordResult> updatePassword(
+      String newPassword) async {
     try {
       await _repository.updatePassword(newPassword);
+
+      // 🔥 Não definir _currentUser aqui
+      // 🔥 Não tratar como login
+      // Deixar SessionManager controlar fluxo
+
       return const ResetPasswordResult(
         success: true,
         message: 'Senha alterada com sucesso.',
@@ -139,11 +162,15 @@ class AuthService {
     } catch (_) {
       return const ResetPasswordResult(
         success: false,
-        message: 'Não foi possível alterar a senha. Tente novamente.',
+        message:
+            'Não foi possível alterar a senha. Tente novamente.',
       );
     }
   }
 
+  // =============================
+  // SIGN OUT
+  // =============================
   Future<void> signOut() async {
     _currentUser = null;
     await _sessionManager?.signOut();

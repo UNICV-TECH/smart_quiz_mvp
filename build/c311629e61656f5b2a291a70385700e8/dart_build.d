@@ -1,0 +1,1 @@
+ C:\\Users\\mathe\\Desktop\\ambiente_teste\\smart_quiz_mvp\\build\\c311629e61656f5b2a291a70385700e8\\dart_build_result.json: 

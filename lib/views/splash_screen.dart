@@ -5,14 +5,14 @@ import 'package:provider/provider.dart';
 
 import '../services/session_manager.dart';
 import '../ui/theme/app_color.dart';
+import '../routes/app_routes.dart';
 import 'welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen>
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
-  final int _splashDuration = 2500;
+  final int _splashDuration = 1500;
 
   @override
   void initState() {
@@ -28,13 +28,13 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1200),
     );
 
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.easeInOut, // Curva suave
+        curve: Curves.easeInOut,
       ),
     );
 
@@ -52,91 +52,73 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToNextScreen() async {
-    // Verificar se está na web e se há uma rota /teacher na URL
-    String? targetRoute;
+  if (!mounted) return;
 
-    if (kIsWeb) {
-      try {
-        // Uri.base funciona em todas as plataformas e retorna a URL atual na web
-        final path = Uri.base.path;
+  final sessionManager = context.read<SessionManager>();
+  await sessionManager.initialize();
 
-        // Se a URL é /teacher ou começa com /teacher/, redirecione para professores
-        if (path.startsWith('/teacher') || path.startsWith('/professor')) {
-          targetRoute = path.isEmpty ? '/teacher' : path;
-        }
-      } catch (e) {
-        debugPrint('Erro ao ler URL no splash: $e');
-      }
-    }
+  if (kIsWeb) {
+    final uri = Uri.base;
 
-    // Se não encontrou rota de professor na URL, verifica autenticação normal
-    if (targetRoute == null) {
-      final sessionManager = context.read<SessionManager>();
-      await sessionManager.initialize();
-      targetRoute = sessionManager.isAuthenticated ? '/main' : '/welcome';
-    }
+    final path = uri.path;
+    final fragment = uri.fragment; // 🔥 ESSENCIAL
 
-    if (!mounted) return;
+    debugPrint('PATH: $path');
+    debugPrint('FRAGMENT: $fragment');
 
-    _animationController.reverse();
-
-    // Navegar para a rota determinada
-    if (targetRoute == '/main') {
-      Navigator.of(context).pushReplacementNamed('/main');
+    // 🔥 RESET PASSWORD (funciona com hash routing)
+    if (path.contains(AppRoutes.resetPassword2) ||
+        fragment.contains(AppRoutes.resetPassword2)) {
+      Navigator.of(context).pushReplacementNamed(
+        AppRoutes.resetPassword2,
+      );
       return;
     }
 
-    if (targetRoute.startsWith('/teacher') ||
-        targetRoute.startsWith('/professor')) {
-      Navigator.of(context).pushReplacementNamed(targetRoute);
+    // 🔥 ROTAS DE PROFESSOR
+    if (path.startsWith('/teacher') ||
+        fragment.startsWith('/teacher') ||
+        path.startsWith('/professor') ||
+        fragment.startsWith('/professor')) {
+      final target =
+          fragment.isNotEmpty ? fragment : path;
+
+      Navigator.of(context).pushReplacementNamed(target);
       return;
     }
-
-    // Para welcome screen, usar transição customizada
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return const WelcomeScreen();
-        },
-        transitionDuration: const Duration(milliseconds: 1000),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            ),
-            child: child,
-          );
-        },
-      ),
-    );
   }
+
+  // 🔥 FLUXO NORMAL
+  if (sessionManager.isAuthenticated) {
+    Navigator.of(context)
+        .pushReplacementNamed(AppRoutes.main);
+    return;
+  }
+
+  Navigator.of(context).pushReplacement(
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => const WelcomeScreen(),
+      transitionDuration:
+          const Duration(milliseconds: 600),
+      transitionsBuilder: (_, animation, __, child) {
+        return FadeTransition(
+            opacity: animation, child: child);
+      },
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.green,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.greenSplash,
-        ),
-        child: Center(
-          child: FadeTransition(
-            opacity: _animation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo do app
-                Image.asset(
-                  'assets/images/logo.webp',
-                  width: 300,
-                  height: 300,
-                ),
-                const SizedBox(height: 24)
-              ],
-            ),
+      body: Center(
+        child: FadeTransition(
+          opacity: _animation,
+          child: Image.asset(
+            'assets/images/logo.webp',
+            width: 300,
+            height: 300,
           ),
         ),
       ),

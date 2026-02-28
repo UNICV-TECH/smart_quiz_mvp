@@ -6,24 +6,20 @@ import '../services/session_manager.dart';
 
 class ExamViewModel extends ChangeNotifier {
   ExamViewModel({
-    SupabaseClient? supabase,
-    required this.userId,
-    required this.examId,
-    required this.courseId,
-    required this.questionCount,
-    ExamRemoteDataSource? dataSource,
-    this.isRetake = false, // Flag para indicar se é uma retomada
-    this.previousQuestionIds, // IDs das questões da prova anterior (para retake)
-    SessionManager? sessionManager,
-  })  : assert(
-          supabase != null || dataSource != null,
-          'Provide either a SupabaseClient or an ExamRemoteDataSource',
-        ),
-        _dataSource = dataSource ??
-            SupabaseExamDataSource(
-              supabase!,
-              sessionManager: sessionManager,
-            );
+  SupabaseClient? supabase,
+  required this.userId,
+  required this.examId,
+  required this.courseId,
+  required this.questionCount,
+  ExamRemoteDataSource? dataSource,
+  this.isRetake = false,
+  this.previousQuestionIds,
+  SessionManager? sessionManager,
+}) : _dataSource = dataSource ??
+        SupabaseExamDataSource(
+          supabase ?? Supabase.instance.client,
+          sessionManager: sessionManager,
+        );
 
   final ExamRemoteDataSource _dataSource;
   final String userId;
