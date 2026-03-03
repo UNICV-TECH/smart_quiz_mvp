@@ -105,25 +105,38 @@ class _RankingScreenState extends State<RankingScreen>
                       controller: _tabController,
                       indicator: BoxDecoration(
                         color: AppColors.green,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorPadding: const EdgeInsets.all(4),
                       labelColor: Colors.white,
                       unselectedLabelColor: AppColors.secondaryDark,
                       labelStyle: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
                       ),
                       unselectedLabelStyle: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Poppins',
                       ),
+                      labelPadding: EdgeInsets.zero,
+                      splashBorderRadius: BorderRadius.circular(10),
                       dividerHeight: 0,
                       tabs: const [
-                        Tab(text: 'Geral'),
-                        Tab(text: 'Por Curso'),
-                        Tab(text: 'Por Prova'),
+                        Tab(
+                          height: 40,
+                          text: 'Geral',
+                        ),
+                        Tab(
+                          height: 40,
+                          text: 'Por Curso',
+                        ),
+                        Tab(
+                          height: 40,
+                          text: 'Por Prova',
+                        ),
                       ],
                     ),
                   ),
@@ -594,18 +607,20 @@ class _RankingListItem extends StatelessWidget {
     if (entry.rankPosition == 3) positionColor = const Color(0xFFCD7F32);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isCurrentUser ? const Color(0xFFF5FBF5) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: isCurrentUser
             ? Border.all(color: AppColors.green, width: 2)
             : Border.all(color: const Color(0xFFE2E7DE), width: 1),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: isTop3
+                ? (positionColor ?? Colors.black).withAlpha(15)
+                : const Color(0x0A000000),
+            blurRadius: isTop3 ? 12 : 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -613,35 +628,41 @@ class _RankingListItem extends StatelessWidget {
         children: [
           // Position
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: isTop3
-                  ? positionColor?.withAlpha(40)
+                  ? positionColor?.withAlpha(30)
                   : const Color(0xFFF5F5F5),
               shape: BoxShape.circle,
               border: isTop3 && positionColor != null
-                  ? Border.all(color: positionColor, width: 2)
+                  ? Border.all(color: positionColor, width: 2.5)
                   : null,
             ),
             alignment: Alignment.center,
-            child: Text(
-              '${entry.rankPosition}',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isTop3 ? positionColor : AppColors.primaryDark,
-                fontFamily: 'Poppins',
-              ),
-            ),
+            child: isTop3
+                ? Icon(
+                    Icons.emoji_events,
+                    size: 20,
+                    color: positionColor,
+                  )
+                : Text(
+                    '${entry.rankPosition}',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
 
           // Avatar with medal
           AvatarWithMedal(
             avatarUrl: entry.avatarUrl,
             medalAsset: level.medalAsset,
-            size: 44,
+            size: 48,
           ),
           const SizedBox(width: 12),
 
@@ -653,7 +674,7 @@ class _RankingListItem extends StatelessWidget {
                 Text(
                   entry.userName,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight:
                         isCurrentUser ? FontWeight.w700 : FontWeight.w500,
                     color: AppColors.primaryDark,
@@ -661,10 +682,11 @@ class _RankingListItem extends StatelessWidget {
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
                   level.label,
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: AppColors.secondaryDark,
                     fontFamily: 'Poppins',
                   ),
@@ -674,13 +696,22 @@ class _RankingListItem extends StatelessWidget {
           ),
 
           // Points
-          Text(
-            '${entry.seasonPoints.toStringAsFixed(0)} pts',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: isTop3 ? positionColor : AppColors.green,
-              fontFamily: 'Poppins',
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: isTop3
+                  ? positionColor?.withAlpha(25)
+                  : AppColors.green.withAlpha(20),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${entry.seasonPoints.toStringAsFixed(0)} pts',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isTop3 ? positionColor : AppColors.green,
+                fontFamily: 'Poppins',
+              ),
             ),
           ),
         ],

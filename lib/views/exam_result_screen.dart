@@ -588,7 +588,7 @@ class _LevelUpCardState extends State<_LevelUpCard>
               const Icon(
                 Icons.emoji_events,
                 color: Color(0xFFFFA000),
-                size: 48,
+                size: 52,
               ),
               const SizedBox(height: 12),
               Text(
@@ -601,15 +601,27 @@ class _LevelUpCardState extends State<_LevelUpCard>
                   fontFamily: 'Poppins',
                 ),
               ),
-              const SizedBox(height: 8),
-              Image.asset(
-                _currentLevel.medalAsset,
-                width: 80,
-                height: 80,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.military_tech,
-                  size: 80,
-                  color: Color(0xFFFFA000),
+              const SizedBox(height: 12),
+              Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x30FFD54F),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  _currentLevel.medalAsset,
+                  width: 120,
+                  height: 120,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.military_tech,
+                    size: 120,
+                    color: Color(0xFFFFA000),
+                  ),
                 ),
               ),
             ],
@@ -726,46 +738,65 @@ class _GamificationFeedbackCard extends StatelessWidget {
 
           // Level progress (only if saved)
           if (gamificationSaved) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Row(
               children: [
-                Image.asset(
-                  level.medalAsset,
-                  width: 36,
-                  height: 36,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.military_tech,
-                    size: 36,
-                    color: Color(0xFF4CAF50),
+                Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x18000000),
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Image.asset(
+                    level.medalAsset,
+                    width: 56,
+                    height: 56,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.military_tech,
+                      size: 56,
+                      color: Color(0xFF4CAF50),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  level.label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2E7D32),
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  level.pointsLabel(accumulatedPoints),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF558B2F),
-                    fontFamily: 'Poppins',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        level.label,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2E7D32),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        level.pointsLabel(accumulatedPoints),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF558B2F),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: level.progressInLevel(accumulatedPoints),
-                minHeight: 8,
+                minHeight: 10,
                 backgroundColor: const Color(0xFFC8E6C9),
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(AppColors.green),

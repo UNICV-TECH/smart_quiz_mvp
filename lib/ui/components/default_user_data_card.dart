@@ -160,7 +160,7 @@ class _UserDataCardState extends State<UserDataCard> {
           AvatarWithMedal(
             avatarUrl: widget.avatarUrl,
             medalAsset: widget.medalAsset,
-            size: 70,
+            size: 80,
           ),
 
           const SizedBox(width: 16),

@@ -247,27 +247,46 @@ class _ProfileViewBody extends StatelessWidget {
         // Current level card
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: const Color(0xFFE8F5ED),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFC8E6C9)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x10000000),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    level.medalAsset,
-                    width: 64,
-                    height: 64,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.military_tech,
-                      size: 64,
-                      color: Color(0xFF4CAF50),
+                  Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x20000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      level.medalAsset,
+                      width: 96,
+                      height: 96,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.military_tech,
+                        size: 96,
+                        color: Color(0xFF4CAF50),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,16 +294,17 @@ class _ProfileViewBody extends StatelessWidget {
                         Text(
                           level.label,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2E7D32),
                             fontFamily: 'Poppins',
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
                           level.pointsLabel(points),
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: Color(0xFF558B2F),
                             fontFamily: 'Poppins',
                           ),
@@ -294,24 +314,24 @@ class _ProfileViewBody extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: LinearProgressIndicator(
                   value: level.progressInLevel(points),
-                  minHeight: 8,
+                  minHeight: 10,
                   backgroundColor: const Color(0xFFC8E6C9),
                   valueColor:
                       const AlwaysStoppedAnimation<Color>(AppColors.green),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
                   'Temporada ${gamVm.activeSeason!.name}',
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     color: Color(0xFF558B2F),
                     fontFamily: 'Poppins',
                   ),
@@ -338,29 +358,48 @@ class _ProfileViewBody extends StatelessWidget {
             final entryLevel =
                 GamificationLevel.fromPoints(entry.totalPoints);
             return Container(
-              margin: const EdgeInsets.only(bottom: 8),
+              margin: const EdgeInsets.only(bottom: 10),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 border: entry.isActive
                     ? Border.all(color: AppColors.green, width: 1.5)
                     : Border.all(color: const Color(0xFFE2E7DE)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x08000000),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  Image.asset(
-                    entryLevel.medalAsset,
-                    width: 36,
-                    height: 36,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.military_tech,
-                      size: 36,
-                      color: Color(0xFF4CAF50),
+                  Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x18000000),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      entryLevel.medalAsset,
+                      width: 56,
+                      height: 56,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.military_tech,
+                        size: 56,
+                        color: Color(0xFF4CAF50),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,15 +407,16 @@ class _ProfileViewBody extends StatelessWidget {
                         Text(
                           'Temporada ${entry.seasonName}',
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins',
                           ),
                         ),
+                        const SizedBox(height: 2),
                         Text(
                           '${entry.totalPoints.toStringAsFixed(0)} pts — #${entry.rankPosition}',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: AppColors.secondaryDark,
                             fontFamily: 'Poppins',
                           ),
@@ -387,15 +427,15 @@ class _ProfileViewBody extends StatelessWidget {
                   if (entry.isActive)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                          horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
                         'Atual',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           color: Color(0xFF2E7D32),
                           fontWeight: FontWeight.w600,
                         ),
