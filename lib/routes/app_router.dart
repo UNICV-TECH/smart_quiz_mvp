@@ -95,16 +95,21 @@ GoRouter createAppRouter(SessionManager sessionManager) {
 
       // 6. If authenticated admin/teacher trying to access student routes
       if (isAuthenticated && (isTeacher || isAdmin)) {
-        const studentPrefixes = [
-          '/home',
-          '/ranking',
-          '/history',
-          '/profile',
-          '/quiz',
-          '/exam',
-        ];
-        if (studentPrefixes.any((prefix) => location.startsWith(prefix))) {
-          return isAdmin ? '/admin' : '/teacher/templates';
+        // Allow admins viewing as student to access student routes
+        if (isAdmin && sessionManager.viewingAsStudent) {
+          // no redirect — let admin use student panel
+        } else {
+          const studentPrefixes = [
+            '/home',
+            '/ranking',
+            '/history',
+            '/profile',
+            '/quiz',
+            '/exam',
+          ];
+          if (studentPrefixes.any((prefix) => location.startsWith(prefix))) {
+            return isAdmin ? '/admin' : '/teacher/templates';
+          }
         }
       }
 

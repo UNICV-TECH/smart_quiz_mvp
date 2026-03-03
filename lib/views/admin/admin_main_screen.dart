@@ -142,7 +142,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     title: 'Painel Aluno',
                     index: -2,
                     onTap: () {
-                      Navigator.of(context).pushNamed('/main');
+                      context.read<SessionManager>().enterStudentView();
+                      context.go('/home');
                     },
                   ),
                 ],
