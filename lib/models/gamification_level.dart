@@ -7,19 +7,19 @@ enum GamificationLevel {
   ),
   explorador(
     label: 'Explorador',
-    minPoints: 101,
+    minPoints: 100,
     maxPoints: 200,
     medalAsset: 'assets/images/medal_explorador.png',
   ),
   mestreDoConteudo(
     label: 'Mestre do Conteúdo',
-    minPoints: 201,
+    minPoints: 200,
     maxPoints: 300,
     medalAsset: 'assets/images/medal_mestre.png',
   ),
   lendario(
     label: 'Lendário',
-    minPoints: 301,
+    minPoints: 300,
     maxPoints: double.infinity,
     medalAsset: 'assets/images/medal_lendario.png',
   );
@@ -37,9 +37,9 @@ enum GamificationLevel {
   final String medalAsset;
 
   static GamificationLevel fromPoints(double points) {
-    if (points >= 301) return GamificationLevel.lendario;
-    if (points >= 201) return GamificationLevel.mestreDoConteudo;
-    if (points >= 101) return GamificationLevel.explorador;
+    if (points >= 300) return GamificationLevel.lendario;
+    if (points >= 200) return GamificationLevel.mestreDoConteudo;
+    if (points >= 100) return GamificationLevel.explorador;
     return GamificationLevel.iniciante;
   }
 

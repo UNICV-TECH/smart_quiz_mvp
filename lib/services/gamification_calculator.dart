@@ -14,7 +14,9 @@ class GamificationCalculator {
     required int questionCount,
     required int correctCount,
   }) {
-    return correctCount * pointsPerCorrectAnswer(questionCount);
+    if (questionCount <= 0) return 0.0;
+    final clamped = correctCount.clamp(0, questionCount);
+    return clamped * pointsPerCorrectAnswer(questionCount);
   }
 
   /// Normal time = questionCount * 2 minutes (in seconds)
@@ -66,7 +68,11 @@ class GamificationCalculator {
     required double percentageScore,
     required bool hasTimeBonus,
     required bool didImprove,
+    bool gamificationSaved = true,
   }) {
+    if (!gamificationSaved) {
+      return 'Seus pontos não puderam ser salvos. Tente novamente mais tarde.';
+    }
     if (!didImprove) {
       return 'Sua pontuação anterior foi mantida. Tente superar!';
     }
@@ -75,6 +81,9 @@ class GamificationCalculator {
     }
     if (percentageScore >= 80 && hasTimeBonus) {
       return 'Excelente! Você está voando!';
+    }
+    if (percentageScore >= 70 && hasTimeBonus) {
+      return 'Ótimo! Velocidade e precisão!';
     }
     if (percentageScore >= 70) {
       return 'Bom trabalho! Continue assim!';

@@ -60,7 +60,7 @@ class GamificationPoints {
       'attempt_id': attemptId,
       'exam_id': examId,
       'course_id': courseId,
-      'exam_template_id': examTemplateId,
+      if (examTemplateId != null) 'exam_template_id': examTemplateId,
       'question_count': questionCount,
       'correct_count': correctCount,
       'percentage_score': percentageScore,

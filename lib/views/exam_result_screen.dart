@@ -516,7 +516,7 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _LevelUpCard extends StatelessWidget {
+class _LevelUpCard extends StatefulWidget {
   const _LevelUpCard({
     required this.previousPoints,
     required this.accumulatedPoints,
@@ -526,20 +526,50 @@ class _LevelUpCard extends StatelessWidget {
   final double accumulatedPoints;
 
   @override
-  Widget build(BuildContext context) {
-    final previousLevel = GamificationLevel.fromPoints(previousPoints);
-    final currentLevel = GamificationLevel.fromPoints(accumulatedPoints);
+  State<_LevelUpCard> createState() => _LevelUpCardState();
+}
 
-    // Only show if level actually changed
-    if (previousLevel == currentLevel) return const SizedBox.shrink();
+class _LevelUpCardState extends State<_LevelUpCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+  late final GamificationLevel _previousLevel;
+  late final GamificationLevel _currentLevel;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousLevel = GamificationLevel.fromPoints(widget.previousPoints);
+    _currentLevel = GamificationLevel.fromPoints(widget.accumulatedPoints);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.elasticOut,
+    );
+    if (_previousLevel != _currentLevel) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_previousLevel == _currentLevel) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 4),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.elasticOut,
-        builder: (context, value, child) {
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          final value = _scaleAnimation.value;
           return Transform.scale(
             scale: value,
             child: Opacity(
@@ -575,7 +605,7 @@ class _LevelUpCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Parabéns! Você alcançou o nível ${currentLevel.label}!',
+                'Parabéns! Você alcançou o nível ${_currentLevel.label}!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 18,
@@ -586,12 +616,12 @@ class _LevelUpCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Image.asset(
-                currentLevel.medalAsset,
-                width: 64,
-                height: 64,
+                _currentLevel.medalAsset,
+                width: 80,
+                height: 80,
                 errorBuilder: (_, __, ___) => const Icon(
                   Icons.military_tech,
-                  size: 64,
+                  size: 80,
                   color: Color(0xFFFFA000),
                 ),
               ),
@@ -635,6 +665,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
       percentageScore: percentageScore,
       hasTimeBonus: hasTimeBonus,
       didImprove: didImprove,
+      gamificationSaved: gamificationSaved,
     );
 
     final recordTimeMinutes =
@@ -670,8 +701,8 @@ class _GamificationFeedbackCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Points breakdown
-          if (didImprove || !gamificationSaved) ...[
+          // Points breakdown (only show when save succeeded)
+          if (didImprove && gamificationSaved) ...[
             _buildPointRow(
               'Pontos base',
               '+${basePoints.toStringAsFixed(1)} pts',
@@ -684,7 +715,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                 Icons.timer,
                 highlight: true,
               ),
-            if (!hasTimeBonus && totalPoints > 0)
+            if (!hasTimeBonus && totalPoints > 0 && questionCount > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
@@ -713,11 +744,11 @@ class _GamificationFeedbackCard extends StatelessWidget {
               children: [
                 Image.asset(
                   level.medalAsset,
-                  width: 28,
-                  height: 28,
+                  width: 36,
+                  height: 36,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.military_tech,
-                    size: 28,
+                    size: 36,
                     color: Color(0xFF4CAF50),
                   ),
                 ),

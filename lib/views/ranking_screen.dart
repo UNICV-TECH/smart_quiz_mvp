@@ -209,8 +209,9 @@ class _GlobalRankingTabState extends State<_GlobalRankingTab>
         itemCount: vm.globalRanking.length + _userOutsideTop(vm, userId),
         itemBuilder: (context, index) {
           // Show user card at the top if outside top 50
-          if (index == 0 && _isUserOutsideRanking(vm, userId)) {
-            return _buildUserPositionCard(vm.userGlobalRank!);
+          final userRank = vm.userGlobalRank;
+          if (index == 0 && userRank != null && _isUserOutsideRanking(vm, userId)) {
+            return _buildUserPositionCard(userRank);
           }
 
           final adjustedIndex =
@@ -640,7 +641,7 @@ class _RankingListItem extends StatelessWidget {
           AvatarWithMedal(
             avatarUrl: entry.avatarUrl,
             medalAsset: level.medalAsset,
-            size: 40,
+            size: 44,
           ),
           const SizedBox(width: 12),
 

@@ -30,6 +30,7 @@ class _UserDataCardState extends State<UserDataCard> {
   bool _isLoading = false;
   final TextEditingController _nameController = TextEditingController();
   final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _keyboardListenerFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -39,9 +40,19 @@ class _UserDataCardState extends State<UserDataCard> {
   }
 
   @override
+  void didUpdateWidget(covariant UserDataCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userName != widget.userName && !_isEditing) {
+      _currentName = widget.userName;
+      _nameController.text = _currentName;
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _nameFocusNode.dispose();
+    _keyboardListenerFocusNode.dispose();
     super.dispose();
   }
 
@@ -188,7 +199,7 @@ class _UserDataCardState extends State<UserDataCard> {
         children: [
           Expanded(
             child: KeyboardListener(
-              focusNode: FocusNode(),
+              focusNode: _keyboardListenerFocusNode,
               onKeyEvent: _handleKeyPress,
               child: TextField(
                 controller: _nameController,
