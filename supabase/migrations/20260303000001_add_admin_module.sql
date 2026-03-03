@@ -99,7 +99,7 @@ BEGIN
     u.is_active,
     u.created_at,
     COUNT(DISTINCT uea.id) AS exam_count,
-    COALESCE(AVG(uea.percentage_score), 0) AS avg_score
+    COALESCE(AVG(uea.percentage_score), 0)::double precision AS avg_score
   FROM public."user" u
   LEFT JOIN public.user_exam_attempts uea ON uea.user_id = u.id AND uea.status = 'completed'
   WHERE (p_role IS NULL OR u.role = p_role)
