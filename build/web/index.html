@@ -34,12 +34,22 @@
 
   <script>
     // The value below is injected by flutter build, do not touch.
-    const serviceWorkerVersion = "1054936338";
+    const serviceWorkerVersion = "1989089709";
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
+  <script>
+    // SPA redirect: restore path from 404.html redirect
+    (function() {
+      var redirect = sessionStorage.getItem('spa-redirect');
+      if (redirect) {
+        sessionStorage.removeItem('spa-redirect');
+        window.history.replaceState(null, '', redirect);
+      }
+    })();
+  </script>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
