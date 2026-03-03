@@ -34,6 +34,7 @@ class SessionManager extends ChangeNotifier {
   bool _handlingUnauthorized = false;
   bool _pendingPasswordRecovery = false;
   bool _viewingAsStudent = false;
+  bool _viewingAsTeacher = false;
   StreamSubscription<AuthState>? _authSubscription;
   Future<void> _roleLoadFuture = Future.value();
 
@@ -54,13 +55,28 @@ class SessionManager extends ChangeNotifier {
   /// Whether admin is temporarily viewing the student panel
   bool get viewingAsStudent => _viewingAsStudent;
 
+  /// Whether admin is temporarily viewing the teacher panel
+  bool get viewingAsTeacher => _viewingAsTeacher;
+
   void enterStudentView() {
     _viewingAsStudent = true;
+    _viewingAsTeacher = false;
     notifyListeners();
   }
 
   void exitStudentView() {
     _viewingAsStudent = false;
+    notifyListeners();
+  }
+
+  void enterTeacherView() {
+    _viewingAsTeacher = true;
+    _viewingAsStudent = false;
+    notifyListeners();
+  }
+
+  void exitTeacherView() {
+    _viewingAsTeacher = false;
     notifyListeners();
   }
 
@@ -92,6 +108,7 @@ class SessionManager extends ChangeNotifier {
 
   Future<void> signOut() async {
     _viewingAsStudent = false;
+    _viewingAsTeacher = false;
     if (_client != null) {
       try {
         await _client!.auth.signOut();

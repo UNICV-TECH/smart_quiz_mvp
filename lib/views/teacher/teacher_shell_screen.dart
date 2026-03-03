@@ -31,14 +31,71 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sessionManager = context.watch<SessionManager>();
+    final isAdminViewing =
+        sessionManager.isAdmin && sessionManager.viewingAsTeacher;
+
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          _buildTeacherSideMenu(),
+          if (isAdminViewing)
+            _buildAdminBanner(context, sessionManager),
           Expanded(
-            child: widget.navigationShell,
+            child: Row(
+              children: [
+                _buildTeacherSideMenu(),
+                Expanded(
+                  child: widget.navigationShell,
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAdminBanner(
+      BuildContext context, SessionManager sessionManager) {
+    return Material(
+      color: const Color(0xFFB8860B),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.visibility, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Visualizando como professor',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                sessionManager.exitTeacherView();
+                context.go('/admin');
+              },
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 16),
+              label: const Text(
+                'Voltar ao Admin',
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
