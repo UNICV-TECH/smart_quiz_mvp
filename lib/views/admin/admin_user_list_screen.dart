@@ -14,7 +14,7 @@ class AdminUserListScreen extends StatefulWidget {
 class _AdminUserListScreenState extends State<AdminUserListScreen> {
   final _searchController = TextEditingController();
 
-  static const _indigoColor = Color(0xFF3F51B5);
+  static const _goldColor = Color(0xFFB8860B);
 
   @override
   void dispose() {
@@ -41,7 +41,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: _indigoColor,
+                    color: _goldColor,
                   ),
                 ),
                 const Spacer(),
@@ -223,9 +223,9 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
       selected: isSelected,
       onSelected: onSelected,
       selectedColor: const Color(0xFFE8EAF6),
-      checkmarkColor: _indigoColor,
+      checkmarkColor: _goldColor,
       labelStyle: TextStyle(
-        color: isSelected ? _indigoColor : Colors.grey[700],
+        color: isSelected ? _goldColor : Colors.grey[700],
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
       ),
     );
@@ -377,7 +377,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
                 onConfirm();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _indigoColor,
+                backgroundColor: _goldColor,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Confirmar'),

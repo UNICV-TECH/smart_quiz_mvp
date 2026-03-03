@@ -77,12 +77,12 @@ class AdminLineChart extends StatelessWidget {
               );
             }).toList(),
             isCurved: true,
-            color: const Color(0xFF3F51B5),
+            color: const Color(0xFFB8860B),
             barWidth: 3,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
+              color: const Color(0xFFB8860B).withValues(alpha: 0.1),
             ),
           ),
           // Active users line
@@ -108,7 +108,7 @@ class AdminLineChart extends StatelessWidget {
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final color = spot.barIndex == 0
-                    ? const Color(0xFF3F51B5)
+                    ? const Color(0xFFB8860B)
                     : const Color(0xFF4CAF50);
                 final label = spot.barIndex == 0 ? 'Provas' : 'Usuários';
                 return LineTooltipItem(

@@ -51,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result.success) {
       if (!mounted) return;
       final sessionManager = context.read<SessionManager>();
+      // Aguardar o role ser carregado do banco antes de redirecionar
       await sessionManager.ensureRoleLoaded();
       if (!mounted) return;
       if (sessionManager.isAdmin) {
