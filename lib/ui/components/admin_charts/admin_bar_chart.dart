@@ -92,7 +92,7 @@ class AdminBarChart extends StatelessWidget {
             barRods: [
               BarChartRodData(
                 toY: entry.value.avgScore,
-                color: const Color(0xFF3F51B5),
+                color: const Color(0xFFB8860B),
                 width: 20,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(4),

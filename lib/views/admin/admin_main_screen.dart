@@ -21,8 +21,8 @@ class AdminMainScreen extends StatefulWidget {
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
 
-  static const _indigoColor = Color(0xFF3F51B5);
-  static const _indigoLight = Color(0xFFE8EAF6);
+  static const _goldColor = Color(0xFFB8860B);
+  static const _goldLight = Color(0xFFFFF8E1);
 
   Map<String, dynamic> get _userData {
     final sessionManager = context.watch<SessionManager>();
@@ -135,6 +135,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                       Navigator.of(context).pushNamed('/teacher');
                     },
                   ),
+                  const SizedBox(height: 8),
+                  _buildMenuItem(
+                    icon: Icons.person_outlined,
+                    title: 'Painel Aluno',
+                    index: -2,
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/main');
+                    },
+                  ),
                 ],
               ),
             ),
@@ -149,7 +158,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
-        color: _indigoColor,
+        color: _goldColor,
         borderRadius: BorderRadius.only(
           bottomRight: Radius.circular(12),
         ),
@@ -186,7 +195,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     bool isSelected = _selectedIndex == index;
 
     return Material(
-      color: isSelected ? _indigoLight : Colors.transparent,
+      color: isSelected ? _goldLight : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap ??
@@ -202,7 +211,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             border: isSelected
                 ? const Border(
                     left: BorderSide(
-                      color: _indigoColor,
+                      color: _goldColor,
                       width: 4,
                     ),
                   )
@@ -212,7 +221,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? _indigoColor : Colors.grey[700],
+                color: isSelected ? _goldColor : Colors.grey[700],
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -222,7 +231,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    color: isSelected ? _indigoColor : Colors.grey[800],
+                    color: isSelected ? _goldColor : Colors.grey[800],
                   ),
                 ),
               ),
@@ -230,7 +239,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 14,
-                  color: _indigoColor,
+                  color: _goldColor,
                 ),
             ],
           ),
@@ -257,7 +266,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: _indigoColor,
+              color: _goldColor,
               borderRadius: BorderRadius.circular(25),
             ),
             child: const Icon(
@@ -295,7 +304,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: _indigoColor,
+                    color: _goldColor,
                   ),
                 ),
               ],
