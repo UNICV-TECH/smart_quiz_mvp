@@ -109,6 +109,7 @@ class _RankingScreenState extends State<RankingScreen>
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       indicatorPadding: const EdgeInsets.all(4),
+                      tabAlignment: TabAlignment.fill,
                       labelColor: Colors.white,
                       unselectedLabelColor: AppColors.secondaryDark,
                       labelStyle: const TextStyle(
