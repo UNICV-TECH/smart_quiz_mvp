@@ -20,6 +20,8 @@ import '../views/splash_screen.dart';
 import '../views/welcome_screen.dart';
 import '../views/reset_password_screen1.dart';
 import '../views/reset_password_screen2.dart';
+import '../models/user_model.dart';
+import '../views/admin/admin_main_screen.dart';
 import '../views/teacher/teacher_main_screen.dart';
 import '../views/teacher/teacher_create_question.dart';
 import '../views/teacher/teacher_question_list_screen.dart';
@@ -47,6 +49,12 @@ class AppRoutes {
   static const String examResult = '/exam/result';
   static const String resetPassword = '/reset_password';
   static const String resetPassword2 = '/reset_password2';
+
+  // Constantes para rotas de administradores
+  static const String admin = '/admin';
+  static const String adminHome = '/admin/home';
+  static const String adminUsers = '/admin/users';
+  static const String adminContent = '/admin/content';
 
   // Constantes para rotas de professores
   static const String teacher = '/teacher';
@@ -157,6 +165,24 @@ class AppRoutes {
               }
               return ExamResultScreen(results: args);
             },
+          ),
+
+      // Rotas de administradores
+      admin: (context) => ProtectedRoute(
+            requiredRole: UserRole.admin,
+            builder: (innerContext) => const AdminMainScreen(),
+          ),
+      adminHome: (context) => ProtectedRoute(
+            requiredRole: UserRole.admin,
+            builder: (innerContext) => const AdminMainScreen(),
+          ),
+      adminUsers: (context) => ProtectedRoute(
+            requiredRole: UserRole.admin,
+            builder: (innerContext) => const AdminMainScreen(),
+          ),
+      adminContent: (context) => ProtectedRoute(
+            requiredRole: UserRole.admin,
+            builder: (innerContext) => const AdminMainScreen(),
           ),
 
       // Rotas de professores

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
 
+import '../services/session_manager.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_button_orange.dart';
 import '../ui/components/default_inline_message.dart';
@@ -47,7 +48,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (result.success) {
-      Navigator.pushReplacementNamed(context, '/main');
+      if (!mounted) return;
+      final sessionManager = context.read<SessionManager>();
+      final user = sessionManager.currentUser;
+      if (user != null && user.isAdmin) {
+        Navigator.pushReplacementNamed(context, '/admin');
+      } else if (user != null && user.isTeacher) {
+        Navigator.pushReplacementNamed(context, '/teacher');
+      } else {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
     }
   }
 

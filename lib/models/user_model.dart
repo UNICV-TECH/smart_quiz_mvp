@@ -25,6 +25,7 @@ class UserModel {
   final String? phone;
   final String? avatarUrl;
   final String? bio;
+  final bool isActive;
 
   const UserModel({
     required this.id,
@@ -34,6 +35,7 @@ class UserModel {
     this.phone,
     this.avatarUrl,
     this.bio,
+    this.isActive = true,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class UserModel {
       phone: json['phone'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       bio: json['bio'] as String?,
+      isActive: json['is_active'] as bool? ?? true,
     );
   }
 
@@ -57,6 +60,7 @@ class UserModel {
       'phone': phone,
       'avatar_url': avatarUrl,
       'bio': bio,
+      'is_active': isActive,
     };
   }
 
@@ -68,6 +72,7 @@ class UserModel {
     String? phone,
     String? avatarUrl,
     String? bio,
+    bool? isActive,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -77,6 +82,7 @@ class UserModel {
       phone: phone ?? this.phone,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,
+      isActive: isActive ?? this.isActive,
     );
   }
 
