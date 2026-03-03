@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -192,15 +193,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
         _isLoading = false;
       });
 
-      await Navigator.pushNamed(
-        context,
-        '/exam',
-        arguments: {
-          'userId': user.id,
-          'examId': examId,
-          'courseId': courseId,
-          'questionCount': int.parse(_selectedQuantity!),
-        },
+      await context.push(
+        '/exam/$examId?courseId=${Uri.encodeComponent(courseId)}&questionCount=${int.parse(_selectedQuantity!)}',
       );
     } catch (error, stackTrace) {
       debugPrint('Falha ao iniciar quiz: $error');
@@ -258,7 +252,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: DefaultButtonArrowBack(
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () => context.pop(),
                                 ),
                               ),
                               const SizedBox(height: 24),
@@ -318,11 +312,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                       _navBarIndex = index;
                     });
                     if (index == 0) {
-                      Navigator.popUntil(
-                        context,
-                        (route) =>
-                            route.settings.name == '/main' || route.isFirst,
-                      );
+                      context.go('/home');
                     } else {
                       debugPrint("NavBar Tapped: $index");
                     }

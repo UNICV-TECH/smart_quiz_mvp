@@ -9,41 +9,36 @@ import '../models/user_model.dart';
 class SessionManager extends ChangeNotifier {
   SessionManager._({
     required SupabaseClient? client,
-    required this.navigatorKey,
   }) : _client = client;
 
   factory SessionManager.enabled({
     required SupabaseClient client,
-    required GlobalKey<NavigatorState> navigatorKey,
   }) {
     final manager = SessionManager._(
       client: client,
-      navigatorKey: navigatorKey,
     );
     manager._listenToAuthChanges();
     return manager;
   }
 
-  factory SessionManager.disabled({
-    required GlobalKey<NavigatorState> navigatorKey,
-  }) {
+  factory SessionManager.disabled() {
     return SessionManager._(
       client: null,
-      navigatorKey: navigatorKey,
     );
   }
 
   final SupabaseClient? _client;
-  final GlobalKey<NavigatorState> navigatorKey;
 
   local.AuthUser? _currentUser;
   bool _initialized = false;
   bool _handlingUnauthorized = false;
+  bool _pendingPasswordRecovery = false;
   StreamSubscription<AuthState>? _authSubscription;
 
   local.AuthUser? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
   bool get initialized => _initialized;
+  bool get pendingPasswordRecovery => _pendingPasswordRecovery;
 
   /// Returns the user's role (student, teacher, or admin)
   UserRole get userRole => _currentUser?.role ?? UserRole.student;
@@ -53,6 +48,10 @@ class SessionManager extends ChangeNotifier {
 
   /// Checks if the current user is an admin
   bool get isAdmin => _currentUser?.isAdmin ?? false;
+
+  void clearPendingPasswordRecovery() {
+    _pendingPasswordRecovery = false;
+  }
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -71,7 +70,7 @@ class SessionManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signOut({bool redirect = true}) async {
+  Future<void> signOut() async {
     if (_client != null) {
       try {
         await _client!.auth.signOut();
@@ -81,9 +80,6 @@ class SessionManager extends ChangeNotifier {
     }
     _updateFromSession(null);
     notifyListeners();
-    if (redirect) {
-      _redirectToLogin();
-    }
   }
 
   Future<void> handleUnauthorized({String? reason}) async {
@@ -126,14 +122,13 @@ class SessionManager extends ChangeNotifier {
       if (authEvent == AuthChangeEvent.signedOut) {
         _updateFromSession(null);
         notifyListeners();
-        _redirectToLogin();
         return;
       }
 
       if (authEvent == AuthChangeEvent.passwordRecovery) {
         _updateFromSession(event.session);
+        _pendingPasswordRecovery = true;
         notifyListeners();
-        _navigateTo('/reset_password2');
         return;
       }
 
@@ -201,33 +196,6 @@ class SessionManager extends ChangeNotifier {
       return firstName.trim();
     }
     return null;
-  }
-
-  void _navigateTo(String route) {
-    final navigator = navigatorKey.currentState;
-    if (navigator == null) return;
-    navigator.pushNamedAndRemoveUntil(route, (route) => false);
-  }
-
-  void _redirectToLogin() {
-    final navigator = navigatorKey.currentState;
-    final context = navigatorKey.currentContext;
-
-    String? currentRoute;
-    if (context != null) {
-      final route = ModalRoute.of(context);
-      currentRoute = route?.settings.name;
-    }
-
-    if (navigator == null) {
-      return;
-    }
-
-    if (currentRoute == '/login') {
-      return;
-    }
-
-    navigator.pushNamedAndRemoveUntil('/login', (route) => false);
   }
 
   bool _isUnauthorizedError(Object error) {

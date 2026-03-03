@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../ui/theme/app_color.dart';
 import '../viewmodels/exam_detail_view_model.dart';
@@ -78,7 +79,7 @@ class _ExamDetailViewBody extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back),
             color: AppColors.primaryDark,
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => context.pop(),
           ),
           const SizedBox(width: 8),
           Expanded(

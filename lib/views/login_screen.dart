@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
 
@@ -47,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (result.success) {
-      Navigator.pushReplacementNamed(context, '/main');
+      context.go('/home');
     }
   }
 
@@ -168,10 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 alignment: Alignment.centerRight,
                                 child: GestureDetector(
                                   onTap: () {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/reset_password',
-                                    );
+                                    context.go('/reset-password');
                                   },
                                   child: Text(
                                     AppStrings.forgotPassword,
@@ -235,10 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     const SizedBox(width: 5),
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.pushReplacementNamed(
-                                          context,
-                                          '/signup',
-                                        );
+                                        context.go('/signup');
                                       },
                                       child: Text(
                                         AppStrings.signupLink,

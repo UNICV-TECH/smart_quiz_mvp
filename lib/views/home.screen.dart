@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/course.dart';
 import 'package:unicv_tech_mvp/viewmodels/course_selection_view_model.dart';
@@ -40,17 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   void _onCourseSelected(Course course, CourseSelectionViewModel viewModel) {
     viewModel.selectCourse(course.id);
-    Navigator.pushNamed(
-      context,
-      '/quiz/config',
-      arguments: {
-        'course': {
-          'id': course.id,
-          'course_key': course.courseKey,
-          'title': course.title,
-          'icon': _getIconData(course.iconKey),
-        },
-      },
+    context.push(
+      '/quiz/config/${course.id}?title=${Uri.encodeComponent(course.title)}&courseKey=${Uri.encodeComponent(course.courseKey)}&iconKey=${Uri.encodeComponent(course.iconKey ?? '')}',
     );
   }
   @override

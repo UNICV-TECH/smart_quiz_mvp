@@ -58,13 +58,9 @@ class _CustomNavBarState extends State<CustomNavBar> {
     final double barHeight = _navBarHeight - navBarTopOffset;
     final double circleLeft = (itemWidth * _currentIndex) +
         (itemWidth / 2) -
-        (_circleSize / 2); // Usar _currentIndex
-// <<<<<<< feature/profile-improvements
-//     final double circleTop = -navBarTopOffset + (_curveDepth - _gap + 10);
-// =======
+        (_circleSize / 2);
     final double circleTop =
-        -navBarTopOffset + (_curveDepth - _gap + 10); // Usar _currentIndex
-// >>>>>>> main
+        -navBarTopOffset + (_curveDepth - _gap + 10);
 
     return SizedBox(
       height: _navBarHeight,

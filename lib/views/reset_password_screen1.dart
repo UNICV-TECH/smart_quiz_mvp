@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../ui/components/default_input.dart';
@@ -95,7 +96,7 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              Navigator.pushReplacementNamed(context, '/login');
+              context.go('/login');
             },
             child: const Text('OK'),
           ),
@@ -177,8 +178,7 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
                                       size: 40,
                                     ),
                                     onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
+                                      context.go('/login');
                                     },
                                     padding: EdgeInsets.zero,
                                     constraints: BoxConstraints(),
