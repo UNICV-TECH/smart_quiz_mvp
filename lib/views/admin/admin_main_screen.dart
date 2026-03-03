@@ -133,6 +133,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     title: 'Painel Professor',
                     index: -1,
                     onTap: () {
+                      context.read<SessionManager>().enterTeacherView();
                       context.go('/teacher/templates');
                     },
                   ),
