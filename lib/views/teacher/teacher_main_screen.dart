@@ -51,19 +51,57 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         const TeacherCategoryListScreen(), // 7: Categorias
       ];
 
+  bool get _isAdmin {
+    final sessionManager = context.watch<SessionManager>();
+    return sessionManager.isAdmin;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          // Menu lateral para professores
-          _buildTeacherSideMenu(),
-
-          // Conteúdo principal
+          if (_isAdmin)
+            _buildAdminReturnBanner(),
           Expanded(
-            child: _screens[_selectedIndex],
+            child: Row(
+              children: [
+                _buildTeacherSideMenu(),
+                Expanded(
+                  child: _screens[_selectedIndex],
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAdminReturnBanner() {
+    return Material(
+      color: const Color(0xFFB8860B),
+      child: InkWell(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Voltar ao Painel Admin',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

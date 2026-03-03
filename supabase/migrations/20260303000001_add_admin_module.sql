@@ -93,19 +93,19 @@ BEGIN
   RETURN QUERY
   SELECT
     u.id,
-    COALESCE(u.name, u.first_name, '') AS name,
+    COALESCE(u.first_name, '') AS name,
     u.email,
     u.role,
     u.is_active,
     u.created_at,
     COUNT(DISTINCT uea.id) AS exam_count,
-    COALESCE(AVG(uea.percentage_score), 0) AS avg_score
+    COALESCE(AVG(uea.percentage_score), 0)::double precision AS avg_score
   FROM public."user" u
   LEFT JOIN public.user_exam_attempts uea ON uea.user_id = u.id AND uea.status = 'completed'
   WHERE (p_role IS NULL OR u.role = p_role)
     AND (p_is_active IS NULL OR u.is_active = p_is_active)
-    AND (p_search IS NULL OR u.email ILIKE '%' || p_search || '%' OR u.name ILIKE '%' || p_search || '%')
-  GROUP BY u.id, u.name, u.first_name, u.email, u.role, u.is_active, u.created_at
+    AND (p_search IS NULL OR u.email ILIKE '%' || p_search || '%' OR u.first_name ILIKE '%' || p_search || '%')
+  GROUP BY u.id, u.first_name, u.email, u.role, u.is_active, u.created_at
   ORDER BY u.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -202,7 +202,7 @@ BEGIN
     q.points,
     q.is_active,
     c.name AS course_name,
-    COALESCE(t.name, t.first_name, '') AS teacher_name,
+    COALESCE(t.first_name, '') AS teacher_name,
     t.email AS teacher_email,
     COUNT(DISTINCT ac.id) AS answer_count,
     q.created_at
@@ -213,7 +213,7 @@ BEGIN
   WHERE (p_course_id IS NULL OR q.id_course = p_course_id)
     AND (p_teacher_id IS NULL OR q.id_teacher = p_teacher_id)
     AND (NOT p_active_only OR q.is_active = true)
-  GROUP BY q.id, q.enunciation, q.difficulty_level, q.points, q.is_active, c.name, t.name, t.first_name, t.email, q.created_at
+  GROUP BY q.id, q.enunciation, q.difficulty_level, q.points, q.is_active, c.name, t.first_name, t.email, q.created_at
   ORDER BY q.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

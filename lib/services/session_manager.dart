@@ -72,6 +72,7 @@ class SessionManager extends ChangeNotifier {
 
   void setAuthenticatedUser(local.AuthUser user) {
     _currentUser = user;
+    _roleLoadFuture = _fetchUserRole(user.id);
     notifyListeners();
   }
 

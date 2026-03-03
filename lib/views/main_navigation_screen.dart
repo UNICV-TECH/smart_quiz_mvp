@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../repositories/gamification_repository.dart';
+import '../services/session_manager.dart';
 import '../ui/components/default_navbar.dart';
 import '../viewmodels/course_selection_view_model.dart';
 import '../viewmodels/gamification_view_model.dart';
@@ -56,21 +57,55 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       rankingChild = const RankingScreen();
     }
 
+    final isAdmin = context.watch<SessionManager>().isAdmin;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
-      extendBody: true,
-      body: IndexedStack(
-        index: _selectedIndex,
+      extendBody: !isAdmin,
+      body: Column(
         children: [
-          ChangeNotifierProvider(
-            create: (context) => CourseSelectionViewModel(
-              courseRepository: context.read<CourseRepository?>(),
+          if (isAdmin)
+            Material(
+              color: const Color(0xFFB8860B),
+              child: InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.arrow_back, color: Colors.white, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Voltar ao Painel Admin',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            child: const HomeScreen(),
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                ChangeNotifierProvider(
+                  create: (context) => CourseSelectionViewModel(
+                    courseRepository: context.read<CourseRepository?>(),
+                  ),
+                  child: const HomeScreen(),
+                ),
+                rankingChild,
+                const ExamHistoryScreen(),
+                const ProfileScreen(),
+              ],
+            ),
           ),
-          rankingChild,
-          const ExamHistoryScreen(),
-          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: CustomNavBar(

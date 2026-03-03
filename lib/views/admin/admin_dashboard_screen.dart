@@ -9,7 +9,7 @@ import '../../ui/components/admin_charts/admin_pie_chart.dart';
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
-  static const _indigoColor = Color(0xFF3F51B5);
+  static const _goldColor = Color(0xFFB8860B);
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class AdminDashboardScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: _indigoColor,
+            color: _goldColor,
           ),
         ),
         const Spacer(),

@@ -58,7 +58,7 @@ class AdminPieChart extends StatelessWidget {
                 PieChartSectionData(
                   value: stats.totalAdmins.toDouble(),
                   title: '${_percentage(stats.totalAdmins, total)}%',
-                  color: const Color(0xFF3F51B5),
+                  color: const Color(0xFFB8860B),
                   radius: 50,
                   titleStyle: const TextStyle(
                     fontSize: 12,
@@ -90,7 +90,7 @@ class AdminPieChart extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _LegendItem(
-                color: const Color(0xFF3F51B5),
+                color: const Color(0xFFB8860B),
                 label: 'Admins',
                 count: stats.totalAdmins,
               ),
