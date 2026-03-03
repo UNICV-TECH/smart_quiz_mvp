@@ -40,6 +40,7 @@ class SessionManager extends ChangeNotifier {
   bool _initialized = false;
   bool _handlingUnauthorized = false;
   StreamSubscription<AuthState>? _authSubscription;
+  Future<void> _roleLoadFuture = Future.value();
 
   local.AuthUser? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
@@ -59,12 +60,16 @@ class SessionManager extends ChangeNotifier {
     if (_client != null) {
       final session = _client!.auth.currentSession;
       _updateFromSession(session);
+      await _roleLoadFuture;
     } else {
       _currentUser = null;
     }
     _initialized = true;
     notifyListeners();
   }
+
+  /// Aguarda o carregamento do role do usuário (chamado após login)
+  Future<void> ensureRoleLoaded() => _roleLoadFuture;
 
   void setAuthenticatedUser(local.AuthUser user) {
     _currentUser = user;
@@ -163,8 +168,8 @@ class SessionManager extends ChangeNotifier {
       name: name,
     );
 
-    // Fetch user role from database asynchronously
-    _fetchUserRole(supabaseUser.id);
+    // Fetch user role from database
+    _roleLoadFuture = _fetchUserRole(supabaseUser.id);
   }
 
   Future<void> _fetchUserRole(String userId) async {
