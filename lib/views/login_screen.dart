@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
 
@@ -53,13 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
       // Aguardar o role ser carregado do banco antes de redirecionar
       await sessionManager.ensureRoleLoaded();
       if (!mounted) return;
-      final user = sessionManager.currentUser;
-      if (user != null && user.isAdmin) {
-        Navigator.pushReplacementNamed(context, '/admin');
-      } else if (user != null && user.isTeacher) {
-        Navigator.pushReplacementNamed(context, '/teacher');
+      if (sessionManager.isAdmin) {
+        context.go('/admin');
+      } else if (sessionManager.isTeacher) {
+        context.go('/teacher/templates');
       } else {
-        Navigator.pushReplacementNamed(context, '/main');
+        context.go('/home');
       }
     }
   }
@@ -181,10 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 alignment: Alignment.centerRight,
                                 child: GestureDetector(
                                   onTap: () {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/reset_password',
-                                    );
+                                    context.go('/reset-password');
                                   },
                                   child: Text(
                                     AppStrings.forgotPassword,
@@ -248,10 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     const SizedBox(width: 5),
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.pushReplacementNamed(
-                                          context,
-                                          '/signup',
-                                        );
+                                        context.go('/signup');
                                       },
                                       child: Text(
                                         AppStrings.signupLink,

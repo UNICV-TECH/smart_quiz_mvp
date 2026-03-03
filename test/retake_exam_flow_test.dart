@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:unicv_tech_mvp/services/session_manager.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
 import 'package:unicv_tech_mvp/views/exam_result_screen.dart';
 
@@ -113,18 +116,6 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
   }
 }
 
-class _RecordingNavigatorObserver extends NavigatorObserver {
-  Route<dynamic>? replacedRoute;
-  Route<dynamic>? replacementRoute;
-
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    replacementRoute = newRoute;
-    replacedRoute = oldRoute;
-    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-  }
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -173,9 +164,10 @@ void main() {
       expect(secondViewModel.attemptId, isNot(equals(viewModel.attemptId)));
     });
 
-    testWidgets('Retake button pushes /exam with validated arguments',
+    testWidgets('Retake button navigates to /exam with correct parameters',
         (tester) async {
-      final observer = _RecordingNavigatorObserver();
+      String? navigatedPath;
+
       final resultsPayload = {
         'attemptId': 'attempt_1',
         'userId': 'user-1',
@@ -190,32 +182,57 @@ void main() {
         'questionsBreakdown': const [],
       };
 
-      await tester.pumpWidget(
-        MaterialApp(
-          debugShowCheckedModeBanner: false,
-          routes: {
-            '/exam/result': (context) =>
+      final router = GoRouter(
+        initialLocation: '/exam-result',
+        routes: [
+          GoRoute(
+            path: '/exam-result',
+            builder: (context, state) =>
                 ExamResultScreen(results: resultsPayload),
-            '/exam': (context) => const SizedBox.shrink(),
-          },
-          initialRoute: '/exam/result',
-          navigatorObservers: [observer],
+          ),
+          GoRoute(
+            path: '/exam/:examId',
+            builder: (context, state) {
+              navigatedPath = state.uri.toString();
+              return const Scaffold(
+                body: Center(child: Text('Exam Screen')),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const Scaffold(
+              body: Center(child: Text('Home')),
+            ),
+          ),
+        ],
+      );
+
+      final sessionManager = SessionManager.disabled();
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<SessionManager>.value(
+                value: sessionManager),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+          ),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       await tester.tap(find.text('Refazer prova'));
       await tester.pumpAndSettle();
 
-      final replacement = observer.replacementRoute;
-      expect(replacement, isNotNull);
-      expect(replacement!.settings.name, equals('/exam'));
-      expect(replacement.settings.arguments, isA<Map<String, dynamic>>());
-
-      final args = replacement.settings.arguments! as Map<String, dynamic>;
-      expect(args['userId'], equals('user-1'));
-      expect(args['examId'], equals('exam-1'));
-      expect(args['courseId'], equals('course-1'));
-      expect(args['questionCount'], equals(5));
+      expect(navigatedPath, isNotNull);
+      final uri = Uri.parse(navigatedPath!);
+      expect(uri.path, equals('/exam/exam-1'));
+      expect(uri.queryParameters['courseId'], equals('course-1'));
+      expect(uri.queryParameters['questionCount'], equals('5'));
+      expect(uri.queryParameters['isRetake'], equals('true'));
     });
   });
 }

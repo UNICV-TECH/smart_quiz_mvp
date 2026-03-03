@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 
@@ -31,7 +32,7 @@ class AboutScreen extends StatelessWidget {
                   size: 32,
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  context.pop();
                 },
               ),
               title: Text(

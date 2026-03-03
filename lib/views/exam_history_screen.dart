@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../ui/theme/app_color.dart';
 import '../viewmodels/exam_history_view_model.dart';
 import '../repositories/exam_attempt_repository_types.dart';
-import 'exam_detail_screen.dart';
 
 class ExamHistoryScreen extends StatelessWidget {
   const ExamHistoryScreen({super.key});
@@ -188,12 +188,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
   Widget _buildHistoryCard(BuildContext context, ExamAttemptHistory attempt) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ExamDetailScreen(attemptId: attempt.id),
-          ),
-        );
+        context.push('/history/${attempt.id}');
       },
       child: _buildHistoryCardContent(context, attempt),
     );

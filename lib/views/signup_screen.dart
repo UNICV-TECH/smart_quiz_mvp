@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/signup_view_model.dart';
 import '../ui/theme/app_color.dart';
@@ -56,7 +57,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (result.success && !result.needsEmailConfirmation) {
-      Navigator.pushReplacementNamed(context, '/login');
+      context.go('/login');
     }
   }
 
@@ -136,8 +137,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                           size: 40,
                                         ),
                                         onPressed: () {
-                                          Navigator.pushReplacementNamed(
-                                              context, '/login');
+                                          context.go('/login');
                                         },
                                         padding: EdgeInsets.zero,
                                         constraints: BoxConstraints(),
@@ -349,8 +349,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                       const SizedBox(width: 5),
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.pushReplacementNamed(
-                                              context, '/login');
+                                          context.go('/login');
                                         },
                                         child: Text(
                                           AppStrings.loginLink,

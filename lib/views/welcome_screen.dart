@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
 
@@ -116,7 +117,7 @@ class WelcomeScreen extends StatelessWidget {
                     height: 67,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/login');
+                        context.go('/login');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.orange,

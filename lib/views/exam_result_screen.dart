@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:unicv_tech_mvp/models/gamification_level.dart';
 import 'package:unicv_tech_mvp/services/gamification_calculator.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
@@ -147,18 +148,9 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         previousQuestionIds?.map((id) => id.toString()).toList();
     debugPrint('Previous question IDs: $questionIdsList');
 
-    await Navigator.pushReplacementNamed(
-      context,
-      '/exam',
-      arguments: {
-        'userId': userId,
-        'examId': examId,
-        'courseId': courseId,
-        'questionCount': questionCount,
-        'isRetake': true, // Flag para indicar que é uma retomada
-        'previousQuestionIds':
-            questionIdsList, // IDs das questões da prova anterior
-      },
+    context.pushReplacement(
+      '/exam/$examId?courseId=${Uri.encodeComponent(courseId)}&questionCount=$questionCount&isRetake=true',
+      extra: {'previousQuestionIds': questionIdsList},
     );
   }
 
@@ -189,7 +181,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                   child: Row(
                     children: [
                       DefaultButtonArrowBack(
-                        onPressed: () => Navigator.pop(context, widget.results),
+                        onPressed: () => context.go('/home'),
                       ),
                       Expanded(
                         child: Center(
@@ -334,12 +326,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                         child: DefaultButtonOrange(
                           texto: 'Voltar ao início',
                           onPressed: () {
-                            Navigator.popUntil(
-                              context,
-                              (route) =>
-                                  route.settings.name == '/main' ||
-                                  route.isFirst,
-                            );
+                            context.go('/home');
                           },
                           largura: double.infinity,
                           altura: 54,

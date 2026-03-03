@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/session_manager.dart';
@@ -132,7 +133,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     title: 'Painel Professor',
                     index: -1,
                     onTap: () {
-                      Navigator.of(context).pushNamed('/teacher');
+                      context.go('/teacher/templates');
                     },
                   ),
                   const SizedBox(height: 8),

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,27 +18,21 @@ import 'repositories/admin_repository.dart';
 import 'repositories/supabase_admin_repository.dart';
 import 'repositories/gamification_repository.dart';
 import 'repositories/supabase_gamification_repository.dart';
-import 'routes/app_routes.dart';
+import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/session_manager.dart';
 import 'ui/theme/app_color.dart';
-import 'views/splash_screen.dart';
-import 'models/user_model.dart';
-import 'views/admin/admin_main_screen.dart';
-import 'views/teacher/teacher_main_screen.dart';
-import 'widgets/protected_route.dart';
 
-// Variável estática para rastrear se o Supabase já foi inicializado
+// Static variable to track whether Supabase has already been initialized
 bool _supabaseInitialized = false;
-final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy();
 
   AuthRepository authRepository;
 
-  // Tentar carregar .env apenas se não estiver na web
-  // Na web, o arquivo .env não pode ser carregado como asset
+  // Try to load .env only if not on web
   if (!kIsWeb) {
     try {
       await dotenv.load(fileName: "assets/dotenv.env");
@@ -51,14 +47,13 @@ Future<void> main() async {
     } catch (e) {
       debugPrint('✗ Erro ao carregar arquivo .env: $e');
       debugPrint('✗ Tentando carregar valores diretamente...');
-      // Continua sem o arquivo .env se não existir
     }
   } else {
     debugPrint(
         'Plataforma web detectada: usando valores padrão ou variáveis de ambiente.');
   }
 
-  // Verificar configuração do Supabase
+  // Check Supabase configuration
   final supabaseUrl = SupabaseOptions.url;
   final supabaseKey = SupabaseOptions.anonKey;
 
@@ -71,7 +66,6 @@ Future<void> main() async {
 
   if (SupabaseOptions.isConfigured) {
     try {
-      // Inicializar Supabase apenas se ainda não foi inicializado
       if (!_supabaseInitialized) {
         await Supabase.initialize(
           url: SupabaseOptions.url,
@@ -90,7 +84,7 @@ Future<void> main() async {
     } catch (e, stackTrace) {
       debugPrint('✗ Erro ao inicializar Supabase: $e');
       debugPrint('Stack trace: $stackTrace');
-      _supabaseInitialized = false; // Reset flag em caso de erro
+      _supabaseInitialized = false;
       authRepository = const DisabledAuthRepository();
     }
   } else {
@@ -103,23 +97,22 @@ Future<void> main() async {
   final sessionManager = SupabaseOptions.isConfigured
       ? SessionManager.enabled(
           client: Supabase.instance.client,
-          navigatorKey: appNavigatorKey,
         )
-      : SessionManager.disabled(
-          navigatorKey: appNavigatorKey,
-        );
+      : SessionManager.disabled();
 
   final authService = AuthService(
     repository: authRepository,
     sessionManager: sessionManager,
   );
 
+  final router = createAppRouter(sessionManager);
+
   runApp(
     MyApp(
       authRepository: authRepository,
       authService: authService,
       sessionManager: sessionManager,
-      navigatorKey: appNavigatorKey,
+      router: router,
     ),
   );
 }
@@ -130,13 +123,13 @@ class MyApp extends StatelessWidget {
     required this.authRepository,
     required this.authService,
     required this.sessionManager,
-    required this.navigatorKey,
+    required this.router,
   });
 
   final AuthRepository authRepository;
   final AuthService authService;
   final SessionManager sessionManager;
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +172,7 @@ class MyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'UniCV Tech',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -187,37 +180,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Poppins',
         ),
-        navigatorKey: navigatorKey,
-        home: const SplashScreen(),
-        onGenerateRoute: (settings) {
-          // Interceptar rotas que começam com /admin
-          if (settings.name?.startsWith('/admin') == true) {
-            return MaterialPageRoute(
-              builder: (context) => ProtectedRoute(
-                requiredRole: UserRole.admin,
-                builder: (innerContext) => const AdminMainScreen(),
-                redirectRoute: AppRoutes.login,
-              ),
-              settings: settings,
-            );
-          }
-
-          // Interceptar rotas que começam com /teacher ou /professor
-          if (settings.name?.startsWith('/teacher') == true ||
-              settings.name?.startsWith('/professor') == true) {
-            return MaterialPageRoute(
-              builder: (context) => ProtectedRoute(
-                builder: (innerContext) => const TeacherMainScreen(),
-                redirectRoute: AppRoutes.login,
-              ),
-              settings: settings,
-            );
-          }
-
-          // Para outras rotas, retorna null para usar o sistema padrão
-          return null;
-        },
-        routes: AppRoutes.getRoutes(),
+        routerConfig: router,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../repositories/course_repository.dart';
@@ -6,7 +7,6 @@ import '../../repositories/teacher_repository.dart';
 import '../../services/session_manager.dart';
 import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
-import '../../routes/app_routes.dart';
 import '../../viewmodels/teacher/question_list_view_model.dart';
 
 /// Tela de listagem de questoes do professor
@@ -320,10 +320,8 @@ class _QuestionListContent extends StatelessWidget {
           isActive: question.isActive,
           createdAt: question.createdAt,
           onEdit: () async {
-            final result = await Navigator.pushNamed(
-              context,
-              AppRoutes.teacherQuestionEdit,
-              arguments: {'questionId': question.id},
+            final result = await context.push<bool>(
+              '/teacher/questions/${question.id}/edit',
             );
             if (result == true) {
               viewModel.loadQuestions();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
 import 'package:unicv_tech_mvp/ui/components/default_radio_group.dart';
@@ -117,7 +118,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => context.pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.green,
                         foregroundColor: AppColors.white,
@@ -165,7 +166,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => context.pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.green,
                         foregroundColor: AppColors.white,
@@ -310,7 +311,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 );
 
                 if (shouldExit == true && mounted) {
-                  Navigator.pop(context);
+                  context.pop();
                 }
               },
             ),
@@ -569,7 +570,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Finalizar Simulado'),
           content: Text(
@@ -578,12 +579,12 @@ class _ExamScreenState extends State<ExamScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 _submitExam(viewModel);
               },
               style: ElevatedButton.styleFrom(
@@ -654,11 +655,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
       if (!mounted) return;
 
-      await Navigator.popAndPushNamed(
-        context,
-        '/exam/result',
-        arguments: results,
-      );
+      context.pushReplacement('/exam-result', extra: results);
     } catch (error) {
       if (!mounted) return;
 
@@ -673,7 +670,7 @@ class _ExamScreenState extends State<ExamScreen> {
           _submitExam(viewModel);
           break;
         case _SubmissionAction.exit:
-          Navigator.of(context).pop();
+          context.pop();
           break;
         default:
           break;

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/session_manager.dart';
 import '../ui/components/default_button_orange.dart';
 import '../ui/components/default_password_input_47.dart';
 import '../ui/theme/app_color.dart';
@@ -19,6 +21,12 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
   bool _isLoading = false;
   String? _passwordError;
   String? _confirmError;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<SessionManager>().clearPendingPasswordRecovery();
+  }
 
   @override
   void dispose() {
@@ -97,7 +105,7 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              Navigator.pushReplacementNamed(context, '/login');
+              context.go('/login');
             },
             child: const Text('OK'),
           ),
@@ -178,8 +186,7 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
                                       size: 40,
                                     ),
                                     onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, '/login');
+                                      context.go('/login');
                                     },
                                     padding: EdgeInsets.zero,
                                     constraints: BoxConstraints(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../services/session_manager.dart';
 import '../../services/auth_service.dart';
@@ -612,7 +613,7 @@ class _TeacherProfileViewBody extends StatelessWidget {
                         icon: Icons.help_outline,
                         title: AppStrings.help,
                         onTap: () {
-                          Navigator.pushNamed(context, '/help');
+                          context.push('/help');
                         },
                       ),
 
@@ -622,7 +623,7 @@ class _TeacherProfileViewBody extends StatelessWidget {
                         icon: Icons.info_outline,
                         title: AppStrings.about,
                         onTap: () {
-                          Navigator.pushNamed(context, '/about');
+                          context.push('/about');
                         },
                       ),
 
