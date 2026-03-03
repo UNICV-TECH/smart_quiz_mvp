@@ -41,6 +41,8 @@ class NotFoundScreen extends StatelessWidget {
                   final sessionManager = context.read<SessionManager>();
                   if (!sessionManager.isAuthenticated) {
                     context.go('/login');
+                  } else if (sessionManager.isAdmin) {
+                    context.go('/admin');
                   } else if (sessionManager.isTeacher) {
                     context.go('/teacher/templates');
                   } else {

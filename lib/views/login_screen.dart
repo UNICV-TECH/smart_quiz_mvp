@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
 
+import '../services/session_manager.dart';
 import '../constants/app_strings.dart';
 import '../ui/components/default_button_orange.dart';
 import '../ui/components/default_inline_message.dart';
@@ -48,7 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (result.success) {
-      context.go('/home');
+      if (!mounted) return;
+      final sessionManager = context.read<SessionManager>();
+      await sessionManager.ensureRoleLoaded();
+      if (!mounted) return;
+      if (sessionManager.isAdmin) {
+        context.go('/admin');
+      } else if (sessionManager.isTeacher) {
+        context.go('/teacher/templates');
+      } else {
+        context.go('/home');
+      }
     }
   }
 

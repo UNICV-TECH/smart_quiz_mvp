@@ -60,7 +60,9 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (sessionManager.isAuthenticated) {
-      if (sessionManager.isTeacher) {
+      if (sessionManager.isAdmin) {
+        context.go('/admin');
+      } else if (sessionManager.isTeacher) {
         context.go('/teacher/templates');
       } else {
         context.go('/home');

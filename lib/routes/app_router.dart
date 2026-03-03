@@ -13,6 +13,7 @@ import '../viewmodels/exam_view_model.dart';
 import '../viewmodels/gamification_view_model.dart';
 import '../viewmodels/login_view_model.dart';
 import '../viewmodels/signup_view_model.dart';
+import '../views/admin/admin_main_screen.dart';
 import '../views/about_screen.dart';
 import '../views/exam_detail_screen.dart';
 import '../views/exam_history_screen.dart';
@@ -55,6 +56,7 @@ GoRouter createAppRouter(SessionManager sessionManager) {
       final isInitialized = sessionManager.initialized;
       final isAuthenticated = sessionManager.isAuthenticated;
       final isTeacher = sessionManager.isTeacher;
+      final isAdmin = sessionManager.isAdmin;
       final pendingRecovery = sessionManager.pendingPasswordRecovery;
 
       // 1. If not initialized and not on splash, go to splash
@@ -86,11 +88,13 @@ GoRouter createAppRouter(SessionManager sessionManager) {
 
       // 5. If authenticated and on a public route (except splash)
       if (isAuthenticated && isPublicRoute && location != '/splash') {
-        return isTeacher ? '/teacher/templates' : '/home';
+        if (isAdmin) return '/admin';
+        if (isTeacher) return '/teacher/templates';
+        return '/home';
       }
 
-      // 6. If authenticated teacher trying to access student routes
-      if (isAuthenticated && isTeacher) {
+      // 6. If authenticated admin/teacher trying to access student routes
+      if (isAuthenticated && (isTeacher || isAdmin)) {
         const studentPrefixes = [
           '/home',
           '/ranking',
@@ -100,13 +104,16 @@ GoRouter createAppRouter(SessionManager sessionManager) {
           '/exam',
         ];
         if (studentPrefixes.any((prefix) => location.startsWith(prefix))) {
-          return '/teacher/templates';
+          return isAdmin ? '/admin' : '/teacher/templates';
         }
       }
 
-      // 7. If authenticated student trying to access teacher routes
-      if (isAuthenticated && !isTeacher && location.startsWith('/teacher')) {
+      // 7. If authenticated student trying to access teacher/admin routes
+      if (isAuthenticated && !isTeacher && !isAdmin && location.startsWith('/teacher')) {
         return '/home';
+      }
+      if (isAuthenticated && !isAdmin && location.startsWith('/admin')) {
+        return isTeacher ? '/teacher/templates' : '/home';
       }
 
       // 8. No redirect needed
@@ -297,6 +304,13 @@ GoRouter createAppRouter(SessionManager sessionManager) {
         path: '/about',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AboutScreen(),
+      ),
+
+      // --- Admin route ---
+      GoRoute(
+        path: '/admin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AdminMainScreen(),
       ),
 
       // --- Teacher shell (sidebar) ---

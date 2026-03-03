@@ -14,6 +14,8 @@ import 'repositories/course_repository.dart';
 import 'repositories/supabase_course_repository.dart';
 import 'repositories/teacher_repository.dart';
 import 'repositories/supabase_teacher_repository.dart';
+import 'repositories/admin_repository.dart';
+import 'repositories/supabase_admin_repository.dart';
 import 'repositories/gamification_repository.dart';
 import 'repositories/supabase_gamification_repository.dart';
 import 'routes/app_router.dart';
@@ -150,6 +152,14 @@ class MyApp extends StatelessWidget {
               return null;
             }
             return SupabaseTeacherRepository(client: Supabase.instance.client);
+          },
+        ),
+        Provider<AdminRepository?>(
+          create: (_) {
+            if (!SupabaseOptions.isConfigured) {
+              return null;
+            }
+            return SupabaseAdminRepository(client: Supabase.instance.client);
           },
         ),
         Provider<GamificationRepository?>(

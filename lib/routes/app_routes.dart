@@ -19,6 +19,12 @@ class AppRoutes {
   static const String resetPassword = '/reset-password';
   static const String resetPasswordConfirm = '/reset-password/confirm';
 
+  // Admin routes
+  static const String admin = '/admin';
+  static const String adminHome = '/admin/home';
+  static const String adminUsers = '/admin/users';
+  static const String adminContent = '/admin/content';
+
   // Teacher routes
   static const String teacherTemplates = '/teacher/templates';
   static const String teacherCreateQuestion = '/teacher/create-question';
