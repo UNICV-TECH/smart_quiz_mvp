@@ -67,6 +67,10 @@ class _SplashScreenState extends State<SplashScreen>
         if (isRecovery) {
           targetRoute = '/reset_password2';
         }
+        // Se a URL começa com /admin, redirecione para admin
+        else if (path.startsWith('/admin')) {
+          targetRoute = path.isEmpty ? '/admin' : path;
+        }
         // Se a URL é /teacher ou começa com /teacher/, redirecione para professores
         else if (path.startsWith('/teacher') ||
             path.startsWith('/professor')) {
@@ -77,11 +81,22 @@ class _SplashScreenState extends State<SplashScreen>
       }
     }
 
-    // Se não encontrou rota de professor na URL, verifica autenticação normal
+    // Se não encontrou rota especial na URL, verifica autenticação e role
     if (targetRoute == null) {
       final sessionManager = context.read<SessionManager>();
       await sessionManager.initialize();
-      targetRoute = sessionManager.isAuthenticated ? '/main' : '/welcome';
+      if (sessionManager.isAuthenticated) {
+        final user = sessionManager.currentUser;
+        if (user != null && user.isAdmin) {
+          targetRoute = '/admin';
+        } else if (user != null && user.isTeacher) {
+          targetRoute = '/teacher';
+        } else {
+          targetRoute = '/main';
+        }
+      } else {
+        targetRoute = '/welcome';
+      }
     }
 
     if (!mounted) return;
@@ -96,6 +111,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (targetRoute == '/main') {
       Navigator.of(context).pushReplacementNamed('/main');
+      return;
+    }
+
+    if (targetRoute.startsWith('/admin')) {
+      Navigator.of(context).pushReplacementNamed(targetRoute);
       return;
     }
 

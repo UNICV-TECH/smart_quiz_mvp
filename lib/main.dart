@@ -12,6 +12,8 @@ import 'repositories/course_repository.dart';
 import 'repositories/supabase_course_repository.dart';
 import 'repositories/teacher_repository.dart';
 import 'repositories/supabase_teacher_repository.dart';
+import 'repositories/admin_repository.dart';
+import 'repositories/supabase_admin_repository.dart';
 import 'repositories/gamification_repository.dart';
 import 'repositories/supabase_gamification_repository.dart';
 import 'routes/app_routes.dart';
@@ -19,6 +21,8 @@ import 'services/auth_service.dart';
 import 'services/session_manager.dart';
 import 'ui/theme/app_color.dart';
 import 'views/splash_screen.dart';
+import 'models/user_model.dart';
+import 'views/admin/admin_main_screen.dart';
 import 'views/teacher/teacher_main_screen.dart';
 import 'widgets/protected_route.dart';
 
@@ -157,6 +161,14 @@ class MyApp extends StatelessWidget {
             return SupabaseTeacherRepository(client: Supabase.instance.client);
           },
         ),
+        Provider<AdminRepository?>(
+          create: (_) {
+            if (!SupabaseOptions.isConfigured) {
+              return null;
+            }
+            return SupabaseAdminRepository(client: Supabase.instance.client);
+          },
+        ),
         Provider<GamificationRepository?>(
           create: (_) {
             if (!SupabaseOptions.isConfigured) {
@@ -178,6 +190,18 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         home: const SplashScreen(),
         onGenerateRoute: (settings) {
+          // Interceptar rotas que começam com /admin
+          if (settings.name?.startsWith('/admin') == true) {
+            return MaterialPageRoute(
+              builder: (context) => ProtectedRoute(
+                requiredRole: UserRole.admin,
+                builder: (innerContext) => const AdminMainScreen(),
+                redirectRoute: AppRoutes.login,
+              ),
+              settings: settings,
+            );
+          }
+
           // Interceptar rotas que começam com /teacher ou /professor
           if (settings.name?.startsWith('/teacher') == true ||
               settings.name?.startsWith('/professor') == true) {
