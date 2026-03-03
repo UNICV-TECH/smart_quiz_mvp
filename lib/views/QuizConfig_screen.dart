@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
-import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/constants/supabase_options.dart';
+import 'package:unicv_tech_mvp/models/exam_template.dart';
+import 'package:unicv_tech_mvp/repositories/published_exam_repository.dart';
+import 'package:unicv_tech_mvp/viewmodels/published_exams_view_model.dart';
+import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
+import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
 import 'package:unicv_tech_mvp/ui/components/default_inline_message.dart';
@@ -11,6 +15,8 @@ import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
+
+enum _QuizMode { simulado, provas }
 
 class QuizConfigScreen extends StatefulWidget {
   final Map<String, dynamic> course;
@@ -27,9 +33,53 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   int _navBarIndex = 0;
   String? _feedbackMessage;
   FeedbackSeverity? _feedbackSeverity;
+  _QuizMode _mode = _QuizMode.simulado;
+  String? _startingTemplateId;
+
+  PublishedExamsViewModel? _publishedExamsVM;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
   final String _logoAssetPath = 'assets/images/logo_color.png';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initPublishedExamsVM();
+    });
+  }
+
+  void _initPublishedExamsVM() {
+    final repo = context.read<PublishedExamRepository?>();
+    final courseId =
+        (widget.course['courseId'] ?? widget.course['id']) as String?;
+    if (repo != null && courseId != null) {
+      _publishedExamsVM = PublishedExamsViewModel(
+        repository: repo,
+        courseId: courseId,
+      );
+      if (mounted) setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _publishedExamsVM?.dispose();
+    super.dispose();
+  }
+
+  void _onModeChanged(_QuizMode mode) {
+    setState(() {
+      _mode = mode;
+      _feedbackMessage = null;
+      _feedbackSeverity = null;
+    });
+    if (mode == _QuizMode.provas && _publishedExamsVM != null) {
+      if (_publishedExamsVM!.templates.isEmpty && !_publishedExamsVM!.isLoading) {
+        _publishedExamsVM!.loadTemplates();
+      }
+    }
+  }
 
   void _onQuantitySelected(String quantity) {
     setState(() {
@@ -210,6 +260,78 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     }
   }
 
+  Future<void> _startPublishedExam(ExamTemplate template) async {
+    final vm = _publishedExamsVM;
+    if (vm == null || _startingTemplateId != null) return;
+
+    _clearFeedback();
+
+    setState(() {
+      _startingTemplateId = template.id;
+    });
+
+    try {
+      if (!SupabaseOptions.isConfigured) {
+        _setFeedback(
+          'Supabase não está configurado nesta build.',
+          FeedbackSeverity.error,
+        );
+        return;
+      }
+
+      final client = Supabase.instance.client;
+      final user = client.auth.currentUser;
+      if (user == null) {
+        _setFeedback(
+            'Faça login para iniciar a prova.', FeedbackSeverity.error);
+        return;
+      }
+
+      final courseId =
+          (widget.course['courseId'] ?? widget.course['id']) as String?;
+      if (courseId == null || courseId.isEmpty) {
+        _setFeedback('Não foi possível identificar o curso selecionado.',
+            FeedbackSeverity.error);
+        return;
+      }
+
+      await _ensureUserRecord(client, user);
+
+      final examId = await vm.startExam(
+        templateId: template.id,
+        userId: user.id,
+      );
+
+      if (examId == null) {
+        _setFeedback(
+          vm.error ?? 'Erro ao iniciar a prova.',
+          FeedbackSeverity.error,
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _startingTemplateId = null;
+      });
+
+      await context.push(
+        '/exam/$examId?courseId=${Uri.encodeComponent(courseId)}&questionCount=${template.questionCount}',
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Falha ao iniciar prova publicada: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      _setFeedback('Erro ao iniciar a prova. Tente novamente.',
+          FeedbackSeverity.error);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _startingTemplateId = null;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isButtonEnabled = _selectedQuantity != null && !_isLoading;
@@ -256,24 +378,18 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              const AppText(
-                                'Escolha a quantidade de questões',
-                                style: AppTextStyle.titleSmall,
-                                color: AppColors.primaryDark,
-                              ),
-                              const SizedBox(height: 5),
-                              AppText(
-                                'Quantas questões deseja fazer ?',
-                                style: AppTextStyle.subtitleMedium,
-                                color: AppColors.secondaryDark
-                                    .withAlpha((0.8 * 255).round()),
-                              ),
-                              const SizedBox(height: 30),
-                              SelectionBox(
-                                options: _quantityOptions,
-                                initialOption: _selectedQuantity,
-                                onOptionSelected: _onQuantitySelected,
-                              ),
+                              _buildModeToggle(),
+                              const SizedBox(height: 24),
+                              if (_mode == _QuizMode.simulado)
+                                _buildSimuladoContent(isButtonEnabled)
+                              else if (_publishedExamsVM != null)
+                                ListenableBuilder(
+                                  listenable: _publishedExamsVM!,
+                                  builder: (context, _) =>
+                                      _buildProvasContent(),
+                                )
+                              else
+                                _buildProvasContent(),
                               if (_feedbackMessage != null &&
                                   _feedbackSeverity != null) ...[
                                 const SizedBox(height: 20),
@@ -283,20 +399,6 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                                   onDismissed: _clearFeedback,
                                 ),
                               ],
-                              const SizedBox(height: 24),
-                              _isLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator(
-                                          color: AppColors.orange),
-                                    )
-                                  : DefaultButtonOrange(
-                                      texto: 'Iniciar',
-                                      onPressed:
-                                          isButtonEnabled ? _startQuiz : null,
-                                      tipo: isButtonEnabled
-                                          ? BotaoTipo.primario
-                                          : BotaoTipo.desabilitado,
-                                    ),
                               const SizedBox(height: 35),
                             ],
                           ),
@@ -323,6 +425,319 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildModeToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.greyShade200,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildToggleTab(
+              label: 'Simulado',
+              isActive: _mode == _QuizMode.simulado,
+              onTap: () => _onModeChanged(_QuizMode.simulado),
+            ),
+          ),
+          Expanded(
+            child: _buildToggleTab(
+              label: 'Provas',
+              isActive: _mode == _QuizMode.provas,
+              onTap: () => _onModeChanged(_QuizMode.provas),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleTab({
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.orange : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.white : AppColors.secondaryDark,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSimuladoContent(bool isButtonEnabled) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const AppText(
+          'Escolha a quantidade de questões',
+          style: AppTextStyle.titleSmall,
+          color: AppColors.primaryDark,
+        ),
+        const SizedBox(height: 5),
+        AppText(
+          'Quantas questões deseja fazer ?',
+          style: AppTextStyle.subtitleMedium,
+          color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+        ),
+        const SizedBox(height: 30),
+        SelectionBox(
+          options: _quantityOptions,
+          initialOption: _selectedQuantity,
+          onOptionSelected: _onQuantitySelected,
+        ),
+        const SizedBox(height: 24),
+        _isLoading
+            ? const Center(
+                child:
+                    CircularProgressIndicator(color: AppColors.orange),
+              )
+            : DefaultButtonOrange(
+                texto: 'Iniciar',
+                onPressed: isButtonEnabled ? _startQuiz : null,
+                tipo: isButtonEnabled
+                    ? BotaoTipo.primario
+                    : BotaoTipo.desabilitado,
+              ),
+      ],
+    );
+  }
+
+  Widget _buildProvasContent() {
+    if (_publishedExamsVM == null) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Text(
+            'Serviço indisponível.',
+            style: TextStyle(
+              fontSize: 15,
+              color: AppColors.secondaryDark,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_publishedExamsVM!.isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: CircularProgressIndicator(color: AppColors.orange),
+        ),
+      );
+    }
+
+    if (_publishedExamsVM!.error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Column(
+            children: [
+              Text(
+                _publishedExamsVM!.error!,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.error,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  _publishedExamsVM!.loadTemplates();
+                },
+                child: const Text(
+                  'Tentar novamente',
+                  style: TextStyle(color: AppColors.orange),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final templates = _publishedExamsVM!.templates;
+
+    if (templates.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Text(
+            'Nenhuma prova disponível para este curso.',
+            style: TextStyle(
+              fontSize: 15,
+              color: AppColors.secondaryDark,
+              fontFamily: 'Poppins',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const AppText(
+          'Provas do Professor',
+          style: AppTextStyle.titleSmall,
+          color: AppColors.primaryDark,
+        ),
+        const SizedBox(height: 5),
+        AppText(
+          'Selecione uma prova para iniciar',
+          style: AppTextStyle.subtitleMedium,
+          color: AppColors.secondaryDark.withAlpha((0.8 * 255).round()),
+        ),
+        const SizedBox(height: 20),
+        ...templates.map((t) => _buildExamTemplateCard(t)),
+      ],
+    );
+  }
+
+  Widget _buildExamTemplateCard(ExamTemplate template) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.greyLight),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              template.name,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryDark,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            if (template.teacherName != null) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.person_outline,
+                      size: 16, color: AppColors.secondaryDark),
+                  const SizedBox(width: 4),
+                  Text(
+                    template.teacherName!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.secondaryDark,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _buildInfoChip(
+                  Icons.quiz_outlined,
+                  '${template.questionCount} questões',
+                ),
+                const SizedBox(width: 12),
+                _buildInfoChip(
+                  Icons.timer_outlined,
+                  template.timeLimitLabel,
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            _buildInfoChip(
+              Icons.grade_outlined,
+              'Nota mínima: ${template.passingScorePercentage.toStringAsFixed(0)}%',
+            ),
+            if (template.description != null &&
+                template.description!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                template.description!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.secondaryDark,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: _startingTemplateId == template.id
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.orange),
+                    )
+                  : DefaultButtonOrange(
+                      texto: 'Iniciar Prova',
+                      onPressed: _startingTemplateId != null
+                          ? null
+                          : () => _startPublishedExam(template),
+                      tipo: _startingTemplateId != null
+                          ? BotaoTipo.desabilitado
+                          : BotaoTipo.primario,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: AppColors.green),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.secondaryDark,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ],
     );
   }
 }

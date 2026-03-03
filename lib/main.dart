@@ -18,6 +18,8 @@ import 'repositories/admin_repository.dart';
 import 'repositories/supabase_admin_repository.dart';
 import 'repositories/gamification_repository.dart';
 import 'repositories/supabase_gamification_repository.dart';
+import 'repositories/published_exam_repository.dart';
+import 'repositories/supabase_published_exam_repository.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/session_manager.dart';
@@ -168,6 +170,15 @@ class MyApp extends StatelessWidget {
               return null;
             }
             return SupabaseGamificationRepository(
+                client: Supabase.instance.client);
+          },
+        ),
+        Provider<PublishedExamRepository?>(
+          create: (_) {
+            if (!SupabaseOptions.isConfigured) {
+              return null;
+            }
+            return SupabasePublishedExamRepository(
                 client: Supabase.instance.client);
           },
         ),
