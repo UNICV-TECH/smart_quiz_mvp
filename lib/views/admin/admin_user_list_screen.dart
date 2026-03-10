@@ -330,25 +330,203 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
     AdminUserManagementViewModel viewModel,
     AdminUserEntry user,
   ) {
-    return IconButton(
-      icon: Icon(
-        user.isActive ? Icons.block : Icons.check_circle_outline,
-        color: user.isActive ? Colors.red : Colors.green,
-        size: 20,
-      ),
-      tooltip: user.isActive ? 'Desativar' : 'Ativar',
-      onPressed: () {
-        _confirmAction(
-          context,
-          title: user.isActive ? 'Desativar usuário' : 'Ativar usuário',
-          message: user.isActive
-              ? 'Deseja desativar a conta de "${user.name}"?'
-              : 'Deseja reativar a conta de "${user.name}"?',
-          onConfirm: () =>
-              viewModel.toggleUserActive(user.id, !user.isActive),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.lock_reset, size: 20),
+          tooltip: 'Redefinir senha',
+          color: _goldColor,
+          onPressed: () => _showChangePasswordDialog(context, viewModel, user),
+        ),
+        IconButton(
+          icon: Icon(
+            user.isActive ? Icons.block : Icons.check_circle_outline,
+            color: user.isActive ? Colors.red : Colors.green,
+            size: 20,
+          ),
+          tooltip: user.isActive ? 'Desativar' : 'Ativar',
+          onPressed: () {
+            _confirmAction(
+              context,
+              title: user.isActive ? 'Desativar usuário' : 'Ativar usuário',
+              message: user.isActive
+                  ? 'Deseja desativar a conta de "${user.name}"?'
+                  : 'Deseja reativar a conta de "${user.name}"?',
+              onConfirm: () =>
+                  viewModel.toggleUserActive(user.id, !user.isActive),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showChangePasswordDialog(
+    BuildContext context,
+    AdminUserManagementViewModel viewModel,
+    AdminUserEntry user,
+  ) {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool obscurePassword = true;
+    bool obscureConfirm = true;
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(
+                'Redefinir Senha',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              content: SizedBox(
+                width: 400,
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Usuário: ${user.name.isEmpty ? user.email : user.name}',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        user.email,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Nova senha',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setDialogState(() {
+                                obscurePassword = !obscurePassword;
+                              });
+                            },
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Informe a nova senha';
+                          }
+                          if (value.length < 6) {
+                            return 'A senha deve ter pelo menos 6 caracteres';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: confirmController,
+                        obscureText: obscureConfirm,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmar senha',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscureConfirm
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setDialogState(() {
+                                obscureConfirm = !obscureConfirm;
+                              });
+                            },
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value != passwordController.text) {
+                            return 'As senhas não coincidem';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed:
+                      isSubmitting ? null : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+
+                          setDialogState(() => isSubmitting = true);
+
+                          final success = await viewModel.updateUserPassword(
+                            user.id,
+                            passwordController.text,
+                          );
+
+                          if (dialogContext.mounted) {
+                            Navigator.pop(dialogContext);
+                          }
+
+                          if (!success && context.mounted) {
+                            // Error message is shown by viewModel
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _goldColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Salvar'),
+                ),
+              ],
+            );
+          },
         );
       },
-    );
+    ).then((_) {
+      passwordController.dispose();
+      confirmController.dispose();
+    });
   }
 
   void _confirmAction(
