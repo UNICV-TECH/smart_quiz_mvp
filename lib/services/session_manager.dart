@@ -206,11 +206,20 @@ class SessionManager extends ChangeNotifier {
     try {
       final response = await _client!
           .from('user')
-          .select('role')
+          .select('role, is_active')
           .eq('id', userId)
           .maybeSingle();
 
       if (response != null && _currentUser != null) {
+        final isActive = response['is_active'] as bool? ?? true;
+
+        if (!isActive) {
+          debugPrint(
+              'SessionManager: usuário desativado detectado. Executando signOut.');
+          await signOut();
+          return;
+        }
+
         final role = UserRole.fromString(response['role'] as String?);
         _currentUser = _currentUser!.copyWith(role: role);
         notifyListeners();

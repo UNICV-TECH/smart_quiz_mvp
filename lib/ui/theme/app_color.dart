@@ -63,7 +63,7 @@ class AppColors {
 
   //yellow
   static const Color backgroundGradient2 = Color(0xFFF7E9D2);
-
+  
   static const Color dividerColor = Color(0xFFD3D9CF);
   static const Color cardFill = Color(0xFFEFF4EA);
 

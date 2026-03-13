@@ -31,6 +31,9 @@ abstract class AdminRepository {
   /// Toggle a user's active status
   Future<void> toggleUserActive(String userId, bool isActive);
 
+  /// Update a user's password (admin only)
+  Future<void> updateUserPassword(String userId, String newPassword);
+
   // ============================================
   // Content Management (global view)
   // ============================================

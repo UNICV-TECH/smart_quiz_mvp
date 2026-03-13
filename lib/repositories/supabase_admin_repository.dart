@@ -107,6 +107,20 @@ class SupabaseAdminRepository implements AdminRepository {
     }
   }
 
+  @override
+  Future<void> updateUserPassword(String userId, String newPassword) async {
+    try {
+      await _client.rpc('admin_update_user_password', params: {
+        'p_user_id': userId,
+        'p_new_password': newPassword,
+      });
+    } catch (error) {
+      throw AdminRepositoryException(
+        'Erro ao alterar senha do usuário: ${error.toString()}',
+      );
+    }
+  }
+
   // ============================================
   // Content Management
   // ============================================

@@ -183,6 +183,26 @@ class SupabaseAuthRepository implements AuthRepository {
         );
       }
 
+      // Check if user account is active
+      try {
+        final userRecord = await _client
+            .from('user')
+            .select('is_active')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (userRecord != null && userRecord['is_active'] == false) {
+          await _client.auth.signOut();
+          throw const AuthRepositoryException(
+            'Sua conta foi desativada. Entre em contato com o administrador.',
+            code: AuthRepositoryErrorCode.accountDisabled,
+          );
+        }
+      } catch (e) {
+        if (e is AuthRepositoryException) rethrow;
+        debugPrint('Erro ao verificar status do usuário: $e');
+      }
+
       return AuthRepositorySignInResponse(
         user: AuthRepositoryUser(
           id: user.id,
