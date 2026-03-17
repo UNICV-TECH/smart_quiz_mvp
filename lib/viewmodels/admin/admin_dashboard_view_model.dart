@@ -53,7 +53,7 @@ class AdminDashboardViewModel extends ChangeNotifier {
       _courseStats = results[1] as List<AdminCourseStats>;
       _monthlyActivity = results[2] as List<AdminMonthlyActivity>;
     } catch (error) {
-      _setError('Erro ao carregar estatísticas: $error');
+      _setError('$error');
       _platformStats = const AdminPlatformStats();
       _courseStats = [];
       _monthlyActivity = [];

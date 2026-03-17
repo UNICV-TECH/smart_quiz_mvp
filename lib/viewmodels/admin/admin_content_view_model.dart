@@ -42,7 +42,7 @@ class AdminContentViewModel extends ChangeNotifier {
       _templates = results[1] as List<ExamTemplate>;
       _courses = results[2] as List<AdminCourseEntry>;
     } catch (error) {
-      _setError('Erro ao carregar conteúdo: $error');
+      _setError('$error');
       _questions = [];
       _templates = [];
       _courses = [];

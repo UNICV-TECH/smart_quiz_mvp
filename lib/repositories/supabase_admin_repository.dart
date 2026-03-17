@@ -11,6 +11,41 @@ class SupabaseAdminRepository implements AdminRepository {
 
   final SupabaseClient _client;
 
+  /// Mapeia mensagens de erro do PostgreSQL para mensagens amigáveis em PT-BR
+  static const _errorMessages = <String, String>{
+    // Toggle user active
+    'Cannot deactivate your own account':
+        'Você não pode desativar sua própria conta',
+    // Update user role
+    'Cannot change your own role':
+        'Você não pode alterar seu próprio papel',
+    'Invalid role':
+        'O papel informado é inválido. Use: student, teacher ou admin',
+    // Update user password
+    'Use the regular password change for your own account':
+        'Para alterar sua própria senha, use a opção no seu perfil',
+    'Password must be at least 6 characters':
+        'A senha deve ter no mínimo 6 caracteres',
+    'User not found':
+        'Usuário não encontrado no sistema',
+    'Failed to update password: auth user not found':
+        'Não foi possível atualizar a senha: usuário não encontrado na autenticação',
+    // Access denied
+    'Access denied: admin role required':
+        'Acesso negado: você precisa ser administrador para realizar esta ação',
+  };
+
+  /// Extrai a mensagem amigável de uma exceção do Supabase/PostgreSQL
+  String _friendlyMessage(Object error, String fallback) {
+    final raw = error.toString();
+    for (final entry in _errorMessages.entries) {
+      if (raw.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+    return fallback;
+  }
+
   // ============================================
   // Analytics
   // ============================================
@@ -23,7 +58,7 @@ class SupabaseAdminRepository implements AdminRepository {
       return AdminPlatformStats.fromJson(response);
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao carregar estatísticas da plataforma: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar as estatísticas da plataforma'),
       );
     }
   }
@@ -37,7 +72,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao carregar estatísticas por curso: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar as estatísticas por curso'),
       );
     }
   }
@@ -52,7 +87,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao carregar atividade mensal: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar a atividade mensal'),
       );
     }
   }
@@ -74,7 +109,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao listar usuários: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar a lista de usuários'),
       );
     }
   }
@@ -88,7 +123,7 @@ class SupabaseAdminRepository implements AdminRepository {
       });
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao atualizar papel do usuário: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível atualizar o papel do usuário'),
       );
     }
   }
@@ -102,7 +137,7 @@ class SupabaseAdminRepository implements AdminRepository {
       });
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao alterar status do usuário: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível alterar o status do usuário'),
       );
     }
   }
@@ -116,7 +151,7 @@ class SupabaseAdminRepository implements AdminRepository {
       });
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao alterar senha do usuário: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível alterar a senha do usuário'),
       );
     }
   }
@@ -140,7 +175,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao listar questões: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar a lista de questões'),
       );
     }
   }
@@ -158,7 +193,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao listar templates: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar os templates de prova'),
       );
     }
   }
@@ -174,7 +209,7 @@ class SupabaseAdminRepository implements AdminRepository {
           .toList();
     } catch (error) {
       throw AdminRepositoryException(
-        'Erro ao listar cursos: ${error.toString()}',
+        _friendlyMessage(error, 'Não foi possível carregar a lista de cursos'),
       );
     }
   }

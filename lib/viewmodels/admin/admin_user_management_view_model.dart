@@ -74,7 +74,7 @@ class AdminUserManagementViewModel extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      _setError('Erro ao carregar usuários: $error');
+      _setError('$error');
       _users = [];
     } finally {
       _setLoading(false);
@@ -91,7 +91,7 @@ class AdminUserManagementViewModel extends ChangeNotifier {
       await loadUsers();
       return true;
     } catch (error) {
-      _setError('Erro ao atualizar papel: $error');
+      _setError('$error');
       return false;
     }
   }
@@ -108,7 +108,7 @@ class AdminUserManagementViewModel extends ChangeNotifier {
       await loadUsers();
       return true;
     } catch (error) {
-      _setError('Erro ao alterar status: $error');
+      _setError('$error');
       return false;
     }
   }
@@ -122,7 +122,7 @@ class AdminUserManagementViewModel extends ChangeNotifier {
       _setSuccess('Senha do usuário alterada com sucesso');
       return true;
     } catch (error) {
-      _setError('Erro ao alterar senha: $error');
+      _setError('$error');
       return false;
     }
   }
