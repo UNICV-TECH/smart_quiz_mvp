@@ -127,6 +127,20 @@ class AdminUserManagementViewModel extends ChangeNotifier {
     }
   }
 
+  // Update user password
+  Future<bool> updateUserPassword(String userId, String newPassword) async {
+    _clearMessages();
+
+    try {
+      await _adminRepository.updateUserPassword(userId, newPassword);
+      _setSuccess('Senha do usuário alterada com sucesso');
+      return true;
+    } catch (error) {
+      _setError('Erro ao alterar senha: $error');
+      return false;
+    }
+  }
+
   Future<void> refresh() async {
     await loadUsers();
   }
