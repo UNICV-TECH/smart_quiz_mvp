@@ -65163,7 +65163,7 @@ h=(l+0+0)/j>i
 a1=t.p
 l=A.b([],a1)
 g=a.a
-g=A.b([A.as(new A.al(B.Ou,A.iB(g.c,a0,a0,B.bZ,!0,a6,a0,a0,B.at),a0),1)],a1)
+g=A.b([A.as(new A.al(B.Ot,A.iB(g.c,a0,a0,B.bZ,!0,a6,a0,a0,B.at),a0),1)],a1)
 if(!h)B.b.N(g,l)
 if(h)g.push(A.cf(a0,a0,j*0.4))
 a1=A.b([A.ao(g,B.l,B.e,B.f,0,a0)],a1)
@@ -66714,7 +66714,7 @@ A.aQg.prototype={
 $1(a){var s,r=this.a,q=r.a,p=q.cx,o=p==null?this.b.r:p
 if(o==null)o=B.ew
 s=q.c[a]
-if(s.gHP().b===46&&q.gaM1())o=o.F(0,B.Ot)
+if(s.gHP().b===46&&q.gaM1())o=o.F(0,B.Os)
 q=r.y
 q===$&&A.a()
 q[a]=o
@@ -108449,7 +108449,7 @@ A.aJd.prototype={
 L(){return"_ImageSourceType."+this.b}}
 A.tv.prototype={
 D(a){var s,r,q=this,p=null,o=A.bs(a,p,t.w).w.a.a
-switch(q.c.a){case 0:s=o*0.24
+switch(q.c.a){case 0:s=o*0.18
 break
 case 1:s=o*0.65
 break
@@ -108883,7 +108883,7 @@ $1(a){var s,r,q=null,p=this.a,o=p.gwE()===a,n=o?0:1
 n=A.aW3(A.cf(A.b_(B.nP[a].h(0,"icon"),B.ai,q,q,24),28,q),B.a_,B.P,n)
 s=B.nP[a].h(0,"label")
 r=o?B.j:B.ai
-return A.hA(B.aL,A.cf(A.ad(A.b([n,new A.al(B.Ov,A.J(s,q,q,q,q,A.a7(q,q,r,q,q,q,q,q,q,q,q,12,q,q,o?B.y:B.A,q,q,!0,q,q,q,q,q,q,q,q),B.aG,q),q)],t.p),B.l,B.ax,B.f),110-this.c,this.b),B.E,!1,q,q,q,q,q,q,q,q,q,q,q,q,q,q,new A.aFH(p,a),q,q,q,q,q,q)},
+return A.hA(B.aL,A.cf(A.ad(A.b([n,new A.al(B.Ou,A.J(s,q,q,q,q,A.a7(q,q,r,q,q,q,q,q,q,q,q,12,q,q,o?B.y:B.A,q,q,!0,q,q,q,q,q,q,q,q),B.aG,q),q)],t.p),B.l,B.ax,B.f),110-this.c,this.b),B.E,!1,q,q,q,q,q,q,q,q,q,q,q,q,q,q,new A.aFH(p,a),q,q,q,q,q,q)},
 $S:261}
 A.aFH.prototype={
 $0(){return this.a.al3(this.b)},
@@ -108962,7 +108962,7 @@ return q},
 D(a){return A.ad(A.z4(this.c.length,new A.abJ(this),!0,t.l),B.v,B.e,B.f)}}
 A.abJ.prototype={
 $1(a){var s=null,r=this.a,q=r.gaup()[a],p=q===r.d?B.o:B.jv
-return A.hA(s,new A.al(B.Oy,A.ao(A.b([A.a1(B.B,A.J(q,s,s,s,s,B.FK,s,s),B.i,s,s,new A.a9(p,s,s,s,s,s,B.aX),s,36,s,s,s,s,s,36),B.a0,A.as(A.J(r.c[a],s,s,s,s,B.a6g,s,s),1)],t.p),B.l,B.e,B.f,0,s),s),B.E,!1,s,s,s,s,s,s,s,s,s,s,s,s,s,s,new A.abI(r,q),s,s,s,s,s,s)},
+return A.hA(s,new A.al(B.Ox,A.ao(A.b([A.a1(B.B,A.J(q,s,s,s,s,B.FK,s,s),B.i,s,s,new A.a9(p,s,s,s,s,s,B.aX),s,36,s,s,s,s,s,36),B.a0,A.as(A.J(r.c[a],s,s,s,s,B.a6g,s,s),1)],t.p),B.l,B.e,B.f,0,s),s),B.E,!1,s,s,s,s,s,s,s,s,s,s,s,s,s,s,new A.abI(r,q),s,s,s,s,s,s)},
 $S:261}
 A.abI.prototype={
 $0(){return this.a.e.$1(this.b)},
@@ -113028,7 +113028,7 @@ case 1:return A.f1(B.GZ,new A.aBZ(a),t.vV)
 case 2:return A.f1(B.GW,new A.aC_(a),t.HV)
 default:return B.KQ}},
 aj7(){var s=this,r=null,q=A.b([new A.aT(0,B.x,B.bb.b4(0.3),B.Aj,8)],t.V),p=t.p
-return A.a1(r,A.ad(A.b([A.a1(r,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",r,B.cG,r,r,r),72,r),B.as,B.a9C],p),B.l,B.e,B.f),B.i,r,r,B.Ik,r,r,r,r,B.ab,r,r,r),B.aA,A.as(A.e1(A.ad(A.b([s.K0(B.uk,0,"Dashboard"),B.a6,s.K0(B.um,1,"Usu\xe1rios"),B.a6,s.K0(B.QL,2,"Conte\xfado"),B.a6,B.NR,B.a6,s.K1(B.eC,-1,new A.aC3(s),"Painel Professor"),B.a6,s.K1(B.QQ,-2,new A.aC4(s),"Painel Aluno")],p),B.l,B.e,B.f),r,B.E,r,r,B.R),1),s.aiZ()],p),B.l,B.e,B.f),B.i,r,r,new A.a9(B.j,r,B.qw,r,q,r,B.q),r,r,r,r,r,r,r,280)},
+return A.a1(r,A.ad(A.b([A.a1(r,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",r,B.cG,r,r,r),100,r),B.as,B.a9C],p),B.l,B.e,B.f),B.i,r,r,B.Ik,r,r,r,r,B.ab,r,r,r),B.aA,A.as(A.e1(A.ad(A.b([s.K0(B.uk,0,"Dashboard"),B.a6,s.K0(B.um,1,"Usu\xe1rios"),B.a6,s.K0(B.QL,2,"Conte\xfado"),B.a6,B.NR,B.a6,s.K1(B.eC,-1,new A.aC3(s),"Painel Professor"),B.a6,s.K1(B.QQ,-2,new A.aC4(s),"Painel Aluno")],p),B.l,B.e,B.f),r,B.E,r,r,B.R),1),s.aiZ()],p),B.l,B.e,B.f),B.i,r,r,new A.a9(B.j,r,B.qw,r,q,r,B.q),r,r,r,r,r,r,r,280)},
 K1(a,b,c,d){var s=null,r=this.d===b,q=r?B.rd:B.u,p=A.a8(8),o=c==null?new A.aC1(this,b):c,n=A.a8(8),m=r?B.HX:s,l=A.b_(a,r?B.aS:B.bu,s,s,22),k=r?B.S:B.A
 l=A.b([l,B.a0,A.as(A.J(d,s,s,s,s,A.a7(s,s,r?B.aS:B.cJ,s,s,s,s,s,s,s,s,15,s,s,k,s,s,!0,s,s,s,s,s,s,s,s),s,s),1)],t.p)
 if(r)l.push(B.Rd)
@@ -113693,7 +113693,7 @@ n=p.e
 n===$&&A.a()
 r=A.a8(20)
 q=A.bV(B.M0,2)
-return new A.al(B.Os,A.i1(n,new A.aK2(p),A.a1(o,A.ad(A.b([B.R7,B.as,A.J("Parab\xe9ns! Voc\xea alcan\xe7ou o n\xedvel "+s.c+"!",o,o,o,o,B.a8n,B.aG,o),B.as,A.a1(o,A.dO(s.f,new A.aK3(),o,120,o,120),B.i,o,o,B.Ih,o,o,o,o,o,o,o,o)],t.p),B.l,B.e,B.f),B.i,o,o,new A.a9(o,o,q,r,B.TG,B.SO,B.q),o,o,o,o,B.ab,o,o,o)),o)}}
+return new A.al(B.Or,A.i1(n,new A.aK2(p),A.a1(o,A.ad(A.b([B.R7,B.as,A.J("Parab\xe9ns! Voc\xea alcan\xe7ou o n\xedvel "+s.c+"!",o,o,o,o,B.a8n,B.aG,o),B.as,A.a1(o,A.dO(s.f,new A.aK3(),o,120,o,120),B.i,o,o,B.Ih,o,o,o,o,o,o,o,o)],t.p),B.l,B.e,B.f),B.i,o,o,new A.a9(o,o,q,r,B.TG,B.SO,B.q),o,o,o,o,B.ab,o,o,o)),o)}}
 A.aK2.prototype={
 $2(a,b){var s,r=this.a.e
 r===$&&A.a()
@@ -113725,7 +113725,7 @@ p.push(h.aiX("Total ganho","+"+B.d.ab(h.e,1)+" pts",B.hY,!0))
 B.b.N(i,p)}if(f)B.b.N(i,A.b([B.p4,A.ao(A.b([A.a1(g,A.dO(r.f,new A.aII(),g,56,g,56),B.i,g,g,B.Id,g,g,g,g,g,g,g,g),B.a0,A.as(A.ad(A.b([A.J(r.c,g,g,g,g,B.FV,g,g),B.iE,A.J(r.a7B(s),g,g,g,g,B.a7S,g,g)],j),B.v,B.e,B.f),1)],j),B.l,B.e,B.f,0,g),B.iD,A.pP(A.a8(6),A.aXm(B.fq,10,g,g,r.a7L(s),B.lW),B.bt)],j))
 return A.a1(g,A.ad(i,B.v,B.e,B.f),B.i,g,g,new A.a9(B.ep,g,k,l,g,g,B.q),g,g,g,g,B.aZ,g,g,g)},
 Ke(a,b,c,d,e){var s=null,r=A.b_(c,e?B.eo:B.dn,s,s,18),q=A.as(A.J(a,s,s,s,s,A.a7(s,s,B.a9,s,s,s,s,s,"Poppins",s,s,13,s,s,d?B.S:B.A,s,s,!0,s,s,s,s,s,s,s,s),s,s),1)
-return new A.al(B.Ow,A.ao(A.b([r,B.aw,q,A.J(b,s,s,s,s,A.a7(s,s,e?B.eo:B.a9,s,s,s,s,s,"Poppins",s,s,13,s,s,B.S,s,s,!0,s,s,s,s,s,s,s,s),s,s)],t.p),B.l,B.e,B.f,0,s),s)},
+return new A.al(B.Ov,A.ao(A.b([r,B.aw,q,A.J(b,s,s,s,s,A.a7(s,s,e?B.eo:B.a9,s,s,s,s,s,"Poppins",s,s,13,s,s,B.S,s,s,!0,s,s,s,s,s,s,s,s),s,s)],t.p),B.l,B.e,B.f,0,s),s)},
 aiW(a,b,c){return this.Ke(a,b,c,!1,!1)},
 aiY(a,b,c,d){return this.Ke(a,b,c,!1,d)},
 aiX(a,b,c,d){return this.Ke(a,b,c,d,!1)}}
@@ -114106,7 +114106,7 @@ $3(a,b,c){var s,r,q,p,o=null
 if(b.c)return B.ek
 s=b.d
 if(s!=null)return A.bF(A.ad(A.b([B.Rx,B.G,A.J(s,o,o,o,o,B.a65,B.aG,o),B.G,A.cR(!1,B.a97,o,o,o,o,o,o,b.gaIp(),o,o)],t.p),B.l,B.ax,B.f),o,o)
-s=A.bF(new A.al(B.Or,new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo UniCV",o),o),o,o)
+s=A.bF(new A.al(B.Oy,new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo UniCV",o),o),o,o)
 r=A.aW7("gostaria de se preparar?",A.ab(204,B.z.n()>>>16&255,B.z.n()>>>8&255,B.z.n()&255),B.iW)
 q=A.bE(b.b,t.g)
 p=A.U(q).i("T<1,al>")
@@ -114165,7 +114165,7 @@ case 5:case 1:return A.o(q,r)}})
 return A.p($async$qf,r)},
 D(a0){var s,r,q,p,o,n,m,l,k,j=this,i=null,h="Poppins",g=A.aP(a0,!0,t.QZ),f=t.w,e=A.bs(a0,i,f).w.a,d=A.a3([B.h7,new A.aKm(j,g)],t.Vz,t.M),c=e.a,b=e.b,a=A.a1(i,A.dO("assets/images/fundo.png",i,B.c7,i,i,i),B.i,i,i,B.hs,i,b,i,i,i,i,i,c)
 f=A.bs(a0,i,f).w
-s=A.bF(A.dO("assets/images/SmartQuiz.png",i,B.cG,93,i,256),i,i)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",i,B.cG,120,i,320),i,i)
 r=A.bF(A.J("Login",i,i,i,i,A.a7(i,i,B.o,i,i,i,i,i,"Open Sans",i,i,40,i,i,B.y,i,i,!0,i,i,i,i,i,i,i,i),i,i),i,i)
 q=A.Sk(j.d,i,"",B.lb,"E-mail",i,new A.aKn())
 p=A.Sl(j.e,i,"","Senha",i,new A.aKo(j),B.pm,new A.aKp())
@@ -114717,7 +114717,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$DL,r)},
 D(a){var s,r,q,p,o,n,m=this,l=null,k=t.w,j=A.bs(a,l,k).w.a,i=j.a,h=j.b,g=A.a1(l,A.dO("assets/images/fundo.png",l,B.c7,l,l,l),B.i,l,l,B.hs,l,h,l,l,l,l,l,i)
 k=A.bs(a,l,k).w
-s=A.bF(A.dO("assets/images/SmartQuiz.png",l,B.cG,93,l,256),l,l)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",l,B.cG,120,l,320),l,l)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,l,l,A.cP(l,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,l,l,40),l,l,new A.aO3(a),B.W,l,l,l,l),l),A.J("Recuperar\nSenha",2,l,l,l,A.a7(l,l,B.o,l,l,l,l,l,"Open Sans",l,l,40,l,l,B.y,l,l,!0,l,l,l,l,l,l,l,l),B.aG,l)],r),B.C,B.aq,l)
 p=A.b([A.Sk(m.d,m.r,"seu@email.com",B.lb,"E-mail",l,l),B.aA],r)
@@ -114812,7 +114812,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$E7,r)},
 D(a){var s,r,q,p,o,n,m,l=this,k=null,j=t.w,i=A.bs(a,k,j).w.a,h=i.a,g=i.b,f=A.a1(k,A.dO("assets/images/fundo.png",k,B.c7,k,k,k),B.i,k,k,B.hs,k,g,k,k,k,k,k,h)
 j=A.bs(a,k,j).w
-s=A.bF(A.dO("assets/images/SmartQuiz.png",k,B.cG,93,k,256),k,k)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",k,B.cG,120,k,320),k,k)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,k,k,A.cP(k,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,k,k,40),k,k,new A.aOa(a),B.W,k,k,k,k),k),A.J("Nova Senha",2,k,k,k,A.a7(k,k,B.o,k,k,k,k,k,"Open Sans",k,k,40,k,k,B.y,k,k,!0,k,k,k,k,k,k,k,k),B.aG,k)],r),B.C,B.aq,k)
 p=A.J("Crie sua nova senha. Ela deve ter ao menos 8 caracteres, incluir uma letra mai\xfascula e um n\xfamero.",k,k,k,k,A.a7(k,k,B.z,k,k,k,k,k,"Poppins",k,k,14,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k)
@@ -114893,7 +114893,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$CS,r)},
 D(a2){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f="Cadastrar",e="Poppins",d=A.aP(a2,!0,t.u1),c=t.w,b=A.bs(a2,g,c).w.a,a=b.a,a0=b.b,a1=A.a1(g,A.dO("assets/images/fundo.png",g,B.c7,g,g,g),B.i,g,g,B.hs,g,a0,g,g,g,g,g,a)
 c=A.bs(a2,g,c).w
-s=A.bF(A.dO("assets/images/SmartQuiz.png",g,B.cG,93,g,256),g,g)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",g,B.cG,120,g,320),g,g)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,g,g,A.cP(g,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,g,g,40),g,g,new A.aPg(a2),B.W,g,g,g,g),g),A.J(f,g,g,g,g,A.a7(g,g,B.o,g,g,g,g,g,"Open Sans",g,g,40,g,g,B.y,g,g,!0,g,g,g,g,g,g,g,g),g,g)],r),B.C,B.aq,g)
 p=A.cf(A.Sk(h.d,g,"",B.a3L,"Nome Completo",g,new A.aPh()),98,g)
@@ -114987,7 +114987,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$xg,r)},
 D(a){var s=null,r=this.e
 r===$&&A.a()
-return A.e0(s,B.o,A.a1(s,A.bF(new A.dA(r,!1,A.ad(A.b([A.dO("assets/images/SmartQuiz.png",s,s,300,s,300),B.bc],t.p),B.l,B.ax,B.f),s),s,s),B.i,s,s,B.Ic,s,1/0,s,s,s,s,s,1/0),s,!1)}}
+return A.e0(s,B.o,A.a1(s,A.bF(new A.dA(r,!1,A.ad(A.b([A.dO("assets/images/SmartQuiz.png",s,s,380,s,380),B.bc],t.p),B.l,B.ax,B.f),s),s,s),B.i,s,s,B.Ic,s,1/0,s,s,s,s,s,1/0),s,!1)}}
 A.aPv.prototype={
 $0(){this.a.xg()},
 $S:0}
@@ -115705,7 +115705,7 @@ A.aR6.prototype={
 $2(a,b){var s=null,r=this.a,q=t.U6,p=A.bE(r.Q,q)[b],o=B.o.b4(0.1),n=""+(b+1),m=A.J(n,s,s,s,s,A.a7(s,s,B.o,s,s,s,s,s,s,s,s,13,s,s,B.y,s,s,!0,s,s,s,s,s,s,s,s),s,s),l=p.r
 n=A.J(l==null?"Questao "+n:l,2,B.an,s,s,B.FU,s,s)
 l=A.cP(s,s,B.RB,s,s,b>0?new A.aR2(r,b):s,s,s,s,"Mover para cima",s)
-return A.b09(A.amz(s,s,s,!0,!0,new A.RP(m,o,16,s),s,s,s,s,n,A.ao(A.b([l,A.cP(s,s,B.RJ,s,s,b<A.bE(r.Q,q).length-1?new A.aR3(r,b):s,s,s,s,"Mover para baixo",s),A.cP(s,s,A.b_(B.kb,B.H,s,s,20),s,s,new A.aR4(r,p),s,s,s,"Remover",s)],t.p),B.l,B.e,B.ae,0,s),s),s,s,B.Ox,s)},
+return A.b09(A.amz(s,s,s,!0,!0,new A.RP(m,o,16,s),s,s,s,s,n,A.ao(A.b([l,A.cP(s,s,B.RJ,s,s,b<A.bE(r.Q,q).length-1?new A.aR3(r,b):s,s,s,s,"Mover para baixo",s),A.cP(s,s,A.b_(B.kb,B.H,s,s,20),s,s,new A.aR4(r,p),s,s,s,"Remover",s)],t.p),B.l,B.e,B.ae,0,s),s),s,s,B.Ow,s)},
 $S:892}
 A.aR2.prototype={
 $0(){var s=this.b
@@ -116088,7 +116088,7 @@ return A.a3(["name",r,"email",q==null?"":q,"role","Professor"],t.N,t.z)},
 D(a){var s,r=this,q=null,p=A.aP(a,!0,t.v),o=p.guX()&&p.r,n=t.p,m=A.b([],n)
 if(o)m.push(r.aif(a,p))
 s=A.b([new A.aT(0,B.x,B.bb.b4(0.3),B.Aj,8)],t.V)
-m.push(A.as(A.ao(A.b([A.a1(q,A.ad(A.b([A.a1(q,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",q,B.cG,q,q,q),72,q),B.as,B.aa7],n),B.l,B.e,B.f),B.i,q,q,B.Ig,q,q,q,q,B.ab,q,q,q),B.aA,A.as(A.e1(A.ad(A.b([r.C6(0,B.nA,"Montar Provas"),B.a6,r.aid(),B.a6,r.C6(4,B.uk,"Dashboard"),B.a6,r.C6(5,B.hY,"Gamifica\xe7\xe3o"),B.a6,r.C6(2,B.hZ,"Perfil")],n),B.l,B.e,B.f),q,B.E,q,q,B.R),1),A.a1(q,A.ao(A.b([A.a1(q,B.Rt,B.i,q,q,new A.a9(B.a9,q,q,A.a8(25),q,q,B.q),q,50,q,q,q,q,q,50),B.a0,A.as(A.ad(A.b([A.J(r.gNy().h(0,"name"),q,B.an,q,q,B.ps,q,q),B.aO,A.J(r.gNy().h(0,"email"),q,B.an,q,q,A.a7(q,q,B.aa,q,q,q,q,q,q,q,q,12,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q),B.iE,A.J(r.gNy().h(0,"role"),q,q,q,q,B.a64,q,q)],n),B.v,B.e,B.f),1)],n),B.l,B.e,B.f,0,q),B.i,q,q,B.qG,q,q,q,q,B.aZ,q,q,q)],n),B.l,B.e,B.f),B.i,q,q,new A.a9(B.j,q,B.qw,q,s,q,B.q),q,q,q,q,q,q,q,280),A.as(r.a.c,1)],n),B.l,B.e,B.f,0,q),1))
+m.push(A.as(A.ao(A.b([A.a1(q,A.ad(A.b([A.a1(q,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",q,B.cG,q,q,q),100,q),B.as,B.aa7],n),B.l,B.e,B.f),B.i,q,q,B.Ig,q,q,q,q,B.ab,q,q,q),B.aA,A.as(A.e1(A.ad(A.b([r.C6(0,B.nA,"Montar Provas"),B.a6,r.aid(),B.a6,r.C6(4,B.uk,"Dashboard"),B.a6,r.C6(5,B.hY,"Gamifica\xe7\xe3o"),B.a6,r.C6(2,B.hZ,"Perfil")],n),B.l,B.e,B.f),q,B.E,q,q,B.R),1),A.a1(q,A.ao(A.b([A.a1(q,B.Rt,B.i,q,q,new A.a9(B.a9,q,q,A.a8(25),q,q,B.q),q,50,q,q,q,q,q,50),B.a0,A.as(A.ad(A.b([A.J(r.gNy().h(0,"name"),q,B.an,q,q,B.ps,q,q),B.aO,A.J(r.gNy().h(0,"email"),q,B.an,q,q,A.a7(q,q,B.aa,q,q,q,q,q,q,q,q,12,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q),B.iE,A.J(r.gNy().h(0,"role"),q,q,q,q,B.a64,q,q)],n),B.v,B.e,B.f),1)],n),B.l,B.e,B.f,0,q),B.i,q,q,B.qG,q,q,q,q,B.aZ,q,q,q)],n),B.l,B.e,B.f),B.i,q,q,new A.a9(B.j,q,B.qw,q,s,q,B.q),q,q,q,q,q,q,q,280),A.as(r.a.c,1)],n),B.l,B.e,B.f,0,q),1))
 return A.e0(q,q,A.ad(m,B.l,B.e,B.f),q,!1)},
 aif(a,b){var s=null
 return A.el(!1,B.P,!0,s,new A.al(B.mU,A.ao(A.b([B.ux,B.aw,B.Pk,A.AM(B.up,B.G4,new A.aQP(b,a),A.oV(s,s,B.j.b4(0.2),s,s,s,s,s,s,s,s,s,B.tq,s,new A.ci(A.a8(20),B.r),s,s,s,s,s))],t.p),B.l,B.e,B.f,0,s),s),B.i,B.aS,0,s,s,s,s,s,B.bo)},
@@ -116323,7 +116323,7 @@ if(j!=null&&j.length!==0)B.b.N(k,A.b([B.h8,A.J(j,o,o,o,o,A.a7(o,o,B.aa,o,o,o,o,o
 return A.a1(o,new A.al(B.aZ,A.ao(A.b([A.as(A.ad(k,B.v,B.e,B.f),1),A.cP(o,o,B.nJ,o,o,p.f,o,o,o,"Editar mat\xe9ria",o),A.cP(o,o,B.nI,o,o,p.r,o,o,o,"Excluir mat\xe9ria",o)],l),B.l,B.e,B.f,0,o),o),B.i,o,o,new A.a9(B.j,o,B.qz,n,m,o,B.q),o,o,o,B.ds,o,o,o,o)}}
 A.Be.prototype={
 D(a){var s=null,r=A.bs(a,s,t.w).w.a,q=r.a,p=r.b,o=p*0.4,n=t.p
-return new A.Ea(A.a3([B.h7,new A.aBF(a)],t.Vz,t.M),A.ia(!0,s,A.e0(s,s,A.dE(B.aH,A.b([A.a1(s,A.dO("assets/images/background.jpg",s,B.c7,s,s,s),B.i,s,s,B.hs,s,p,s,s,s,s,s,q),A.a1(s,s,B.i,B.o.b4(0.8),s,s,s,p,s,s,s,s,s,q),A.ks(0,A.a1(s,s,B.i,s,s,B.If,s,s,s,s,s,s,s,s),p*0.5,s,0,0,s,s),A.ks(0,A.a1(s,s,B.i,s,s,B.hr,s,s,s,s,s,s,s,s),o,s,0,0,s,s),A.ks(s,A.bF(A.dO("assets/images/SmartQuiz.png",s,B.cG,p*0.15,s,q*0.7),s,s),s,s,0,0,p*0.07,s),A.ks(0,new A.al(B.OQ,A.ad(A.b([B.a2r,B.a9T,B.aA,B.aam,B.a2q,A.cf(A.hc(!1,B.aaw,s,s,s,s,s,s,new A.aBG(a),s,A.f3(s,s,B.bv,s,s,s,0,s,s,B.j,s,s,s,s,new A.ci(A.a8(20),B.r),s,s,s,s,s)),67,1/0)],n),B.l,B.e,B.f),s),o,s,0,0,s,s)],n),B.C,B.aq,s),s,!1),s,s,s,s,!0,s,s,s,s,s,s),s)}}
+return new A.Ea(A.a3([B.h7,new A.aBF(a)],t.Vz,t.M),A.ia(!0,s,A.e0(s,s,A.dE(B.aH,A.b([A.a1(s,A.dO("assets/images/background.jpg",s,B.c7,s,s,s),B.i,s,s,B.hs,s,p,s,s,s,s,s,q),A.a1(s,s,B.i,B.o.b4(0.8),s,s,s,p,s,s,s,s,s,q),A.ks(0,A.a1(s,s,B.i,s,s,B.If,s,s,s,s,s,s,s,s),p*0.5,s,0,0,s,s),A.ks(0,A.a1(s,s,B.i,s,s,B.hr,s,s,s,s,s,s,s,s),o,s,0,0,s,s),A.ks(s,A.bF(A.dO("assets/images/SmartQuiz.png",s,B.cG,p*0.22,s,q*0.8),s,s),s,s,0,0,p*0.07,s),A.ks(0,new A.al(B.OQ,A.ad(A.b([B.a2r,B.a9T,B.aA,B.aam,B.a2q,A.cf(A.hc(!1,B.aaw,s,s,s,s,s,s,new A.aBG(a),s,A.f3(s,s,B.bv,s,s,s,0,s,s,B.j,s,s,s,s,new A.ci(A.a8(20),B.r),s,s,s,s,s)),67,1/0)],n),B.l,B.e,B.f),s),o,s,0,0,s,s)],n),B.C,B.aq,s),s,!1),s,s,s,s,!0,s,s,s,s,s,s),s)}}
 A.aBF.prototype={
 $0(){A.cq(this.a).dB("/login",null)},
 $S:0}
@@ -121041,16 +121041,16 @@ B.Oo=new A.a5(0,0,0,2)
 B.Op=new A.a5(0,0,0,4)
 B.fz=new A.a5(0,0,0,8)
 B.Oq=new A.a5(0,12,0,12)
-B.Or=new A.a5(0,12,0,20)
-B.Os=new A.a5(0,12,0,4)
-B.Ot=new A.a5(0,13,0,13)
-B.Ou=new A.a5(0,14,0,14)
-B.Ov=new A.a5(0,2,0,0)
-B.Ow=new A.a5(0,2,0,2)
+B.Or=new A.a5(0,12,0,4)
+B.Os=new A.a5(0,13,0,13)
+B.Ot=new A.a5(0,14,0,14)
+B.Ou=new A.a5(0,2,0,0)
+B.Ov=new A.a5(0,2,0,2)
 B.mT=new A.a5(0,4,0,0)
-B.Ox=new A.a5(0,4,0,4)
-B.Oy=new A.a5(0,6,0,6)
+B.Ow=new A.a5(0,4,0,4)
+B.Ox=new A.a5(0,6,0,6)
 B.tp=new A.a5(0,8,0,0)
+B.Oy=new A.a5(0,8,0,12)
 B.jK=new A.a5(0,8,0,8)
 B.dt=new A.a5(10,10,10,10)
 B.fA=new A.a5(10,4,10,4)
