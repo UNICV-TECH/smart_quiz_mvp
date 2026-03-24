@@ -166,6 +166,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ComponentePasswordInput(
                                 controller: _passwordController,
                                 labelText: AppStrings.passwordLabel,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _handleLogin(),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Informe sua senha';

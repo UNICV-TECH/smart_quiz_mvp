@@ -95,6 +95,8 @@ class ComponentePasswordInput extends StatefulWidget {
   final TextStyle labelStyle;
   final bool initialObscureText; // Parâmetro adicional para previews
   final String? Function(String?)? validator;
+  final ValueChanged<String>? onFieldSubmitted;
+  final TextInputAction? textInputAction;
 
   const ComponentePasswordInput({
     super.key,
@@ -118,6 +120,8 @@ class ComponentePasswordInput extends StatefulWidget {
     ),
     this.initialObscureText = true, // Por padrão a senha começa oculta
     this.validator,
+    this.onFieldSubmitted,
+    this.textInputAction,
   });
 
   @override
@@ -184,6 +188,8 @@ class _ComponentePasswordInputState extends State<ComponentePasswordInput> {
             style: widget.textStyle,
             obscureText: _obscureText, // Aplica o estado de visibilidade
             keyboardType: TextInputType.visiblePassword,
+            textInputAction: widget.textInputAction,
+            onFieldSubmitted: widget.onFieldSubmitted,
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle:
