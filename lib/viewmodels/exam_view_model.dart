@@ -447,25 +447,22 @@ class ExamViewModel extends ChangeNotifier {
       await _dataSource.ensureUserRecord(userId);
 
       // Atualizar também a tabela exam com os dados do resultado
-      await _dataSource.updateExam(
-        examId,
-        {
-          'is_completed': true,
-          'id_user': userId,
-          'total_score': correctCount.toDouble(), // Quantidade de acertos
-          'percentage_score': percentageScore,
-          'passing_score_percentage': 70.0, // Pode ser configurável no futuro
-          'updated_at': completedAt.toIso8601String(),
-        },
-      );
-
-      debugPrint('=== ATUALIZANDO TABELA EXAM ===');
-      debugPrint('ExamId: $examId');
-      debugPrint('UserId: $userId');
-      debugPrint('IsCompleted: true');
-      debugPrint('TotalScore (acertos): $correctCount');
-      debugPrint('PercentageScore: $percentageScore');
-      debugPrint('PassingScorePercentage: 70.0');
+      // (non-blocking: dados essenciais já estão em user_exam_attempts)
+      try {
+        await _dataSource.updateExam(
+          examId,
+          {
+            'is_completed': true,
+            'id_user': userId,
+            'correct_answers': correctCount,
+            'score': percentageScore,
+            'passed': percentageScore >= 70.0,
+          },
+        );
+        debugPrint('=== TABELA EXAM ATUALIZADA ===');
+      } catch (e) {
+        debugPrint('Exam table update failed (non-blocking): $e');
+      }
 
       // Gamification calculation
       final gamResult = GamificationCalculator.calculate(

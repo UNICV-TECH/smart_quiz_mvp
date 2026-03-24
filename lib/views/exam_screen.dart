@@ -673,6 +673,11 @@ class _ExamScreenState extends State<ExamScreen> {
 
       if (!mounted) return;
 
+      // Allow pending rebuilds (from notifyListeners) to flush before
+      // replacing the route, preventing "is not our descendant" assertion.
+      await Future<void>.delayed(Duration.zero);
+      if (!mounted) return;
+
       WebNavigationGuard.disable();
       context.pushReplacement('/exam-result', extra: results);
     } catch (error) {
