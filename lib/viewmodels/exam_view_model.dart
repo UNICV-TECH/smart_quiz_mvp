@@ -447,6 +447,22 @@ class ExamViewModel extends ChangeNotifier {
       await _dataSource.ensureUserRecord(userId);
 
       // Atualizar também a tabela exam com os dados do resultado
+      // (non-blocking: dados essenciais já estão em user_exam_attempts)
+      try {
+        await _dataSource.updateExam(
+          examId,
+          {
+            'is_completed': true,
+            'id_user': userId,
+            'correct_answers': correctCount,
+            'score': percentageScore,
+            'passed': percentageScore >= 70.0,
+          },
+        );
+        debugPrint('=== TABELA EXAM ATUALIZADA ===');
+      } catch (e) {
+        debugPrint('Exam table update failed (non-blocking): $e');
+      }
       await _dataSource.updateExam(
         examId,
         {
