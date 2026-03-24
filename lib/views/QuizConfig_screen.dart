@@ -185,12 +185,13 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
 
       final questionCount = int.parse(_selectedQuantity!);
 
-      // Contar total de questões disponíveis para o curso
+      // Contar total de questões disponíveis para simulado (apenas ENADE, sem questões de professores)
       final questionsResponse = await client
           .from('question')
           .select('id')
           .eq('id_course', courseId)
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .isFilter('id_teacher', null);
 
       final totalAvailableQuestions = questionsResponse.length;
 

@@ -118,6 +118,13 @@ class ExamViewModel extends ChangeNotifier {
   Future<void> _loadQuestions() async {
     List<Map<String, dynamic>> questionsData;
 
+    // Detectar tipo de exame: template ou simulado
+    final examRecord = await _dataSource.fetchExamRecord(examId);
+    if (examRecord == null) {
+      throw Exception('Exame $examId não encontrado');
+    }
+    final isTemplateExam = examRecord['id_exam_template'] != null;
+
     // Se for retake e tiver questionIds anteriores, usar essas questões específicas
     if (isRetake &&
         previousQuestionIds != null &&
@@ -125,14 +132,11 @@ class ExamViewModel extends ChangeNotifier {
       debugPrint('Retake: Carregando as mesmas questões da prova anterior');
       debugPrint('Question IDs: ${previousQuestionIds!.join(", ")}');
 
-      // Buscar apenas as questões específicas que foram usadas anteriormente
-      final allQuestionsData =
-          await _dataSource.fetchQuestions(examId: examId, courseId: courseId);
-
-      // Filtrar apenas as questões que foram usadas antes
-      questionsData = allQuestionsData
-          .where((q) => previousQuestionIds!.contains(q['id'] as String))
-          .toList();
+      // Buscar questões por IDs específicos (independente de origem)
+      questionsData = await _dataSource.fetchQuestionsByIds(
+        examId: examId,
+        questionIds: previousQuestionIds!,
+      );
 
       // Manter a ordem original das questões
       final questionOrderMap = <String, int>{};
@@ -144,10 +148,16 @@ class ExamViewModel extends ChangeNotifier {
         final orderB = questionOrderMap[b['id'] as String] ?? 999;
         return orderA.compareTo(orderB);
       });
+    } else if (isTemplateExam) {
+      // PROVA DE TEMPLATE: carregar questões vinculadas via examquestion
+      debugPrint('Carregando questões do template via examquestion');
+      questionsData = await _dataSource.fetchQuestionsFromExam(examId);
     } else {
-      // Comportamento normal: buscar todas as questões e embaralhar
+      // SIMULADO: carregar apenas questões ENADE (id_teacher IS NULL)
+      debugPrint('Carregando questões de simulado (apenas ENADE)');
       final List<Map<String, dynamic>> allQuestionsData =
-          await _dataSource.fetchQuestions(examId: examId, courseId: courseId);
+          await _dataSource.fetchSimuladoQuestions(
+              examId: examId, courseId: courseId);
 
       // Only shuffle when we actually need to sample a subset; otherwise keep the
       // original order so deterministic tests don't become flaky.
@@ -189,8 +199,8 @@ class ExamViewModel extends ChangeNotifier {
       );
     }).toList();
 
-    // Se não for retake, inserir os registros na tabela examquestion
-    if (!isRetake) {
+    // Só linkar questões ao exame para simulados (templates já foram linkados pelo RPC)
+    if (!isRetake && !isTemplateExam) {
       await _linkQuestionsToExam(questionIds);
     }
   }
@@ -568,6 +578,24 @@ abstract class ExamRemoteDataSource {
   Future<void> insertExamQuestions(List<Map<String, dynamic>> examQuestions);
 
   Future<void> updateExam(String examId, Map<String, dynamic> updates);
+
+  /// Busca o registro do exame para verificar se é template ou simulado.
+  Future<Map<String, dynamic>?> fetchExamRecord(String examId);
+
+  /// Busca questões vinculadas ao exame via tabela examquestion (para provas de template).
+  Future<List<Map<String, dynamic>>> fetchQuestionsFromExam(String examId);
+
+  /// Busca apenas questões de simulado (id_teacher IS NULL) para o curso.
+  Future<List<Map<String, dynamic>>> fetchSimuladoQuestions({
+    required String examId,
+    required String courseId,
+  });
+
+  /// Busca questões específicas por IDs (usado no retake).
+  Future<List<Map<String, dynamic>>> fetchQuestionsByIds({
+    required String examId,
+    required List<String> questionIds,
+  });
 }
 
 class SupabaseExamDataSource implements ExamRemoteDataSource {
@@ -835,5 +863,122 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
         }));
+  }
+
+  @override
+  Future<Map<String, dynamic>?> fetchExamRecord(String examId) async {
+    final response = await _guard(() => _client
+        .from('exam')
+        .select('id, id_exam_template, id_course')
+        .eq('id', examId)
+        .maybeSingle());
+    return response;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsFromExam(
+      String examId) async {
+    // Busca questões vinculadas via examquestion (populada pelo RPC generate_exam_from_template)
+    final List<dynamic> response = await _guard(() => _client
+        .from('examquestion')
+        .select(
+            'id_question, question_order, question:id_question(id, enunciation, question_text, difficulty_level, points, is_active, created_at, updated_at)')
+        .eq('id_exam', examId)
+        .order('question_order'));
+
+    final mapped = <Map<String, dynamic>>[];
+    for (final item in response) {
+      final raw = item as Map<String, dynamic>;
+      final question = raw['question'] as Map<String, dynamic>?;
+      if (question == null) continue;
+
+      final normalized = Map<String, dynamic>.from(question);
+      normalized['exam_id'] = examId;
+      normalized['question_order'] = raw['question_order'] ?? mapped.length;
+      mapped.add(normalized);
+    }
+    return mapped;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchSimuladoQuestions({
+    required String examId,
+    required String courseId,
+  }) async {
+    List<dynamic> response;
+    try {
+      response = await _guard(() => _client
+          .from('question')
+          .select(
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, updated_at')
+          .eq('id_course', courseId)
+          .eq('is_active', true)
+          .isFilter('id_teacher', null)
+          .order('created_at'));
+    } on PostgrestException catch (error) {
+      if (error.code != '42703') {
+        rethrow;
+      }
+      response = await _guard(() => _client
+          .from('question')
+          .select(
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, update_at')
+          .eq('id_course', courseId)
+          .eq('is_active', true)
+          .isFilter('id_teacher', null)
+          .order('created_at'));
+    }
+
+    final mapped = <Map<String, dynamic>>[];
+    for (var i = 0; i < response.length; i++) {
+      final item = response[i] as Map<String, dynamic>;
+      final normalized = Map<String, dynamic>.from(item);
+      normalized['updated_at'] ??= normalized['update_at'];
+      normalized.remove('update_at');
+      normalized['question_text'] ??= normalized['question'];
+      normalized['exam_id'] = examId;
+      normalized['question_order'] ??= i;
+      mapped.add(normalized);
+    }
+    return mapped;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsByIds({
+    required String examId,
+    required List<String> questionIds,
+  }) async {
+    if (questionIds.isEmpty) return const [];
+
+    List<dynamic> response;
+    try {
+      response = await _guard(() => _client
+          .from('question')
+          .select(
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, updated_at')
+          .inFilter('id', questionIds));
+    } on PostgrestException catch (error) {
+      if (error.code != '42703') {
+        rethrow;
+      }
+      response = await _guard(() => _client
+          .from('question')
+          .select(
+              'id, enunciation, question_text, difficulty_level, points, is_active, created_at, update_at')
+          .inFilter('id', questionIds));
+    }
+
+    final mapped = <Map<String, dynamic>>[];
+    for (var i = 0; i < response.length; i++) {
+      final item = response[i] as Map<String, dynamic>;
+      final normalized = Map<String, dynamic>.from(item);
+      normalized['updated_at'] ??= normalized['update_at'];
+      normalized.remove('update_at');
+      normalized['question_text'] ??= normalized['question'];
+      normalized['exam_id'] = examId;
+      normalized['question_order'] ??= i;
+      mapped.add(normalized);
+    }
+    return mapped;
   }
 }
