@@ -455,7 +455,7 @@ class ExamViewModel extends ChangeNotifier {
           'total_score': correctCount.toDouble(), // Quantidade de acertos
           'percentage_score': percentageScore,
           'passing_score_percentage': 70.0, // Pode ser configurável no futuro
-          'update_at': completedAt.toIso8601String(),
+          'updated_at': completedAt.toIso8601String(),
         },
       );
 
@@ -782,18 +782,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
 
   @override
   Future<void> updateExam(String examId, Map<String, dynamic> updates) async {
-    try {
-      // Tentar atualizar com update_at primeiro
-      await _guard(() => _client.from('exam').update(updates).eq('id', examId));
-    } catch (e) {
-      // Se falhar, tentar com updated_at
-      final updatedData = Map<String, dynamic>.from(updates);
-      if (updatedData.containsKey('update_at')) {
-        updatedData['updated_at'] = updatedData.remove('update_at');
-      }
-      await _guard(
-          () => _client.from('exam').update(updatedData).eq('id', examId));
-    }
+    await _guard(() => _client.from('exam').update(updates).eq('id', examId));
   }
 
   @override
