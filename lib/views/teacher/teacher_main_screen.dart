@@ -61,8 +61,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     return Scaffold(
       body: Column(
         children: [
-          if (_isAdmin)
-            _buildAdminReturnBanner(),
+          if (_isAdmin) _buildAdminReturnBanner(),
           Expanded(
             child: Row(
               children: [
@@ -200,9 +199,11 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
-            height: 100,
+            height: 200,
             child: Image.asset(
               'assets/images/SmartQuiz.png',
+              width: 500,
+              height: 500,
               fit: BoxFit.contain,
             ),
           ),

@@ -164,9 +164,11 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
-            height: 72,
+            height: 200,
             child: Image.asset(
               'assets/images/SmartQuiz.png',
+              width: 400,
+              height: 400,
               fit: BoxFit.contain,
             ),
           ),

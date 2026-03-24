@@ -151,8 +151,8 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
                       Center(
                         child: Image.asset(
                           'assets/images/SmartQuiz.png',
-                          width: 320,
-                          height: 120,
+                          width: 500,
+                          height: 500,
                           fit: BoxFit.contain,
                         ),
                       ),

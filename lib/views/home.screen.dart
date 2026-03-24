@@ -3,16 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/course.dart';
 import 'package:unicv_tech_mvp/viewmodels/course_selection_view_model.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_subject_card.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
+
 class _HomeScreenState extends State<HomeScreen> {
   final String _logoAssetPath = 'assets/images/SmartQuiz.png';
 
@@ -35,16 +36,19 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<CourseSelectionViewModel>().loadCourses();
     });
   }
+
   IconData _getIconData(String? iconKey) {
     if (iconKey == null) return Icons.school_outlined;
     return _iconMap[iconKey] ?? Icons.school_outlined;
   }
+
   void _onCourseSelected(Course course, CourseSelectionViewModel viewModel) {
     viewModel.selectCourse(course.id);
     context.push(
       '/quiz/config/${course.id}?title=${Uri.encodeComponent(course.title)}&courseKey=${Uri.encodeComponent(course.courseKey)}&iconKey=${Uri.encodeComponent(course.iconKey ?? '')}',
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,14 +109,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 8.0, bottom: 12.0),
-                                  child: AppLogoWidget.asset(
-                                    size: AppLogoSize.small,
-                                    logoPath: _logoAssetPath,
-                                    semanticLabel: 'Logo UniCV',
-                                  ),
+                                child: Image.asset(
+                                  'assets/images/SmartQuiz.png',
+                                  width: 300,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                               const AppText('Para qual prova',

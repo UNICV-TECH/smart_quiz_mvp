@@ -198,9 +198,11 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
       child: Column(
         children: [
           SizedBox(
-            height: 100,
+            height: 200,
             child: Image.asset(
               'assets/images/SmartQuiz.png',
+              width: 500,
+              height: 500,
               fit: BoxFit.contain,
             ),
           ),

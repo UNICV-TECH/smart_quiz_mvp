@@ -6,7 +6,6 @@ import 'package:unicv_tech_mvp/ui/components/default_radio_group.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 import 'package:unicv_tech_mvp/ui/components/default_question_navigation.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_exit_confirmation_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
@@ -257,14 +256,16 @@ class _ExamScreenState extends State<ExamScreen> {
                                 .map((ac) => ac.choiceText)
                                 .toList(),
                             selectedOption: _getSelectedOptionLetter(
-                                currentAnswer, currentExamQuestion.answerChoices),
+                                currentAnswer,
+                                currentExamQuestion.answerChoices),
                             onChanged: (option) {
                               // Mapear a letra selecionada (A, B, C, D) para o índice e então para o choiceKey real
-                              final selectedIndex =
-                                  option.codeUnitAt(0) - 65; // A=0, B=1, C=2, D=3
+                              final selectedIndex = option.codeUnitAt(0) -
+                                  65; // A=0, B=1, C=2, D=3
                               if (selectedIndex >= 0 &&
                                   selectedIndex <
-                                      currentExamQuestion.answerChoices.length) {
+                                      currentExamQuestion
+                                          .answerChoices.length) {
                                 final realChoiceKey = currentExamQuestion
                                     .answerChoices[selectedIndex].choiceKey;
                                 viewModel.selectAnswer(
@@ -296,8 +297,6 @@ class _ExamScreenState extends State<ExamScreen> {
     return SafeArea(
       bottom: false,
       child: Container(
-        padding:
-            EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
         child: Row(
           children: [
             DefaultButtonArrowBack(
@@ -305,13 +304,13 @@ class _ExamScreenState extends State<ExamScreen> {
             ),
             Expanded(
               child: Center(
-                child: logo.AppLogoWidget.asset(
-                  size: logo.AppLogoSize.small,
-                  logoPath: 'assets/images/SmartQuiz.png',
+                child: Image.asset(
+                  'assets/images/SmartQuiz.png',
+                  width: 250,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
-            const SizedBox(width: 40),
           ],
         ),
       ),
@@ -645,22 +644,17 @@ class _ExamScreenState extends State<ExamScreen> {
             courseId: results['courseId'] as String,
             questionCount: results['totalQuestions'] as int,
             correctCount: results['correctCount'] as int,
-            percentageScore:
-                (results['percentageScore'] as num).toDouble(),
+            percentageScore: (results['percentageScore'] as num).toDouble(),
             durationSeconds: safeDuration,
-            basePoints:
-                (results['gamificationBasePoints'] as num).toDouble(),
-            timeBonus:
-                (results['gamificationTimeBonus'] as num).toDouble(),
-            totalPoints:
-                (results['gamificationTotalPoints'] as num).toDouble(),
+            basePoints: (results['gamificationBasePoints'] as num).toDouble(),
+            timeBonus: (results['gamificationTimeBonus'] as num).toDouble(),
+            totalPoints: (results['gamificationTotalPoints'] as num).toDouble(),
           );
           if (!mounted) return;
 
           results['gamificationAccumulatedPoints'] =
               saveResult.accumulatedPoints;
-          results['gamificationPreviousPoints'] =
-              saveResult.previousPoints;
+          results['gamificationPreviousPoints'] = saveResult.previousPoints;
           results['gamificationDidImprove'] = saveResult.didImprove;
           results['gamificationPointsSaved'] = saveResult.pointsSaved;
           results['gamificationSeasonName'] = season.name;

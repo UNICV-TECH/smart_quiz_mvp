@@ -98,8 +98,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       Center(
                         child: Image.asset(
                           'assets/images/SmartQuiz.png',
-                          width: 320,
-                          height: 120,
+                          width: 500,
+                          height: 500,
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -165,7 +165,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.nameLabel,
                                     keyboardType: TextInputType.name,
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Por favor, insira seu nome';
                                       }
                                       return null;
@@ -183,7 +184,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.emailLabel,
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Por favor, insira seu email';
                                       }
                                       final emailRegex =

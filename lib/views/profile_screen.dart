@@ -89,29 +89,11 @@ class _ProfileViewBody extends StatelessWidget {
             child: SafeArea(
               child: Column(
                 children: [
-                  // Header com logo
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/images/SmartQuiz.png',
-                        width: 120,
-                        height: 50,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 120,
-                            height: 50,
-                            color: AppColors.green,
-                            child: Center(
-                              child: Text(
-                                'Logo',
-                                style: TextStyle(color: AppColors.white),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                  Center(
+                    child: Image.asset(
+                      'assets/images/SmartQuiz.png',
+                      width: 200,
+                      fit: BoxFit.contain,
                     ),
                   ),
 
@@ -156,20 +138,23 @@ class _ProfileViewBody extends StatelessWidget {
                               // Card de perfil
                               Builder(
                                 builder: (ctx) {
-                                  final gamVm = ctx.watch<GamificationViewModel?>();
-                                  final medalAsset = gamVm != null && gamVm.userPoints > 0
-                                      ? gamVm.userLevel.medalAsset
-                                      : null;
+                                  final gamVm =
+                                      ctx.watch<GamificationViewModel?>();
+                                  final medalAsset =
+                                      gamVm != null && gamVm.userPoints > 0
+                                          ? gamVm.userLevel.medalAsset
+                                          : null;
                                   return UserDataCard(
                                     userName: user.name,
                                     userEmail: user.email,
                                     medalAsset: medalAsset,
                                     onNameUpdate: (newName) async {
-                                      final success =
-                                          await viewModel.updateUserName(newName);
+                                      final success = await viewModel
+                                          .updateUserName(newName);
                                       return success;
                                     },
-                                    onShowFeedback: (message, {isError = false}) {
+                                    onShowFeedback: (message,
+                                        {isError = false}) {
                                       ScaffoldMessenger.of(ctx).showSnackBar(
                                         SnackBar(
                                           content: Text(message),
@@ -355,12 +340,10 @@ class _ProfileViewBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ...gamVm.seasonHistory.map((entry) {
-            final entryLevel =
-                GamificationLevel.fromPoints(entry.totalPoints);
+            final entryLevel = GamificationLevel.fromPoints(entry.totalPoints);
             return Container(
               margin: const EdgeInsets.only(bottom: 10),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),

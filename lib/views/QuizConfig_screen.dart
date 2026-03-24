@@ -6,7 +6,6 @@ import 'package:unicv_tech_mvp/constants/supabase_options.dart';
 import 'package:unicv_tech_mvp/models/exam_template.dart';
 import 'package:unicv_tech_mvp/repositories/published_exam_repository.dart';
 import 'package:unicv_tech_mvp/viewmodels/published_exams_view_model.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
@@ -37,7 +36,6 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   PublishedExamsViewModel? _publishedExamsVM;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
-  final String _logoAssetPath = 'assets/images/SmartQuiz.png';
 
   @override
   void initState() {
@@ -73,7 +71,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
       _feedbackSeverity = null;
     });
     if (mode == _QuizMode.provas && _publishedExamsVM != null) {
-      if (_publishedExamsVM!.templates.isEmpty && !_publishedExamsVM!.isLoading) {
+      if (_publishedExamsVM!.templates.isEmpty &&
+          !_publishedExamsVM!.isLoading) {
         _publishedExamsVM!.loadTemplates();
       }
     }
@@ -320,8 +319,8 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
     } catch (error, stackTrace) {
       debugPrint('Falha ao iniciar prova publicada: $error');
       debugPrintStack(stackTrace: stackTrace);
-      _setFeedback('Erro ao iniciar a prova. Tente novamente.',
-          FeedbackSeverity.error);
+      _setFeedback(
+          'Erro ao iniciar a prova. Tente novamente.', FeedbackSeverity.error);
     } finally {
       if (mounted) {
         setState(() {
@@ -361,15 +360,13 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 15),
                               Center(
-                                child: AppLogoWidget.asset(
-                                  size: AppLogoSize.small,
-                                  logoPath: _logoAssetPath,
-                                  semanticLabel: 'Logo UniCV',
+                                child: Image.asset(
+                                  'assets/images/SmartQuiz.png',
+                                  width: 500,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
-                              const SizedBox(height: 20),
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: DefaultButtonArrowBack(
@@ -495,8 +492,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
         const SizedBox(height: 24),
         _isLoading
             ? const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.orange),
+                child: CircularProgressIndicator(color: AppColors.orange),
               )
             : DefaultButtonOrange(
                 texto: 'Iniciar',
@@ -690,8 +686,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
               width: double.infinity,
               child: _startingTemplateId == template.id
                   ? const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.orange),
+                      child: CircularProgressIndicator(color: AppColors.orange),
                     )
                   : DefaultButtonOrange(
                       texto: 'Iniciar Prova',

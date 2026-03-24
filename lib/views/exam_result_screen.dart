@@ -175,25 +175,22 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
             controller: _scrollController,
             slivers: [
               SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: Row(
-                    children: [
-                      DefaultButtonArrowBack(
-                        onPressed: () => context.go('/home'),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: logo.AppLogoWidget.asset(
-                            size: logo.AppLogoSize.small,
-                            logoPath: 'assets/images/SmartQuiz.png',
-                          ),
+                child: Row(
+                  children: [
+                    DefaultButtonArrowBack(
+                      onPressed: () => context.go('/home'),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Image.asset(
+                          'assets/images/SmartQuiz.png',
+                          width: 250,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(width: 40),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 40),
+                  ],
                 ),
               ),
               SliverToBoxAdapter(
@@ -288,10 +285,8 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       (context, index) {
                         final item = _questionsBreakdown[index];
                         final isCorrect = item['isCorrect'] as bool? ?? false;
-                        final isAnswered =
-                            item['isAnswered'] as bool? ?? false;
-                        final isLast =
-                            index == _questionsBreakdown.length - 1;
+                        final isAnswered = item['isAnswered'] as bool? ?? false;
+                        final isLast = index == _questionsBreakdown.length - 1;
                         return Padding(
                           padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
                           child: Container(
@@ -842,9 +837,8 @@ class _GamificationFeedbackCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: highlight
-                  ? const Color(0xFFFFA000)
-                  : const Color(0xFF2E7D32),
+              color:
+                  highlight ? const Color(0xFFFFA000) : const Color(0xFF2E7D32),
               fontFamily: 'Poppins',
             ),
           ),
