@@ -92,5 +92,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add build/web -f
           git diff --staged --quiet || git commit -m "chore: build web release [skip ci]"
+          git checkout -- .
           git pull --rebase
           git push
