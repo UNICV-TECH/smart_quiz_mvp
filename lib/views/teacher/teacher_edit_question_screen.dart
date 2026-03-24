@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/teacher_repository.dart';
 import '../../repositories/teacher_repository_types.dart';
+import '../../services/form_protection_notifier.dart';
 import '../../services/session_manager.dart';
+import '../../services/web_navigation_guard.dart';
 import '../../ui/components/default_create_question-statement.dart' hide Preview;
+import '../../ui/components/default_exit_confirmation_dialog.dart';
 import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/edit_question_view_model.dart';
@@ -42,14 +45,70 @@ class TeacherEditQuestionScreen extends StatelessWidget {
   }
 }
 
-class _EditQuestionContent extends StatelessWidget {
+class _EditQuestionContent extends StatefulWidget {
   const _EditQuestionContent();
+
+  @override
+  State<_EditQuestionContent> createState() => _EditQuestionContentState();
+}
+
+class _EditQuestionContentState extends State<_EditQuestionContent> {
+  bool _hasChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WebNavigationGuard.enable();
+    // Marcar como "tem alterações" assim que a tela abre (é uma edição)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FormProtectionNotifier>().markUnsaved(label: 'edição de questão');
+    });
+  }
+
+  @override
+  void dispose() {
+    WebNavigationGuard.disable();
+    try {
+      context.read<FormProtectionNotifier>().markSaved();
+    } catch (_) {}
+    super.dispose();
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges) return true;
+
+    final result = await DefaultExitConfirmationDialog.show(
+      context,
+      title: 'Alterações não salvas',
+      message: 'Você tem alterações não salvas na edição da questão. '
+          'Se sair agora, suas alterações serão perdidas.',
+    );
+
+    if (result == ExitConfirmationResult.exitAndLose) {
+      if (mounted) {
+        context.read<FormProtectionNotifier>().markSaved();
+      }
+      return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<EditQuestionViewModel>();
+    _hasChanges = true;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          final canPop = await _onWillPop();
+          if (canPop && context.mounted) {
+            context.pop();
+          }
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Editar Questao'),
         backgroundColor: Colors.white,
@@ -94,6 +153,7 @@ class _EditQuestionContent extends StatelessWidget {
                 ),
               ),
             ),
+    ),
     );
   }
 
@@ -346,6 +406,9 @@ class _EditQuestionContent extends StatelessWidget {
             final success = await viewModel.saveQuestion();
 
             if (success && context.mounted) {
+              context.read<FormProtectionNotifier>().markSaved();
+              WebNavigationGuard.disable();
+              _hasChanges = false;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Questao atualizada com sucesso!'),

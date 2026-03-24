@@ -8,11 +8,13 @@ import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 import 'package:unicv_tech_mvp/ui/components/default_question_navigation.dart';
 import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
+import 'package:unicv_tech_mvp/ui/components/default_exit_confirmation_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/viewmodels/exam_view_model.dart';
 import 'package:unicv_tech_mvp/repositories/gamification_repository.dart';
+import 'package:unicv_tech_mvp/services/web_navigation_guard.dart';
 
 class ExamScreen extends StatefulWidget {
   final String userId;
@@ -39,9 +41,17 @@ class _ExamScreenState extends State<ExamScreen> {
   @override
   void initState() {
     super.initState();
+    WebNavigationGuard.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = context.read<ExamViewModel>();
-      viewModel.initialize();
+      viewModel.initialize().then((_) {
+        if (mounted && viewModel.savedQuestionIndex > 0) {
+          setState(() {
+            currentQuestionIndex = viewModel.savedQuestionIndex
+                .clamp(0, viewModel.examQuestions.length - 1);
+          });
+        }
+      });
     });
   }
 
@@ -197,76 +207,84 @@ class _ExamScreenState extends State<ExamScreen> {
 
         const horizontalPadding = 24.0;
 
-        return Scaffold(
-          body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFE8F5ED),
-                  Color(0xFFE8F5ED),
-                  Color(0xFFE8F5ED),
-                ],
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              _showExitConfirmation(viewModel);
+            }
+          },
+          child: Scaffold(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                    Color(0xFFE8F5ED),
+                  ],
+                ),
               ),
-            ),
-            child: Column(
-              children: [
-                _buildAppBar(horizontalPadding),
-                _buildProgressIndicator(horizontalPadding,
-                    viewModel.examQuestions.length, viewModel),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: horizontalPadding, vertical: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildQuestionTitle(currentQuestionIndex + 1),
-                        const SizedBox(height: 16),
-                        if (hasSupportingTexts) ...[
-                          ...supportingTextWidgets,
+              child: Column(
+                children: [
+                  _buildAppBar(horizontalPadding, viewModel),
+                  _buildProgressIndicator(horizontalPadding,
+                      viewModel.examQuestions.length, viewModel),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: horizontalPadding, vertical: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildQuestionTitle(currentQuestionIndex + 1),
                           const SizedBox(height: 16),
+                          if (hasSupportingTexts) ...[
+                            ...supportingTextWidgets,
+                            const SizedBox(height: 16),
+                          ],
+                          _buildEnunciation(
+                              currentExamQuestion.question.enunciation),
+                          if (hasQuestionBody) ...[
+                            const SizedBox(height: 16),
+                            _buildQuestionBody(questionBody),
+                          ],
+                          const SizedBox(height: 24),
+                          AlternativeSelectorVertical(
+                            labels: currentExamQuestion.answerChoices
+                                .map((ac) => ac.choiceText)
+                                .toList(),
+                            selectedOption: _getSelectedOptionLetter(
+                                currentAnswer, currentExamQuestion.answerChoices),
+                            onChanged: (option) {
+                              // Mapear a letra selecionada (A, B, C, D) para o índice e então para o choiceKey real
+                              final selectedIndex =
+                                  option.codeUnitAt(0) - 65; // A=0, B=1, C=2, D=3
+                              if (selectedIndex >= 0 &&
+                                  selectedIndex <
+                                      currentExamQuestion.answerChoices.length) {
+                                final realChoiceKey = currentExamQuestion
+                                    .answerChoices[selectedIndex].choiceKey;
+                                viewModel.selectAnswer(
+                                    currentExamQuestion.question.id,
+                                    realChoiceKey);
+                              }
+                            },
+                          ),
                         ],
-                        _buildEnunciation(
-                            currentExamQuestion.question.enunciation),
-                        if (hasQuestionBody) ...[
-                          const SizedBox(height: 16),
-                          _buildQuestionBody(questionBody),
-                        ],
-                        const SizedBox(height: 24),
-                        AlternativeSelectorVertical(
-                          labels: currentExamQuestion.answerChoices
-                              .map((ac) => ac.choiceText)
-                              .toList(),
-                          selectedOption: _getSelectedOptionLetter(
-                              currentAnswer, currentExamQuestion.answerChoices),
-                          onChanged: (option) {
-                            // Mapear a letra selecionada (A, B, C, D) para o índice e então para o choiceKey real
-                            final selectedIndex =
-                                option.codeUnitAt(0) - 65; // A=0, B=1, C=2, D=3
-                            if (selectedIndex >= 0 &&
-                                selectedIndex <
-                                    currentExamQuestion.answerChoices.length) {
-                              final realChoiceKey = currentExamQuestion
-                                  .answerChoices[selectedIndex].choiceKey;
-                              viewModel.selectAnswer(
-                                  currentExamQuestion.question.id,
-                                  realChoiceKey);
-                            }
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                _buildNavigationButtons(
-                  isFirstQuestion: isFirstQuestion,
-                  isLastQuestion: isLastQuestion,
-                  horizontalPadding: horizontalPadding,
-                  viewModel: viewModel,
-                ),
-              ],
+                  _buildNavigationButtons(
+                    isFirstQuestion: isFirstQuestion,
+                    isLastQuestion: isLastQuestion,
+                    horizontalPadding: horizontalPadding,
+                    viewModel: viewModel,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -274,7 +292,7 @@ class _ExamScreenState extends State<ExamScreen> {
     );
   }
 
-  Widget _buildAppBar(double horizontalPadding) {
+  Widget _buildAppBar(double horizontalPadding, ExamViewModel viewModel) {
     return SafeArea(
       bottom: false,
       child: Container(
@@ -283,37 +301,7 @@ class _ExamScreenState extends State<ExamScreen> {
         child: Row(
           children: [
             DefaultButtonArrowBack(
-              onPressed: () async {
-                final shouldExit = await showDialog<bool>(
-                  context: context,
-                  builder: (dialogContext) {
-                    return AlertDialog(
-                      title: const Text('Sair do simulado?'),
-                      content: const Text(
-                        'Ao sair agora, sua tentativa não será salva.',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(dialogContext, false),
-                          child: const Text('Continuar'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(dialogContext, true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.green,
-                            foregroundColor: AppColors.white,
-                          ),
-                          child: const Text('Sair'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-
-                if (shouldExit == true && mounted) {
-                  context.pop();
-                }
-              },
+              onPressed: () => _showExitConfirmation(viewModel),
             ),
             Expanded(
               child: Center(
@@ -328,6 +316,32 @@ class _ExamScreenState extends State<ExamScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _showExitConfirmation(ExamViewModel viewModel) async {
+    final result = await DefaultExitConfirmationDialog.show(
+      context,
+      title: 'Sair do simulado?',
+      message: 'Você está no meio de uma prova. O que deseja fazer?',
+      showFinalizeOption: viewModel.selectedAnswers.isNotEmpty,
+      answeredCount: viewModel.selectedAnswers.length,
+      totalQuestions: viewModel.examQuestions.length,
+    );
+
+    if (!mounted || result == null) return;
+
+    switch (result) {
+      case ExitConfirmationResult.continueWork:
+        break;
+      case ExitConfirmationResult.exitAndLose:
+        viewModel.clearAutoSave();
+        WebNavigationGuard.disable();
+        context.pop();
+        break;
+      case ExitConfirmationResult.finalizeNow:
+        _submitExam(viewModel);
+        break;
+    }
   }
 
   Widget _buildProgressIndicator(
@@ -385,6 +399,8 @@ class _ExamScreenState extends State<ExamScreen> {
                   onQuestionSelected: (questionNumber) {
                     setState(() {
                       currentQuestionIndex = questionNumber - 1;
+                      final vm = context.read<ExamViewModel>();
+                      vm.updateCurrentQuestionIndex(currentQuestionIndex);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _scrollToQuestion(
                           totalQuestions: totalQuestions,
@@ -525,6 +541,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     setState(() {
                       currentQuestionIndex--;
                     });
+                    viewModel.updateCurrentQuestionIndex(currentQuestionIndex);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _scrollToQuestion(
                         totalQuestions: viewModel.examQuestions.length,
@@ -548,6 +565,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     setState(() {
                       currentQuestionIndex++;
                     });
+                    viewModel.updateCurrentQuestionIndex(currentQuestionIndex);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _scrollToQuestion(
                         totalQuestions: viewModel.examQuestions.length,
@@ -655,6 +673,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
       if (!mounted) return;
 
+      WebNavigationGuard.disable();
       context.pushReplacement('/exam-result', extra: results);
     } catch (error) {
       if (!mounted) return;
@@ -735,6 +754,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
   @override
   void dispose() {
+    WebNavigationGuard.disable();
     _questionScrollController.dispose();
     super.dispose();
   }

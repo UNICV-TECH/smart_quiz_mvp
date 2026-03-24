@@ -22,6 +22,7 @@ import 'repositories/published_exam_repository.dart';
 import 'repositories/supabase_published_exam_repository.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
+import 'services/form_protection_notifier.dart';
 import 'services/session_manager.dart';
 import 'ui/theme/app_color.dart';
 
@@ -181,6 +182,9 @@ class MyApp extends StatelessWidget {
             return SupabasePublishedExamRepository(
                 client: Supabase.instance.client);
           },
+        ),
+        ChangeNotifierProvider<FormProtectionNotifier>(
+          create: (_) => FormProtectionNotifier(),
         ),
       ],
       child: MaterialApp.router(

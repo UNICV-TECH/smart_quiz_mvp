@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../services/form_protection_notifier.dart';
 import '../services/session_manager.dart';
+import '../ui/components/default_exit_confirmation_dialog.dart';
 import '../ui/components/default_navbar.dart';
 
 class StudentShellScreen extends StatelessWidget {
@@ -11,6 +13,30 @@ class StudentShellScreen extends StatelessWidget {
     super.key,
     required this.navigationShell,
   });
+
+  Future<void> _navigateToBranch(BuildContext context, int index) async {
+    if (index == navigationShell.currentIndex) {
+      navigationShell.goBranch(index, initialLocation: true);
+      return;
+    }
+
+    final formProtection = context.read<FormProtectionNotifier>();
+    if (formProtection.hasUnsavedChanges) {
+      final result = await DefaultExitConfirmationDialog.show(
+        context,
+        title: 'Alterações não salvas',
+        message:
+            'Você tem alterações não salvas. Se sair agora, suas alterações serão perdidas.',
+      );
+
+      if (result == null || result == ExitConfirmationResult.continueWork) {
+        return;
+      }
+      formProtection.markSaved();
+    }
+
+    navigationShell.goBranch(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +55,7 @@ class StudentShellScreen extends StatelessWidget {
       ),
       bottomNavigationBar: CustomNavBar(
         selectedIndex: navigationShell.currentIndex,
-        onItemTapped: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
+        onItemTapped: (index) => _navigateToBranch(context, index),
       ),
     );
   }

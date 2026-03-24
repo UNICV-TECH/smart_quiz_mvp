@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/teacher_repository.dart';
 import '../../repositories/teacher_repository_types.dart';
+import '../../services/form_protection_notifier.dart';
 import '../../services/session_manager.dart';
+import '../../services/web_navigation_guard.dart';
 import '../../ui/components/default_create_question-statement.dart' hide Preview;
 import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
@@ -38,8 +40,55 @@ class TeacherScreenCreateQuestion extends StatelessWidget {
   }
 }
 
-class _CreateQuestionContent extends StatelessWidget {
+class _CreateQuestionContent extends StatefulWidget {
   const _CreateQuestionContent();
+
+  @override
+  State<_CreateQuestionContent> createState() => _CreateQuestionContentState();
+}
+
+class _CreateQuestionContentState extends State<_CreateQuestionContent> {
+  bool _webGuardActive = false;
+
+  void _onViewModelChanged() {
+    final viewModel = context.read<CreateQuestionViewModel>();
+    final formProtection = context.read<FormProtectionNotifier>();
+    final hasContent = viewModel.enunciation.trim().isNotEmpty;
+
+    if (hasContent) {
+      formProtection.markUnsaved(label: 'criação de questão');
+      if (!_webGuardActive) {
+        WebNavigationGuard.enable();
+        _webGuardActive = true;
+      }
+    } else {
+      formProtection.markSaved();
+      if (_webGuardActive) {
+        WebNavigationGuard.disable();
+        _webGuardActive = false;
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CreateQuestionViewModel>().addListener(_onViewModelChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_webGuardActive) {
+      WebNavigationGuard.disable();
+    }
+    // Limpar proteção ao sair da tela
+    try {
+      context.read<FormProtectionNotifier>().markSaved();
+    } catch (_) {}
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -355,6 +404,9 @@ class _CreateQuestionContent extends StatelessWidget {
             final success = await viewModel.saveQuestion();
 
             if (success && context.mounted) {
+              context.read<FormProtectionNotifier>().markSaved();
+              WebNavigationGuard.disable();
+              _webGuardActive = false;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Questao salva com sucesso!'),
