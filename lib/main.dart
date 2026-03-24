@@ -20,6 +20,7 @@ import 'repositories/gamification_repository.dart';
 import 'repositories/supabase_gamification_repository.dart';
 import 'repositories/published_exam_repository.dart';
 import 'repositories/supabase_published_exam_repository.dart';
+import 'viewmodels/gamification_view_model.dart';
 import 'routes/app_router.dart';
 import 'services/auth_service.dart';
 import 'services/form_protection_notifier.dart';
@@ -172,6 +173,13 @@ class MyApp extends StatelessWidget {
             }
             return SupabaseGamificationRepository(
                 client: Supabase.instance.client);
+          },
+        ),
+        ChangeNotifierProvider<GamificationViewModel?>(
+          create: (context) {
+            final repo = context.read<GamificationRepository?>();
+            if (repo == null) return null;
+            return GamificationViewModel(repository: repo);
           },
         ),
         Provider<PublishedExamRepository?>(
