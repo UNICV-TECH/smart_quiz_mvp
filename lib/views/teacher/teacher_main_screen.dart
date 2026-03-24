@@ -202,7 +202,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
           SizedBox(
             height: 72,
             child: Image.asset(
-              'assets/images/logo.webp',
+              'assets/images/SmartQuiz.png',
               fit: BoxFit.contain,
             ),
           ),

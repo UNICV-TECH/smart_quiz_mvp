@@ -150,7 +150,7 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
                       // Logo centralizado
                       Center(
                         child: Image.asset(
-                          'assets/images/logo.webp',
+                          'assets/images/SmartQuiz.png',
                           width: 256,
                           height: 93,
                           fit: BoxFit.contain,

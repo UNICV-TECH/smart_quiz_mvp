@@ -76,7 +76,7 @@ class WelcomeScreen extends StatelessWidget {
             right: 0,
             child: Center(
               child: Image.asset(
-                'assets/images/logo.webp',
+                'assets/images/SmartQuiz.png',
                 width: size.width * 0.7,
                 height: size.height * 0.15,
                 fit: BoxFit.contain,

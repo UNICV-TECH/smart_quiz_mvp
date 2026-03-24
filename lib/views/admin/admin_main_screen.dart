@@ -171,7 +171,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           SizedBox(
             height: 72,
             child: Image.asset(
-              'assets/images/logo.webp',
+              'assets/images/SmartQuiz.png',
               fit: BoxFit.contain,
             ),
           ),

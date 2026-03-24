@@ -307,7 +307,7 @@ class _ExamScreenState extends State<ExamScreen> {
               child: Center(
                 child: logo.AppLogoWidget.asset(
                   size: logo.AppLogoSize.small,
-                  logoPath: 'assets/images/logo_color.png',
+                  logoPath: 'assets/images/SmartQuiz.png',
                 ),
               ),
             ),

@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 42),
                       Center(
                         child: Image.asset(
-                          'assets/images/logo.webp',
+                          'assets/images/SmartQuiz.png',
                           width: 256,
                           height: 93,
                           fit: BoxFit.contain,

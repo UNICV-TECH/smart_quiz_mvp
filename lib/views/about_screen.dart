@@ -57,7 +57,7 @@ class AboutScreen extends StatelessWidget {
                     // Logo do app
                     Center(
                       child: Image.asset(
-                        'assets/images/logo_color.png',
+                        'assets/images/SmartQuiz.png',
                         width: 120,
                         height: 50,
                         fit: BoxFit.contain,

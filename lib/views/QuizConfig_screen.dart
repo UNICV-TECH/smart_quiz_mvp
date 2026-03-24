@@ -37,7 +37,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   PublishedExamsViewModel? _publishedExamsVM;
 
   final List<String> _quantityOptions = ['5', '10', '15', '20'];
-  final String _logoAssetPath = 'assets/images/logo_color.png';
+  final String _logoAssetPath = 'assets/images/SmartQuiz.png';
 
   @override
   void initState() {

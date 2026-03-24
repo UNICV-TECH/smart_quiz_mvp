@@ -94,7 +94,7 @@ class _ProfileViewBody extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
                       child: Image.asset(
-                        'assets/images/logo_color.png',
+                        'assets/images/SmartQuiz.png',
                         width: 120,
                         height: 50,
                         fit: BoxFit.contain,

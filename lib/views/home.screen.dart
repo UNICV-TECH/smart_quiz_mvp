@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 class _HomeScreenState extends State<HomeScreen> {
-  final String _logoAssetPath = 'assets/images/logo_color.png';
+  final String _logoAssetPath = 'assets/images/SmartQuiz.png';
 
   final Map<String, IconData> _iconMap = {
     'psychology_outlined': Icons.psychology_outlined,

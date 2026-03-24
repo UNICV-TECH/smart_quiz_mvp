@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // Logo do app
                 Image.asset(
-                  'assets/images/logo.webp',
+                  'assets/images/SmartQuiz.png',
                   width: 300,
                   height: 300,
                 ),
