@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../ui/theme/app_color.dart';
 import '../constants/app_strings.dart';
@@ -10,7 +11,15 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.enter): () {
+          context.go('/login');
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
       body: Stack(
         children: [
           Container(
@@ -143,6 +152,8 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }

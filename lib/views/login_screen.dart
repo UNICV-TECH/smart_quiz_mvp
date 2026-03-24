@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/viewmodels/login_view_model.dart';
@@ -69,7 +70,17 @@ class _LoginScreenState extends State<LoginScreen> {
     final viewModel = context.watch<LoginViewModel>();
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.enter): () {
+          if (!viewModel.isLoading) {
+            _handleLogin();
+          }
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
       body: Stack(
         children: [
           // Imagem de fundo
@@ -275,6 +286,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }
