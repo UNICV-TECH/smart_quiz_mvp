@@ -112870,7 +112870,7 @@ A.aMs.prototype={
 $0(){this.a.x=null},
 $S:0}
 A.aMy.prototype={
-$2(a,b){var s,r,q,p,o=null,n=this.a,m=t.p,l=A.b([B.a2n,A.bF(new A.tv(B.iU,"assets/images/logo_color.png",B.lz,"Logo UniCV",o),o,o),B.aA,new A.dw(B.cF,o,o,A.aWy(new A.aMw(a)),o),B.bc,n.aiO(),B.bc],m)
+$2(a,b){var s,r,q,p,o=null,n=this.a,m=t.p,l=A.b([B.a2n,A.bF(new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo UniCV",o),o,o),B.aA,new A.dw(B.cF,o,o,A.aWy(new A.aMw(a)),o),B.bc,n.aiO(),B.bc],m)
 if(n.w===B.lF){s=this.b
 r=A.aW7("Quantas quest\xf5es deseja fazer ?",A.ab(204,B.z.n()>>>16&255,B.z.n()>>>8&255,B.z.n()&255),B.iW)
 q=n.d
@@ -112911,7 +112911,7 @@ $0(){return this.a.tZ(this.b)},
 $S:0}
 A.xk.prototype={
 D(a){var s=this,r=null,q="Poppins",p=t.p
-return A.e0(r,B.u,A.dE(B.aH,A.b([A.oB(0,A.dO("assets/images/FundoWhiteHome.png",r,B.c7,r,r,r)),A.e0(A.abN(B.u,!0,0,r,A.cP(r,r,A.b_(B.hX,B.o,r,r,32),r,r,new A.ab3(a),r,r,r,r,r),A.J("Sobre",r,r,r,r,A.a7(r,r,B.o,r,r,r,r,r,q,r,r,24,r,r,B.y,r,r,!0,r,r,r,r,r,r,r,r),r,r)),B.u,A.eC(!0,A.e1(A.ad(A.b([B.iD,A.bF(A.dO("assets/images/logo_color.png",new A.ab4(),B.cG,50,r,120),r,r),B.dg,A.bF(A.J("Vers\xe3o 1.0.0",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),r,r),B.a2p,A.J("Sobre o Desenvolvimento",r,r,r,r,A.a7(r,r,B.o,r,r,r,r,r,q,r,r,20,r,r,B.y,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.G,s.C2("O Smart Quiz nasceu da necessidade de ajudar estudantes a se prepararem melhor para suas provas. A ideia era criar uma plataforma simples, mas eficiente, onde os alunos pudessem praticar e acompanhar sua evolu\xe7\xe3o.",B.Qp,B.bv,"A Ideia"),B.G,s.C2("Desenvolvido com Flutter, o app foi constru\xeddo pensando em performance e experi\xeancia do usu\xe1rio. A arquitetura foi planejada para ser escal\xe1vel e f\xe1cil de manter, utilizando as melhores pr\xe1ticas do mercado.",B.Qg,B.o,"Tecnologias"),B.G,s.C2("Foi um desafio emocionante! Desde o design das telas at\xe9 a implementa\xe7\xe3o das funcionalidades, cada etapa foi pensada para proporcionar a melhor experi\xeancia de estudo. O foco sempre foi na simplicidade e efici\xeancia.",B.Qs,B.eq,"O Processo"),B.G,s.C2("O projeto continua em evolu\xe7\xe3o! Estamos trabalhando em novas funcionalidades, mais mat\xe9rias e recursos que v\xe3o tornar sua experi\xeancia de estudo ainda melhor. Fique ligado nas atualiza\xe7\xf5es!",B.R1,B.H,"Pr\xf3ximos Passos"),B.dg,A.bF(A.ad(A.b([A.J("Feito com",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.a6,A.ao(A.b([A.b_(B.Ql,B.H,r,r,20),B.aw,A.J("e muito",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.aw,A.b_(B.Qh,B.bv,r,r,20)],p),B.l,B.ax,B.f,0,r)],p),B.l,B.e,B.f),r,r),B.aA],p),B.v,B.e,B.f),r,B.E,B.bK,r,B.R),B.W,!0),r,!1)],p),B.C,B.aq,r),r,!0)},
+return A.e0(r,B.u,A.dE(B.aH,A.b([A.oB(0,A.dO("assets/images/FundoWhiteHome.png",r,B.c7,r,r,r)),A.e0(A.abN(B.u,!0,0,r,A.cP(r,r,A.b_(B.hX,B.o,r,r,32),r,r,new A.ab3(a),r,r,r,r,r),A.J("Sobre",r,r,r,r,A.a7(r,r,B.o,r,r,r,r,r,q,r,r,24,r,r,B.y,r,r,!0,r,r,r,r,r,r,r,r),r,r)),B.u,A.eC(!0,A.e1(A.ad(A.b([B.iD,A.bF(A.dO("assets/images/SmartQuiz.png",new A.ab4(),B.cG,50,r,120),r,r),B.dg,A.bF(A.J("Vers\xe3o 1.0.0",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),r,r),B.a2p,A.J("Sobre o Desenvolvimento",r,r,r,r,A.a7(r,r,B.o,r,r,r,r,r,q,r,r,20,r,r,B.y,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.G,s.C2("O Smart Quiz nasceu da necessidade de ajudar estudantes a se prepararem melhor para suas provas. A ideia era criar uma plataforma simples, mas eficiente, onde os alunos pudessem praticar e acompanhar sua evolu\xe7\xe3o.",B.Qp,B.bv,"A Ideia"),B.G,s.C2("Desenvolvido com Flutter, o app foi constru\xeddo pensando em performance e experi\xeancia do usu\xe1rio. A arquitetura foi planejada para ser escal\xe1vel e f\xe1cil de manter, utilizando as melhores pr\xe1ticas do mercado.",B.Qg,B.o,"Tecnologias"),B.G,s.C2("Foi um desafio emocionante! Desde o design das telas at\xe9 a implementa\xe7\xe3o das funcionalidades, cada etapa foi pensada para proporcionar a melhor experi\xeancia de estudo. O foco sempre foi na simplicidade e efici\xeancia.",B.Qs,B.eq,"O Processo"),B.G,s.C2("O projeto continua em evolu\xe7\xe3o! Estamos trabalhando em novas funcionalidades, mais mat\xe9rias e recursos que v\xe3o tornar sua experi\xeancia de estudo ainda melhor. Fique ligado nas atualiza\xe7\xf5es!",B.R1,B.H,"Pr\xf3ximos Passos"),B.dg,A.bF(A.ad(A.b([A.J("Feito com",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.a6,A.ao(A.b([A.b_(B.Ql,B.H,r,r,20),B.aw,A.J("e muito",r,r,r,r,A.a7(r,r,B.z,r,r,r,r,r,q,r,r,14,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r),B.aw,A.b_(B.Qh,B.bv,r,r,20)],p),B.l,B.ax,B.f,0,r)],p),B.l,B.e,B.f),r,r),B.aA],p),B.v,B.e,B.f),r,B.E,B.bK,r,B.R),B.W,!0),r,!1)],p),B.C,B.aq,r),r,!0)},
 C2(a,b,c,d){var s=null,r=A.a8(15),q=A.b([new A.aT(0,B.x,B.bw,B.ag,6)],t.V),p=c.b4(0.1),o=A.a8(10),n=t.p
 return A.a1(s,A.ad(A.b([A.ao(A.b([A.a1(s,A.b_(b,c,s,s,24),B.i,s,s,new A.a9(p,s,s,o,s,s,B.q),s,s,s,s,B.dt,s,s,s),B.a0,A.as(A.J(d,s,s,s,s,A.a7(s,s,B.m,s,s,s,s,s,"Poppins",s,s,18,s,s,B.y,s,s,!0,s,s,s,s,s,s,s,s),s,s),1)],n),B.l,B.e,B.f,0,s),B.as,A.J(a,s,s,s,s,A.a7(s,s,B.z,s,s,s,s,s,"Poppins",s,s,14,s,s,s,s,1.5,!0,s,s,s,s,s,s,s,s),s,s)],n),B.v,B.e,B.f),B.i,s,s,new A.a9(B.j,s,s,r,q,s,B.q),s,s,s,s,B.ab,s,s,1/0)}}
 A.ab3.prototype={
@@ -113028,7 +113028,7 @@ case 1:return A.f1(B.GZ,new A.aBZ(a),t.vV)
 case 2:return A.f1(B.GW,new A.aC_(a),t.HV)
 default:return B.KQ}},
 aj7(){var s=this,r=null,q=A.b([new A.aT(0,B.x,B.bb.b4(0.3),B.Aj,8)],t.V),p=t.p
-return A.a1(r,A.ad(A.b([A.a1(r,A.ad(A.b([A.cf(A.dO("assets/images/logo.webp",r,B.cG,r,r,r),72,r),B.as,B.a9C],p),B.l,B.e,B.f),B.i,r,r,B.Ik,r,r,r,r,B.ab,r,r,r),B.aA,A.as(A.e1(A.ad(A.b([s.K0(B.uk,0,"Dashboard"),B.a6,s.K0(B.um,1,"Usu\xe1rios"),B.a6,s.K0(B.QL,2,"Conte\xfado"),B.a6,B.NR,B.a6,s.K1(B.eC,-1,new A.aC3(s),"Painel Professor"),B.a6,s.K1(B.QQ,-2,new A.aC4(s),"Painel Aluno")],p),B.l,B.e,B.f),r,B.E,r,r,B.R),1),s.aiZ()],p),B.l,B.e,B.f),B.i,r,r,new A.a9(B.j,r,B.qw,r,q,r,B.q),r,r,r,r,r,r,r,280)},
+return A.a1(r,A.ad(A.b([A.a1(r,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",r,B.cG,r,r,r),72,r),B.as,B.a9C],p),B.l,B.e,B.f),B.i,r,r,B.Ik,r,r,r,r,B.ab,r,r,r),B.aA,A.as(A.e1(A.ad(A.b([s.K0(B.uk,0,"Dashboard"),B.a6,s.K0(B.um,1,"Usu\xe1rios"),B.a6,s.K0(B.QL,2,"Conte\xfado"),B.a6,B.NR,B.a6,s.K1(B.eC,-1,new A.aC3(s),"Painel Professor"),B.a6,s.K1(B.QQ,-2,new A.aC4(s),"Painel Aluno")],p),B.l,B.e,B.f),r,B.E,r,r,B.R),1),s.aiZ()],p),B.l,B.e,B.f),B.i,r,r,new A.a9(B.j,r,B.qw,r,q,r,B.q),r,r,r,r,r,r,r,280)},
 K1(a,b,c,d){var s=null,r=this.d===b,q=r?B.rd:B.u,p=A.a8(8),o=c==null?new A.aC1(this,b):c,n=A.a8(8),m=r?B.HX:s,l=A.b_(a,r?B.aS:B.bu,s,s,22),k=r?B.S:B.A
 l=A.b([l,B.a0,A.as(A.J(d,s,s,s,s,A.a7(s,s,r?B.aS:B.cJ,s,s,s,s,s,s,s,s,15,s,s,k,s,s,!0,s,s,s,s,s,s,s,s),s,s),1)],t.p)
 if(r)l.push(B.Rd)
@@ -113588,7 +113588,7 @@ k=A.a3(["previousQuestionIds",m],t.N,t.Xb)
 A.cq(a).a7P("/exam/"+i+"?courseId="+l+"&questionCount="+o+"&isRetake=true",k,t.X)
 case 1:return A.o(q,r)}})
 return A.p($async$CQ,r)},
-D(a){var s,r,q,p,o,n,m,l=this,k=null,j=t.p,i=A.b([new A.kz(new A.al(B.tv,A.ao(A.b([A.aWy(new A.aH9(a)),A.as(A.bF(new A.tv(B.iU,"assets/images/logo_color.png",B.lz,"Logo do aplicativo",k),k,k),1),B.Fc],j),B.l,B.e,B.f,0,k),k),k),new A.kz(new A.al(B.bg,new A.dw(B.cF,k,k,A.ad(B.UH,B.v,B.e,B.f),k),k),k),B.a2t,new A.kz(new A.al(B.bg,new A.a7s(l.gZN(),l.gWb(),l.gN6()-l.gWb()-l.ga1x(),l.ga1x(),l.gN6(),l.Xh(l.gL7()),k),k),k)],j)
+D(a){var s,r,q,p,o,n,m,l=this,k=null,j=t.p,i=A.b([new A.kz(new A.al(B.tv,A.ao(A.b([A.aWy(new A.aH9(a)),A.as(A.bF(new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo do aplicativo",k),k,k),1),B.Fc],j),B.l,B.e,B.f,0,k),k),k),new A.kz(new A.al(B.bg,new A.dw(B.cF,k,k,A.ad(B.UH,B.v,B.e,B.f),k),k),k),B.a2t,new A.kz(new A.al(B.bg,new A.a7s(l.gZN(),l.gWb(),l.gN6()-l.gWb()-l.ga1x(),l.ga1x(),l.gN6(),l.Xh(l.gL7()),k),k),k)],j)
 if(l.gLo()){s=A.bX(l.a.c.h(0,"gamificationPreviousPoints"))
 if(s==null)s=k
 if(s==null)s=0
@@ -113748,7 +113748,7 @@ A.aYl()
 $.af.k4$.push(new A.aHG(this))},
 D(a){return A.b0o(new A.aHD(this),t.pN)},
 aii(a,b){var s=null
-return A.eC(!1,A.a1(s,A.ao(A.b([A.aWy(new A.aHd(this,b)),A.as(A.bF(new A.tv(B.iU,"assets/images/logo_color.png",B.lz,"Logo do aplicativo",s),s,s),1),B.Fc],t.p),B.l,B.e,B.f,0,s),B.i,s,s,s,s,s,s,s,new A.a5(a,8,a,8),s,s,s),B.W,!0)},
+return A.eC(!1,A.a1(s,A.ao(A.b([A.aWy(new A.aHd(this,b)),A.as(A.bF(new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo do aplicativo",s),s,s),1),B.Fc],t.p),B.l,B.e,B.f,0,s),B.i,s,s,s,s,s,s,s,new A.a5(a,8,a,8),s,s,s),B.W,!0)},
 xw(a){return this.axm(a)},
 axm(a){var s=0,r=A.q(t.H),q,p=this,o,n,m
 var $async$xw=A.m(function(b,c){if(b===1)return A.n(c,r)
@@ -114106,7 +114106,7 @@ $3(a,b,c){var s,r,q,p,o=null
 if(b.c)return B.ek
 s=b.d
 if(s!=null)return A.bF(A.ad(A.b([B.Rx,B.G,A.J(s,o,o,o,o,B.a65,B.aG,o),B.G,A.cR(!1,B.a97,o,o,o,o,o,o,b.gaIp(),o,o)],t.p),B.l,B.ax,B.f),o,o)
-s=A.bF(new A.al(B.Or,new A.tv(B.iU,"assets/images/logo_color.png",B.lz,"Logo UniCV",o),o),o,o)
+s=A.bF(new A.al(B.Or,new A.tv(B.iU,"assets/images/SmartQuiz.png",B.lz,"Logo UniCV",o),o),o,o)
 r=A.aW7("gostaria de se preparar?",A.ab(204,B.z.n()>>>16&255,B.z.n()>>>8&255,B.z.n()&255),B.iW)
 q=A.bE(b.b,t.g)
 p=A.U(q).i("T<1,al>")
@@ -114165,7 +114165,7 @@ case 5:case 1:return A.o(q,r)}})
 return A.p($async$qf,r)},
 D(a0){var s,r,q,p,o,n,m,l,k,j=this,i=null,h="Poppins",g=A.aP(a0,!0,t.QZ),f=t.w,e=A.bs(a0,i,f).w.a,d=A.a3([B.h7,new A.aKm(j,g)],t.Vz,t.M),c=e.a,b=e.b,a=A.a1(i,A.dO("assets/images/fundo.png",i,B.c7,i,i,i),B.i,i,i,B.hs,i,b,i,i,i,i,i,c)
 f=A.bs(a0,i,f).w
-s=A.bF(A.dO("assets/images/logo.webp",i,B.cG,93,i,256),i,i)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",i,B.cG,93,i,256),i,i)
 r=A.bF(A.J("Login",i,i,i,i,A.a7(i,i,B.o,i,i,i,i,i,"Open Sans",i,i,40,i,i,B.y,i,i,!0,i,i,i,i,i,i,i,i),i,i),i,i)
 q=A.Sk(j.d,i,"",B.lb,"E-mail",i,new A.aKn())
 p=A.Sl(j.e,i,"","Senha",i,new A.aKo(j),B.pm,new A.aKp())
@@ -114255,7 +114255,7 @@ if(s!=null)r.push(A.RM(null,s,t.Kz))
 return A.b2r(B.adV,r)}}
 A.a55.prototype={
 D(a){var s=null,r=A.aP(a,!0,t.bn),q=t.p
-return A.e0(s,B.u,A.dE(B.aH,A.b([A.oB(0,A.dO("assets/images/FundoWhiteHome.png",s,B.c7,s,s,s)),A.oB(0,A.eC(!0,A.ad(A.b([new A.al(B.aZ,A.bF(A.dO("assets/images/logo_color.png",new A.aLS(),B.cG,50,s,120),s,s),s),A.as(new A.dQ(new A.aLT(this,r),s),1)],q),B.l,B.e,B.f),B.W,!0))],q),B.C,B.aq,s),s,!0)},
+return A.e0(s,B.u,A.dE(B.aH,A.b([A.oB(0,A.dO("assets/images/FundoWhiteHome.png",s,B.c7,s,s,s)),A.oB(0,A.eC(!0,A.ad(A.b([new A.al(B.aZ,A.bF(A.dO("assets/images/SmartQuiz.png",new A.aLS(),B.cG,50,s,120),s,s),s),A.as(new A.dQ(new A.aLT(this,r),s),1)],q),B.l,B.e,B.f),B.W,!0))],q),B.C,B.aq,s),s,!0)},
 aiD(a){var s,r,q,p,o,n=null,m=A.aP(a,!0,t.Jp)
 if(m==null||m.d==null)return B.az
 s=m.f
@@ -114717,7 +114717,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$DL,r)},
 D(a){var s,r,q,p,o,n,m=this,l=null,k=t.w,j=A.bs(a,l,k).w.a,i=j.a,h=j.b,g=A.a1(l,A.dO("assets/images/fundo.png",l,B.c7,l,l,l),B.i,l,l,B.hs,l,h,l,l,l,l,l,i)
 k=A.bs(a,l,k).w
-s=A.bF(A.dO("assets/images/logo.webp",l,B.cG,93,l,256),l,l)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",l,B.cG,93,l,256),l,l)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,l,l,A.cP(l,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,l,l,40),l,l,new A.aO3(a),B.W,l,l,l,l),l),A.J("Recuperar\nSenha",2,l,l,l,A.a7(l,l,B.o,l,l,l,l,l,"Open Sans",l,l,40,l,l,B.y,l,l,!0,l,l,l,l,l,l,l,l),B.aG,l)],r),B.C,B.aq,l)
 p=A.b([A.Sk(m.d,m.r,"seu@email.com",B.lb,"E-mail",l,l),B.aA],r)
@@ -114812,7 +114812,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$E7,r)},
 D(a){var s,r,q,p,o,n,m,l=this,k=null,j=t.w,i=A.bs(a,k,j).w.a,h=i.a,g=i.b,f=A.a1(k,A.dO("assets/images/fundo.png",k,B.c7,k,k,k),B.i,k,k,B.hs,k,g,k,k,k,k,k,h)
 j=A.bs(a,k,j).w
-s=A.bF(A.dO("assets/images/logo.webp",k,B.cG,93,k,256),k,k)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",k,B.cG,93,k,256),k,k)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,k,k,A.cP(k,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,k,k,40),k,k,new A.aOa(a),B.W,k,k,k,k),k),A.J("Nova Senha",2,k,k,k,A.a7(k,k,B.o,k,k,k,k,k,"Open Sans",k,k,40,k,k,B.y,k,k,!0,k,k,k,k,k,k,k,k),B.aG,k)],r),B.C,B.aq,k)
 p=A.J("Crie sua nova senha. Ela deve ter ao menos 8 caracteres, incluir uma letra mai\xfascula e um n\xfamero.",k,k,k,k,A.a7(k,k,B.z,k,k,k,k,k,"Poppins",k,k,14,k,k,k,k,k,!0,k,k,k,k,k,k,k,k),k,k)
@@ -114893,7 +114893,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$CS,r)},
 D(a2){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f="Cadastrar",e="Poppins",d=A.aP(a2,!0,t.u1),c=t.w,b=A.bs(a2,g,c).w.a,a=b.a,a0=b.b,a1=A.a1(g,A.dO("assets/images/fundo.png",g,B.c7,g,g,g),B.i,g,g,B.hs,g,a0,g,g,g,g,g,a)
 c=A.bs(a2,g,c).w
-s=A.bF(A.dO("assets/images/logo.webp",g,B.cG,93,g,256),g,g)
+s=A.bF(A.dO("assets/images/SmartQuiz.png",g,B.cG,93,g,256),g,g)
 r=t.p
 q=A.dE(B.B,A.b([new A.dw(B.cF,g,g,A.cP(g,new A.ak(0,1/0,0,1/0),A.b_(B.hX,B.o,g,g,40),g,g,new A.aPg(a2),B.W,g,g,g,g),g),A.J(f,g,g,g,g,A.a7(g,g,B.o,g,g,g,g,g,"Open Sans",g,g,40,g,g,B.y,g,g,!0,g,g,g,g,g,g,g,g),g,g)],r),B.C,B.aq,g)
 p=A.cf(A.Sk(h.d,g,"",B.a3L,"Nome Completo",g,new A.aPh()),98,g)
@@ -114987,7 +114987,7 @@ case 1:return A.o(q,r)}})
 return A.p($async$xg,r)},
 D(a){var s=null,r=this.e
 r===$&&A.a()
-return A.e0(s,B.o,A.a1(s,A.bF(new A.dA(r,!1,A.ad(A.b([A.dO("assets/images/logo.webp",s,s,300,s,300),B.bc],t.p),B.l,B.ax,B.f),s),s,s),B.i,s,s,B.Ic,s,1/0,s,s,s,s,s,1/0),s,!1)}}
+return A.e0(s,B.o,A.a1(s,A.bF(new A.dA(r,!1,A.ad(A.b([A.dO("assets/images/SmartQuiz.png",s,s,300,s,300),B.bc],t.p),B.l,B.ax,B.f),s),s,s),B.i,s,s,B.Ic,s,1/0,s,s,s,s,s,1/0),s,!1)}}
 A.aPv.prototype={
 $0(){this.a.xg()},
 $S:0}
@@ -116088,7 +116088,7 @@ return A.a3(["name",r,"email",q==null?"":q,"role","Professor"],t.N,t.z)},
 D(a){var s,r=this,q=null,p=A.aP(a,!0,t.v),o=p.guX()&&p.r,n=t.p,m=A.b([],n)
 if(o)m.push(r.aif(a,p))
 s=A.b([new A.aT(0,B.x,B.bb.b4(0.3),B.Aj,8)],t.V)
-m.push(A.as(A.ao(A.b([A.a1(q,A.ad(A.b([A.a1(q,A.ad(A.b([A.cf(A.dO("assets/images/logo.webp",q,B.cG,q,q,q),72,q),B.as,B.aa7],n),B.l,B.e,B.f),B.i,q,q,B.Ig,q,q,q,q,B.ab,q,q,q),B.aA,A.as(A.e1(A.ad(A.b([r.C6(0,B.nA,"Montar Provas"),B.a6,r.aid(),B.a6,r.C6(4,B.uk,"Dashboard"),B.a6,r.C6(5,B.hY,"Gamifica\xe7\xe3o"),B.a6,r.C6(2,B.hZ,"Perfil")],n),B.l,B.e,B.f),q,B.E,q,q,B.R),1),A.a1(q,A.ao(A.b([A.a1(q,B.Rt,B.i,q,q,new A.a9(B.a9,q,q,A.a8(25),q,q,B.q),q,50,q,q,q,q,q,50),B.a0,A.as(A.ad(A.b([A.J(r.gNy().h(0,"name"),q,B.an,q,q,B.ps,q,q),B.aO,A.J(r.gNy().h(0,"email"),q,B.an,q,q,A.a7(q,q,B.aa,q,q,q,q,q,q,q,q,12,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q),B.iE,A.J(r.gNy().h(0,"role"),q,q,q,q,B.a64,q,q)],n),B.v,B.e,B.f),1)],n),B.l,B.e,B.f,0,q),B.i,q,q,B.qG,q,q,q,q,B.aZ,q,q,q)],n),B.l,B.e,B.f),B.i,q,q,new A.a9(B.j,q,B.qw,q,s,q,B.q),q,q,q,q,q,q,q,280),A.as(r.a.c,1)],n),B.l,B.e,B.f,0,q),1))
+m.push(A.as(A.ao(A.b([A.a1(q,A.ad(A.b([A.a1(q,A.ad(A.b([A.cf(A.dO("assets/images/SmartQuiz.png",q,B.cG,q,q,q),72,q),B.as,B.aa7],n),B.l,B.e,B.f),B.i,q,q,B.Ig,q,q,q,q,B.ab,q,q,q),B.aA,A.as(A.e1(A.ad(A.b([r.C6(0,B.nA,"Montar Provas"),B.a6,r.aid(),B.a6,r.C6(4,B.uk,"Dashboard"),B.a6,r.C6(5,B.hY,"Gamifica\xe7\xe3o"),B.a6,r.C6(2,B.hZ,"Perfil")],n),B.l,B.e,B.f),q,B.E,q,q,B.R),1),A.a1(q,A.ao(A.b([A.a1(q,B.Rt,B.i,q,q,new A.a9(B.a9,q,q,A.a8(25),q,q,B.q),q,50,q,q,q,q,q,50),B.a0,A.as(A.ad(A.b([A.J(r.gNy().h(0,"name"),q,B.an,q,q,B.ps,q,q),B.aO,A.J(r.gNy().h(0,"email"),q,B.an,q,q,A.a7(q,q,B.aa,q,q,q,q,q,q,q,q,12,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q),B.iE,A.J(r.gNy().h(0,"role"),q,q,q,q,B.a64,q,q)],n),B.v,B.e,B.f),1)],n),B.l,B.e,B.f,0,q),B.i,q,q,B.qG,q,q,q,q,B.aZ,q,q,q)],n),B.l,B.e,B.f),B.i,q,q,new A.a9(B.j,q,B.qw,q,s,q,B.q),q,q,q,q,q,q,q,280),A.as(r.a.c,1)],n),B.l,B.e,B.f,0,q),1))
 return A.e0(q,q,A.ad(m,B.l,B.e,B.f),q,!1)},
 aif(a,b){var s=null
 return A.el(!1,B.P,!0,s,new A.al(B.mU,A.ao(A.b([B.ux,B.aw,B.Pk,A.AM(B.up,B.G4,new A.aQP(b,a),A.oV(s,s,B.j.b4(0.2),s,s,s,s,s,s,s,s,s,B.tq,s,new A.ci(A.a8(20),B.r),s,s,s,s,s))],t.p),B.l,B.e,B.f,0,s),s),B.i,B.aS,0,s,s,s,s,s,B.bo)},
@@ -116323,7 +116323,7 @@ if(j!=null&&j.length!==0)B.b.N(k,A.b([B.h8,A.J(j,o,o,o,o,A.a7(o,o,B.aa,o,o,o,o,o
 return A.a1(o,new A.al(B.aZ,A.ao(A.b([A.as(A.ad(k,B.v,B.e,B.f),1),A.cP(o,o,B.nJ,o,o,p.f,o,o,o,"Editar mat\xe9ria",o),A.cP(o,o,B.nI,o,o,p.r,o,o,o,"Excluir mat\xe9ria",o)],l),B.l,B.e,B.f,0,o),o),B.i,o,o,new A.a9(B.j,o,B.qz,n,m,o,B.q),o,o,o,B.ds,o,o,o,o)}}
 A.Be.prototype={
 D(a){var s=null,r=A.bs(a,s,t.w).w.a,q=r.a,p=r.b,o=p*0.4,n=t.p
-return new A.Ea(A.a3([B.h7,new A.aBF(a)],t.Vz,t.M),A.ia(!0,s,A.e0(s,s,A.dE(B.aH,A.b([A.a1(s,A.dO("assets/images/background.jpg",s,B.c7,s,s,s),B.i,s,s,B.hs,s,p,s,s,s,s,s,q),A.a1(s,s,B.i,B.o.b4(0.8),s,s,s,p,s,s,s,s,s,q),A.ks(0,A.a1(s,s,B.i,s,s,B.If,s,s,s,s,s,s,s,s),p*0.5,s,0,0,s,s),A.ks(0,A.a1(s,s,B.i,s,s,B.hr,s,s,s,s,s,s,s,s),o,s,0,0,s,s),A.ks(s,A.bF(A.dO("assets/images/logo.webp",s,B.cG,p*0.15,s,q*0.7),s,s),s,s,0,0,p*0.07,s),A.ks(0,new A.al(B.OQ,A.ad(A.b([B.a2r,B.a9T,B.aA,B.aam,B.a2q,A.cf(A.hc(!1,B.aaw,s,s,s,s,s,s,new A.aBG(a),s,A.f3(s,s,B.bv,s,s,s,0,s,s,B.j,s,s,s,s,new A.ci(A.a8(20),B.r),s,s,s,s,s)),67,1/0)],n),B.l,B.e,B.f),s),o,s,0,0,s,s)],n),B.C,B.aq,s),s,!1),s,s,s,s,!0,s,s,s,s,s,s),s)}}
+return new A.Ea(A.a3([B.h7,new A.aBF(a)],t.Vz,t.M),A.ia(!0,s,A.e0(s,s,A.dE(B.aH,A.b([A.a1(s,A.dO("assets/images/background.jpg",s,B.c7,s,s,s),B.i,s,s,B.hs,s,p,s,s,s,s,s,q),A.a1(s,s,B.i,B.o.b4(0.8),s,s,s,p,s,s,s,s,s,q),A.ks(0,A.a1(s,s,B.i,s,s,B.If,s,s,s,s,s,s,s,s),p*0.5,s,0,0,s,s),A.ks(0,A.a1(s,s,B.i,s,s,B.hr,s,s,s,s,s,s,s,s),o,s,0,0,s,s),A.ks(s,A.bF(A.dO("assets/images/SmartQuiz.png",s,B.cG,p*0.15,s,q*0.7),s,s),s,s,0,0,p*0.07,s),A.ks(0,new A.al(B.OQ,A.ad(A.b([B.a2r,B.a9T,B.aA,B.aam,B.a2q,A.cf(A.hc(!1,B.aaw,s,s,s,s,s,s,new A.aBG(a),s,A.f3(s,s,B.bv,s,s,s,0,s,s,B.j,s,s,s,s,new A.ci(A.a8(20),B.r),s,s,s,s,s)),67,1/0)],n),B.l,B.e,B.f),s),o,s,0,0,s,s)],n),B.C,B.aq,s),s,!1),s,s,s,s,!0,s,s,s,s,s,s),s)}}
 A.aBF.prototype={
 $0(){A.cq(this.a).dB("/login",null)},
 $S:0}
