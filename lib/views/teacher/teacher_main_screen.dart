@@ -200,7 +200,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
-            height: 72,
+            height: 100,
             child: Image.asset(
               'assets/images/SmartQuiz.png',
               fit: BoxFit.contain,

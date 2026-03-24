@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Center(
                                 child: Padding(
                                   padding: const EdgeInsets.only(
-                                      top: 12.0, bottom: 20.0),
+                                      top: 8.0, bottom: 12.0),
                                   child: AppLogoWidget.asset(
                                     size: AppLogoSize.small,
                                     logoPath: _logoAssetPath,

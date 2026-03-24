@@ -91,8 +91,8 @@ class _SplashScreenState extends State<SplashScreen>
                 // Logo do app
                 Image.asset(
                   'assets/images/SmartQuiz.png',
-                  width: 300,
-                  height: 300,
+                  width: 380,
+                  height: 380,
                 ),
                 const SizedBox(height: 24)
               ],

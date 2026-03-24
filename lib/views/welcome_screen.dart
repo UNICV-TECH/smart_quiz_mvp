@@ -77,8 +77,8 @@ class WelcomeScreen extends StatelessWidget {
             child: Center(
               child: Image.asset(
                 'assets/images/SmartQuiz.png',
-                width: size.width * 0.7,
-                height: size.height * 0.15,
+                width: size.width * 0.8,
+                height: size.height * 0.22,
                 fit: BoxFit.contain,
               ),
             ),

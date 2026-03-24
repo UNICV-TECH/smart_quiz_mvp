@@ -46,7 +46,7 @@ class AppLogoWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final double logoWidth;
     switch (size) {
-      case AppLogoSize.small: logoWidth = screenWidth * 0.24; break;
+      case AppLogoSize.small: logoWidth = screenWidth * 0.18; break;
       case AppLogoSize.medium: logoWidth = screenWidth * 0.65; break;
       case AppLogoSize.large: logoWidth = screenWidth * 0.92; break;
     }

@@ -98,8 +98,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       Center(
                         child: Image.asset(
                           'assets/images/SmartQuiz.png',
-                          width: 256,
-                          height: 93,
+                          width: 320,
+                          height: 120,
                           fit: BoxFit.contain,
                         ),
                       ),

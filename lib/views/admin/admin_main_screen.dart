@@ -169,7 +169,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       child: Column(
         children: [
           SizedBox(
-            height: 72,
+            height: 100,
             child: Image.asset(
               'assets/images/SmartQuiz.png',
               fit: BoxFit.contain,
