@@ -2,6 +2,7 @@ enum AuthRepositoryErrorCode {
   emailNotConfirmed,
   invalidCredentials,
   accountDisabled,
+  emailAlreadyRegistered,
   unknown,
 }
 

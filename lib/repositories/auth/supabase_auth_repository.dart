@@ -22,6 +22,15 @@ class SupabaseAuthRepository implements AuthRepository {
         data: {'full_name': name},
       );
 
+      // Supabase retorna sucesso falso para emails duplicados (proteção contra enumeração).
+      // Quando isso acontece, a lista de identities vem vazia.
+      if (response.user?.identities?.isEmpty == true) {
+        throw const AuthRepositoryException(
+          'Este e-mail já está cadastrado. Tente fazer login ou recuperar sua senha.',
+          code: AuthRepositoryErrorCode.emailAlreadyRegistered,
+        );
+      }
+
       // Criar registro na tabela user após signup bem-sucedido
       final user = response.user;
       if (user != null) {
@@ -53,6 +62,8 @@ class SupabaseAuthRepository implements AuthRepository {
       return AuthRepositorySignUpResponse(
         needsEmailConfirmation: response.session == null,
       );
+    } on AuthRepositoryException {
+      rethrow;
     } on AuthException catch (error) {
       throw AuthRepositoryException(
         error.message.isNotEmpty
@@ -242,6 +253,8 @@ class SupabaseAuthRepository implements AuthRepository {
             ? error.message
             : 'Não foi possível concluir o login.',
       );
+    } on AuthRepositoryException {
+      rethrow;
     } catch (_) {
       throw const AuthRepositoryException(
         'Não foi possível comunicar com o serviço de autenticação.',

@@ -165,7 +165,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.nameLabel,
                                     keyboardType: TextInputType.name,
                                     validator: (value) {
-                                      if (value == null || value.isEmpty) {
+                                      if (value == null || value.trim().isEmpty) {
                                         return 'Por favor, insira seu nome';
                                       }
                                       return null;
@@ -183,7 +183,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.emailLabel,
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (value) {
-                                      if (value == null || value.isEmpty) {
+                                      if (value == null || value.trim().isEmpty) {
                                         return 'Por favor, insira seu email';
                                       }
                                       final emailRegex =
