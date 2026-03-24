@@ -114,6 +114,70 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
   Future<void> updateExam(String examId, Map<String, dynamic> updates) async {
     // Implementação para testes
   }
+
+  @override
+  Future<Map<String, dynamic>?> fetchExamRecord(String examId) async {
+    // Retorna simulado por padrão (sem template)
+    return {'id': examId, 'id_exam_template': null, 'id_course': 'course-1'};
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsFromExam(
+      String examId) async {
+    return [
+      {
+        'id': 'question-1',
+        'exam_id': examId,
+        'enunciation': 'Quanto é 2 + 2?',
+        'question_order': 0,
+        'difficulty_level': 'easy',
+        'points': 1,
+        'is_active': true,
+        'created_at': DateTime(2024, 1, 1).toIso8601String(),
+        'updated_at': DateTime(2024, 1, 1).toIso8601String(),
+      },
+    ];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchSimuladoQuestions({
+    required String examId,
+    required String courseId,
+  }) async {
+    return [
+      {
+        'id': 'question-1',
+        'exam_id': examId,
+        'enunciation': 'Quanto é 2 + 2?',
+        'question_order': 0,
+        'difficulty_level': 'easy',
+        'points': 1,
+        'is_active': true,
+        'created_at': DateTime(2024, 1, 1).toIso8601String(),
+        'updated_at': DateTime(2024, 1, 1).toIso8601String(),
+      },
+    ];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsByIds({
+    required String examId,
+    required List<String> questionIds,
+  }) async {
+    return [
+      {
+        'id': 'question-1',
+        'exam_id': examId,
+        'enunciation': 'Quanto é 2 + 2?',
+        'question_order': 0,
+        'difficulty_level': 'easy',
+        'points': 1,
+        'is_active': true,
+        'created_at': DateTime(2024, 1, 1).toIso8601String(),
+        'updated_at': DateTime(2024, 1, 1).toIso8601String(),
+      },
+    ];
+  }
 }
 
 void main() {

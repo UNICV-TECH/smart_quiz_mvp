@@ -121,6 +121,41 @@ class FakeExamDataSource implements ExamRemoteDataSource {
   Future<void> updateExam(String examId, Map<String, dynamic> updates) async {
     // Implementação para testes
   }
+
+  @override
+  Future<Map<String, dynamic>?> fetchExamRecord(String examId) async {
+    // Retorna simulado por padrão (sem template)
+    return {'id': examId, 'id_exam_template': null, 'id_course': 'course-1'};
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsFromExam(
+      String examId) async {
+    // Para testes de template, retorna as mesmas questões
+    return questions.map((q) => Map<String, dynamic>.from(q)).toList();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchSimuladoQuestions({
+    required String examId,
+    required String courseId,
+  }) async {
+    if (throwOnFetchQuestions) {
+      throw Exception('Query failed');
+    }
+    return questions.map((q) => Map<String, dynamic>.from(q)).toList();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchQuestionsByIds({
+    required String examId,
+    required List<String> questionIds,
+  }) async {
+    return questions
+        .where((q) => questionIds.contains(q['id'] as String))
+        .map((q) => Map<String, dynamic>.from(q))
+        .toList();
+  }
 }
 
 void main() {
