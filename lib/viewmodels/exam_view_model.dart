@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
 
+import '../services/exam_auto_save_service.dart';
 import '../services/gamification_calculator.dart';
 import '../services/session_manager.dart';
 
@@ -50,6 +51,28 @@ class ExamViewModel extends ChangeNotifier {
   Future<void> initialize() async {
     _setLoading(true);
     try {
+      // Tentar restaurar estado salvo (auto-save de F5/reload)
+      final savedState = ExamAutoSaveService.loadState(examId);
+      if (savedState != null) {
+        debugPrint('Restaurando estado salvo do auto-save para examId: $examId');
+        _attemptId = savedState['attemptId'] as String?;
+        _startedAt = DateTime.tryParse(savedState['startedAt'] as String? ?? '');
+        _currentQuestionIndex = savedState['currentQuestionIndex'] as int? ?? 0;
+
+        final savedAnswers = savedState['selectedAnswers'] as Map<String, dynamic>?;
+        if (savedAnswers != null) {
+          _selectedAnswers.clear();
+          savedAnswers.forEach((key, value) {
+            _selectedAnswers[key] = value as String;
+          });
+        }
+
+        await _loadQuestions();
+        _error = null;
+        debugPrint('Estado restaurado: ${_selectedAnswers.length} respostas, questão $_currentQuestionIndex');
+        return;
+      }
+
       // Se não for retake, criar nova tentativa; caso contrário, apenas carregar questões
       if (!isRetake) {
         debugPrint('Inicializando prova normal - criando nova tentativa');
@@ -72,6 +95,8 @@ class ExamViewModel extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  int get savedQuestionIndex => _currentQuestionIndex;
 
   Future<void> _createAttempt() async {
     // Preservar o _startedAt se já existir (para retake), senão criar novo
@@ -203,8 +228,33 @@ class ExamViewModel extends ChangeNotifier {
 
   void selectAnswer(String questionId, String choiceKey) {
     _selectedAnswers[questionId] = choiceKey;
+    _autoSave();
     notifyListeners();
   }
+
+  int _currentQuestionIndex = 0;
+
+  void updateCurrentQuestionIndex(int index) {
+    _currentQuestionIndex = index;
+    _autoSave();
+  }
+
+  void _autoSave() {
+    if (_startedAt == null) return;
+    ExamAutoSaveService.saveState(
+      examId: examId,
+      selectedAnswers: Map<String, String>.from(_selectedAnswers),
+      currentQuestionIndex: _currentQuestionIndex,
+      attemptId: _attemptId,
+      startedAt: _startedAt!.toIso8601String(),
+    );
+  }
+
+  void clearAutoSave() {
+    ExamAutoSaveService.clearState(examId);
+  }
+
+  bool get hasAutoSavedState => ExamAutoSaveService.hasSavedState(examId);
 
   Future<Map<String, dynamic>> finalize() async {
     // Se for retake e ainda não tiver tentativa criada, criar uma agora
@@ -423,6 +473,9 @@ class ExamViewModel extends ChangeNotifier {
         correctCount: correctCount,
         durationSeconds: durationSeconds,
       );
+
+      // Limpar auto-save após finalização bem-sucedida
+      clearAutoSave();
 
       _error = null;
       return {

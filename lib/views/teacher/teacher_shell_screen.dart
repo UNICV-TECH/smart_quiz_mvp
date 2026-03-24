@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../services/form_protection_notifier.dart';
 import '../../services/session_manager.dart';
+import '../../ui/components/default_exit_confirmation_dialog.dart';
 
 class TeacherShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -17,6 +19,28 @@ class TeacherShellScreen extends StatefulWidget {
 
 class _TeacherShellScreenState extends State<TeacherShellScreen> {
   bool _isQuestionMenuExpanded = false;
+
+  Future<void> _navigateToBranch(int branchIndex) async {
+    if (widget.navigationShell.currentIndex == branchIndex) return;
+
+    final formProtection = context.read<FormProtectionNotifier>();
+    if (formProtection.hasUnsavedChanges) {
+      final result = await DefaultExitConfirmationDialog.show(
+        context,
+        title: 'Alterações não salvas',
+        message:
+            'Você tem alterações não salvas no ${formProtection.screenLabel}. '
+            'Se sair agora, suas alterações serão perdidas.',
+      );
+
+      if (result == null || result == ExitConfirmationResult.continueWork) {
+        return;
+      }
+      formProtection.markSaved();
+    }
+
+    widget.navigationShell.goBranch(branchIndex);
+  }
 
   Map<String, dynamic> get _userData {
     final sessionManager = context.watch<SessionManager>();
@@ -208,9 +232,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
         color: isSelected ? const Color(0xFFE8F5E9) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          onTap: () {
-            widget.navigationShell.goBranch(branchIndex);
-          },
+          onTap: () => _navigateToBranch(branchIndex),
           borderRadius: BorderRadius.circular(8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -349,9 +371,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
       color: isSelected ? const Color(0xFFE8F5E9) : Colors.transparent,
       borderRadius: BorderRadius.circular(6),
       child: InkWell(
-        onTap: () {
-          widget.navigationShell.goBranch(branchIndex);
-        },
+        onTap: () => _navigateToBranch(branchIndex),
         borderRadius: BorderRadius.circular(6),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
