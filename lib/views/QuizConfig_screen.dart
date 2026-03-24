@@ -11,7 +11,6 @@ import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_chekbox.dart';
 import 'package:unicv_tech_mvp/ui/components/default_inline_message.dart';
-import 'package:unicv_tech_mvp/ui/components/default_navbar.dart';
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
 import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
@@ -30,7 +29,6 @@ class QuizConfigScreen extends StatefulWidget {
 class _QuizConfigScreenState extends State<QuizConfigScreen> {
   String? _selectedQuantity;
   bool _isLoading = false;
-  int _navBarIndex = 0;
   String? _feedbackMessage;
   FeedbackSeverity? _feedbackSeverity;
   _QuizMode _mode = _QuizMode.simulado;
@@ -406,19 +404,6 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
                       );
                     },
                   ),
-                ),
-                CustomNavBar(
-                  selectedIndex: _navBarIndex,
-                  onItemTapped: (index) {
-                    setState(() {
-                      _navBarIndex = index;
-                    });
-                    if (index == 0) {
-                      context.go('/home');
-                    } else {
-                      debugPrint("NavBar Tapped: $index");
-                    }
-                  },
                 ),
               ],
             ),
