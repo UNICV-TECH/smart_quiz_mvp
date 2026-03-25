@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
@@ -36,10 +37,13 @@ class ExamScreen extends StatefulWidget {
 class _ExamScreenState extends State<ExamScreen> {
   int currentQuestionIndex = 0;
   final ScrollController _questionScrollController = ScrollController();
+  bool _showTimer = false;
+  final Stopwatch _stopwatch = Stopwatch();
 
   @override
   void initState() {
     super.initState();
+    _stopwatch.start();
     WebNavigationGuard.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = context.read<ExamViewModel>();
@@ -54,6 +58,7 @@ class _ExamScreenState extends State<ExamScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ExamViewModel>(
@@ -66,9 +71,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -89,9 +94,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -149,9 +154,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -220,9 +225,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -296,20 +301,64 @@ class _ExamScreenState extends State<ExamScreen> {
   Widget _buildAppBar(double horizontalPadding, ExamViewModel viewModel) {
     return SafeArea(
       bottom: false,
-      child: Container(
-        child: Row(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding, vertical: 4),
+        child: Column(
           children: [
-            DefaultButtonArrowBack(
-              onPressed: () => _showExitConfirmation(viewModel),
-            ),
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  'assets/images/SmartQuiz.png',
-                  width: 250,
-                  fit: BoxFit.contain,
+            Row(
+              children: [
+                DefaultButtonArrowBack(
+                  onPressed: () => _showExitConfirmation(viewModel),
                 ),
-              ),
+                Expanded(
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/SmartQuiz.png',
+                      width: 160,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                // Timer com olhinho para mostrar/ocultar
+                GestureDetector(
+                  onTap: () => setState(() => _showTimer = !_showTimer),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showTimer
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                          size: 18,
+                          color: AppColors.green,
+                        ),
+                        const SizedBox(width: 5),
+                        _showTimer
+                            ? _TimerText(
+                                stopwatch: _stopwatch,
+                              )
+                            : const Text(
+                                '--:--',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.green,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -763,3 +812,48 @@ class _ExamScreenState extends State<ExamScreen> {
 }
 
 enum _SubmissionAction { retry, exit }
+
+class _TimerText extends StatefulWidget {
+  const _TimerText({required this.stopwatch});
+
+  final Stopwatch stopwatch;
+
+  @override
+  State<_TimerText> createState() => _TimerTextState();
+}
+
+class _TimerTextState extends State<_TimerText>
+    with SingleTickerProviderStateMixin {
+  late final Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker((_) {
+      if (mounted) setState(() {});
+    });
+    _ticker.start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final elapsed = widget.stopwatch.elapsed;
+    final minutes = elapsed.inMinutes.toString().padLeft(2, '0');
+    final seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+    return Text(
+      '$minutes:$seconds',
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppColors.green,
+        fontFamily: 'Poppins',
+      ),
+    );
+  }
+}

@@ -333,77 +333,107 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isButtonEnabled = _selectedQuantity != null && !_isLoading;
+    final courseTitle = widget.course['title'] as String? ?? 'Curso';
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      extendBody: true,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/FundoWhiteHome.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 33.0),
-                        child: ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: constraints.maxHeight),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Image.asset(
-                                  'assets/images/SmartQuiz.png',
-                                  width: 500,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: DefaultButtonArrowBack(
-                                  onPressed: () => context.pop(),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _buildModeToggle(),
-                              const SizedBox(height: 24),
-                              if (_mode == _QuizMode.simulado)
-                                _buildSimuladoContent(isButtonEnabled)
-                              else if (_publishedExamsVM != null)
-                                ListenableBuilder(
-                                  listenable: _publishedExamsVM!,
-                                  builder: (context, _) =>
-                                      _buildProvasContent(),
-                                )
-                              else
-                                _buildProvasContent(),
-                              if (_feedbackMessage != null &&
-                                  _feedbackSeverity != null) ...[
-                                const SizedBox(height: 20),
-                                DefaultInlineMessage(
-                                  message: _feedbackMessage!,
-                                  severity: _feedbackSeverity!,
-                                  onDismissed: _clearFeedback,
-                                ),
-                              ],
-                              const SizedBox(height: 35),
-                            ],
-                          ),
+      backgroundColor: AppColors.pageBg,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Header com gradiente
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.headerGradientStart,
+                    AppColors.headerGradientMid,
+                    AppColors.headerGradientEnd,
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: DefaultButtonArrowBack(
+                          onPressed: () => context.pop(),
+                          iconColor: Colors.white,
                         ),
-                      );
-                    },
+                      ),
+                      Image.asset(
+                        'assets/images/SmartQuiz.png',
+                        width: 200,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        courseTitle,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Prepare-se para o desafio!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
+            ),
+          ),
+          // Content
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModeToggle(),
+                  const SizedBox(height: 24),
+                  if (_mode == _QuizMode.simulado)
+                    _buildSimuladoContent(isButtonEnabled)
+                  else if (_publishedExamsVM != null)
+                    ListenableBuilder(
+                      listenable: _publishedExamsVM!,
+                      builder: (context, _) => _buildProvasContent(),
+                    )
+                  else
+                    _buildProvasContent(),
+                  if (_feedbackMessage != null &&
+                      _feedbackSeverity != null) ...[
+                    const SizedBox(height: 20),
+                    DefaultInlineMessage(
+                      message: _feedbackMessage!,
+                      severity: _feedbackSeverity!,
+                      onDismissed: _clearFeedback,
+                    ),
+                  ],
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         ],
@@ -423,6 +453,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
           Expanded(
             child: _buildToggleTab(
               label: 'Simulado',
+              icon: Icons.quiz_rounded,
               isActive: _mode == _QuizMode.simulado,
               onTap: () => _onModeChanged(_QuizMode.simulado),
             ),
@@ -430,6 +461,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
           Expanded(
             child: _buildToggleTab(
               label: 'Provas',
+              icon: Icons.assignment_rounded,
               isActive: _mode == _QuizMode.provas,
               onTap: () => _onModeChanged(_QuizMode.provas),
             ),
@@ -441,6 +473,7 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
 
   Widget _buildToggleTab({
     required String label,
+    required IconData icon,
     required bool isActive,
     required VoidCallback onTap,
   }) {
@@ -455,14 +488,25 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
         alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: isActive ? Colors.white : AppColors.secondaryDark,
-            fontFamily: 'Poppins',
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isActive ? Colors.white : AppColors.secondaryDark,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: isActive ? Colors.white : AppColors.secondaryDark,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
         ),
       ),
     );
