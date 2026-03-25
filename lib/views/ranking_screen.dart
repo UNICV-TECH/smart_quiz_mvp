@@ -34,7 +34,6 @@ class _RankingScreenState extends State<RankingScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Gracefully handle missing GamificationViewModel
     final hasViewModel = context.read<GamificationViewModel?>() != null;
 
     return Scaffold(
@@ -87,7 +86,6 @@ class _RankingScreenState extends State<RankingScreen>
                         'Ranking indisponível no momento.'),
                   )
                 else ...[
-                  // Tab bar
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 24),
                     decoration: BoxDecoration(
@@ -126,18 +124,9 @@ class _RankingScreenState extends State<RankingScreen>
                       splashBorderRadius: BorderRadius.circular(10),
                       dividerHeight: 0,
                       tabs: const [
-                        Tab(
-                          height: 40,
-                          text: 'Geral',
-                        ),
-                        Tab(
-                          height: 40,
-                          text: 'Por Curso',
-                        ),
-                        Tab(
-                          height: 40,
-                          text: 'Por Prova',
-                        ),
+                        Tab(height: 40, text: 'Geral'),
+                        Tab(height: 40, text: 'Por Curso'),
+                        Tab(height: 40, text: 'Por Prova'),
                       ],
                     ),
                   ),
@@ -160,6 +149,357 @@ class _RankingScreenState extends State<RankingScreen>
       ),
     );
   }
+}
+
+// ── Podium Widget ─────────────────────────────────────────
+
+class _PodiumSection extends StatelessWidget {
+  const _PodiumSection({
+    required this.ranking,
+    required this.currentUserId,
+  });
+
+  final List<RankingEntry> ranking;
+  final String? currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    final first = ranking.isNotEmpty ? ranking[0] : null;
+    final second = ranking.length > 1 ? ranking[1] : null;
+    final third = ranking.length > 2 ? ranking[2] : null;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: IntrinsicHeight(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // 2nd place
+            if (second != null)
+              Expanded(
+                child: _PodiumItem(
+                  entry: second,
+                  position: 2,
+                  podiumHeight: 80,
+                  color: const Color(0xFFC0C0C0),
+                  isCurrentUser: second.userId == currentUserId,
+                ),
+              )
+            else
+              const Expanded(child: SizedBox()),
+            const SizedBox(width: 6),
+            // 1st place
+            if (first != null)
+              Expanded(
+                child: _PodiumItem(
+                  entry: first,
+                  position: 1,
+                  podiumHeight: 105,
+                  color: const Color(0xFFFFD700),
+                  isCurrentUser: first.userId == currentUserId,
+                ),
+              )
+            else
+              const Expanded(child: SizedBox()),
+            const SizedBox(width: 6),
+            // 3rd place
+            if (third != null)
+              Expanded(
+                child: _PodiumItem(
+                  entry: third,
+                  position: 3,
+                  podiumHeight: 60,
+                  color: const Color(0xFFCD7F32),
+                  isCurrentUser: third.userId == currentUserId,
+                ),
+              )
+            else
+              const Expanded(child: SizedBox()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PodiumItem extends StatelessWidget {
+  const _PodiumItem({
+    required this.entry,
+    required this.position,
+    required this.podiumHeight,
+    required this.color,
+    required this.isCurrentUser,
+  });
+
+  final RankingEntry entry;
+  final int position;
+  final double podiumHeight;
+  final Color color;
+  final bool isCurrentUser;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = GamificationLevel.fromPoints(entry.seasonPoints);
+    final firstName = entry.userName.split(' ').first;
+    final avatarSize = position == 1 ? 52.0 : 44.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Crown for 1st place
+        if (position == 1)
+          Icon(
+            Icons.auto_awesome,
+            color: color,
+            size: 22,
+          ),
+        if (position == 1) const SizedBox(height: 2),
+
+        // Avatar
+        AvatarWithMedal(
+          avatarUrl: entry.avatarUrl,
+          medalAsset: level.medalAsset,
+          size: avatarSize,
+        ),
+        const SizedBox(height: 4),
+
+        // Name
+        Text(
+          firstName,
+          style: TextStyle(
+            fontSize: position == 1 ? 14 : 13,
+            fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w600,
+            color: isCurrentUser ? AppColors.green : AppColors.primaryDark,
+            fontFamily: 'Poppins',
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+
+        // Points
+        Text(
+          '${entry.seasonPoints.toStringAsFixed(0)} pts',
+          style: TextStyle(
+            fontSize: position == 1 ? 13 : 12,
+            fontWeight: FontWeight.w700,
+            color: color,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        const SizedBox(height: 4),
+
+        // Podium block
+        Container(
+          width: double.infinity,
+          height: podiumHeight,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                color.withAlpha(200),
+                color.withAlpha(120),
+              ],
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withAlpha(40),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Position number
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(230),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(20),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$position',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+              if (podiumHeight > 70) ...[
+                const SizedBox(height: 2),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    level.label,
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withAlpha(220),
+                      fontFamily: 'Poppins',
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Ranking List Builder (shared) ─────────────────────────
+
+Widget _buildRankingContent({
+  required List<RankingEntry> ranking,
+  required String? currentUserId,
+  required Future<void> Function() onRefresh,
+  RankingEntry? userRankOutside,
+}) {
+  // Sort by rankPosition ascending (1st, 2nd, 3rd...)
+  final sorted = List<RankingEntry>.from(ranking)
+    ..sort((a, b) => a.rankPosition.compareTo(b.rankPosition));
+
+  final top3 = sorted.take(3).toList();
+  final rest = sorted.length > 3 ? sorted.sublist(3) : <RankingEntry>[];
+
+  return RefreshIndicator(
+    onRefresh: onRefresh,
+    color: AppColors.green,
+    child: CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        // User position card if outside ranking
+        if (userRankOutside != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: _buildUserPositionCard(userRankOutside),
+            ),
+          ),
+
+        // Podium
+        if (top3.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _PodiumSection(
+              ranking: sorted,
+              currentUserId: currentUserId,
+            ),
+          ),
+
+        // Divider
+        if (rest.isNotEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: const Color(0xFFE2E7DE),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'Demais participantes',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondaryDark,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: const Color(0xFFE2E7DE),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Rest of the list (4th+)
+        if (rest.isNotEmpty)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final entry = rest[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _RankingListItem(
+                      entry: entry,
+                      isCurrentUser: entry.userId == currentUserId,
+                    ),
+                  );
+                },
+                childCount: rest.length,
+              ),
+            ),
+          ),
+
+        // Bottom spacing if only podium (no rest)
+        if (rest.isEmpty)
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 120),
+          ),
+      ],
+    ),
+  );
+}
+
+Widget _buildUserPositionCard(RankingEntry entry) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: const Color(0xFFE8F5E9),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.green, width: 2),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.person, color: AppColors.green, size: 20),
+        const SizedBox(width: 8),
+        Text(
+          'Voce: #${entry.rankPosition} — ${entry.seasonPoints.toStringAsFixed(0)} pts',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.green,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 // ── Global Ranking Tab ────────────────────────────────────
@@ -215,74 +555,21 @@ class _GlobalRankingTabState extends State<_GlobalRankingTab>
       return _buildEmptyState('Nenhum aluno pontuou ainda nesta temporada.');
     }
 
-    final ranking = vm.globalRanking.reversed.toList();
+    final userOutside = _isUserOutsideRanking(vm, userId)
+        ? vm.userGlobalRank
+        : null;
 
-    return RefreshIndicator(
+    return _buildRankingContent(
+      ranking: vm.globalRanking,
+      currentUserId: userId,
       onRefresh: _loadData,
-      color: AppColors.green,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
-        itemCount: ranking.length + _userOutsideTop(vm, userId),
-        itemBuilder: (context, index) {
-          // Show user card at the top if outside top 50
-          final userRank = vm.userGlobalRank;
-          if (index == 0 && userRank != null && _isUserOutsideRanking(vm, userId)) {
-            return _buildUserPositionCard(userRank);
-          }
-
-          final adjustedIndex =
-              _isUserOutsideRanking(vm, userId) ? index - 1 : index;
-          final entry = ranking[adjustedIndex];
-          final isCurrentUser = entry.userId == userId;
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _RankingListItem(
-              entry: entry,
-              isCurrentUser: isCurrentUser,
-            ),
-          );
-        },
-      ),
+      userRankOutside: userOutside,
     );
-  }
-
-  int _userOutsideTop(GamificationViewModel vm, String? userId) {
-    if (_isUserOutsideRanking(vm, userId)) return 1;
-    return 0;
   }
 
   bool _isUserOutsideRanking(GamificationViewModel vm, String? userId) {
     if (userId == null || vm.userGlobalRank == null) return false;
     return !vm.globalRanking.any((e) => e.userId == userId);
-  }
-
-  Widget _buildUserPositionCard(RankingEntry entry) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.green, width: 2),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.person, color: AppColors.green, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            'Você: #${entry.rankPosition} — ${entry.seasonPoints.toStringAsFixed(0)} pts',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.green,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -355,7 +642,6 @@ class _CourseRankingTabState extends State<_CourseRankingTab>
 
     return Column(
       children: [
-        // Course dropdown
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
@@ -393,8 +679,7 @@ class _CourseRankingTabState extends State<_CourseRankingTab>
         const SizedBox(height: 12),
         Expanded(
           child: _selectedCourseId == null
-              ? _buildEmptyState(
-                  'Selecione um curso para ver o ranking')
+              ? _buildEmptyState('Selecione um curso para ver o ranking')
               : vm.loading
                   ? const Center(
                       child:
@@ -402,30 +687,11 @@ class _CourseRankingTabState extends State<_CourseRankingTab>
                   : vm.courseRanking.isEmpty
                       ? _buildEmptyState(
                           'Nenhum aluno pontuou neste curso.')
-                      : RefreshIndicator(
+                      : _buildRankingContent(
+                          ranking: vm.courseRanking,
+                          currentUserId: userId,
                           onRefresh: () =>
                               _onCourseSelected(_selectedCourseId!),
-                          color: AppColors.green,
-                          child: Builder(
-                            builder: (context) {
-                              final ranking = vm.courseRanking.reversed.toList();
-                              return ListView.builder(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
-                                itemCount: ranking.length,
-                                itemBuilder: (context, index) {
-                                  final entry = ranking[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: _RankingListItem(
-                                      entry: entry,
-                                      isCurrentUser: entry.userId == userId,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
                         ),
         ),
       ],
@@ -495,7 +761,6 @@ class _TemplateRankingTabState extends State<_TemplateRankingTab>
 
     return Column(
       children: [
-        // Template list
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Container(
@@ -559,8 +824,7 @@ class _TemplateRankingTabState extends State<_TemplateRankingTab>
         const SizedBox(height: 12),
         Expanded(
           child: _selectedTemplateId == null
-              ? _buildEmptyState(
-                  'Selecione uma prova para ver o ranking')
+              ? _buildEmptyState('Selecione uma prova para ver o ranking')
               : vm.loading
                   ? const Center(
                       child:
@@ -568,30 +832,11 @@ class _TemplateRankingTabState extends State<_TemplateRankingTab>
                   : vm.templateRanking.isEmpty
                       ? _buildEmptyState(
                           'Nenhum aluno pontuou nesta prova.')
-                      : RefreshIndicator(
+                      : _buildRankingContent(
+                          ranking: vm.templateRanking,
+                          currentUserId: userId,
                           onRefresh: () =>
                               _onTemplateSelected(_selectedTemplateId!),
-                          color: AppColors.green,
-                          child: Builder(
-                            builder: (context) {
-                              final ranking = vm.templateRanking.reversed.toList();
-                              return ListView.builder(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
-                                itemCount: ranking.length,
-                                itemBuilder: (context, index) {
-                                  final entry = ranking[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: _RankingListItem(
-                                      entry: entry,
-                                      isCurrentUser: entry.userId == userId,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
                         ),
         ),
       ],
@@ -613,12 +858,6 @@ class _RankingListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final level = GamificationLevel.fromPoints(entry.seasonPoints);
-    final isTop3 = entry.rankPosition >= 1 && entry.rankPosition <= 3;
-
-    Color? positionColor;
-    if (entry.rankPosition == 1) positionColor = const Color(0xFFFFD700);
-    if (entry.rankPosition == 2) positionColor = const Color(0xFFC0C0C0);
-    if (entry.rankPosition == 3) positionColor = const Color(0xFFCD7F32);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -628,13 +867,11 @@ class _RankingListItem extends StatelessWidget {
         border: isCurrentUser
             ? Border.all(color: AppColors.green, width: 2)
             : Border.all(color: const Color(0xFFE2E7DE), width: 1),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: isTop3
-                ? (positionColor ?? Colors.black).withAlpha(15)
-                : const Color(0x0A000000),
-            blurRadius: isTop3 ? 12 : 8,
-            offset: const Offset(0, 2),
+            color: Color(0x0A000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -642,33 +879,22 @@ class _RankingListItem extends StatelessWidget {
         children: [
           // Position
           Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isTop3
-                  ? positionColor?.withAlpha(30)
-                  : const Color(0xFFF5F5F5),
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F5F5),
               shape: BoxShape.circle,
-              border: isTop3 && positionColor != null
-                  ? Border.all(color: positionColor, width: 2.5)
-                  : null,
             ),
             alignment: Alignment.center,
-            child: isTop3
-                ? Icon(
-                    Icons.emoji_events,
-                    size: 20,
-                    color: positionColor,
-                  )
-                : Text(
-                    '${entry.rankPosition}',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
+            child: Text(
+              '${entry.rankPosition}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryDark,
+                fontFamily: 'Poppins',
+              ),
+            ),
           ),
           const SizedBox(width: 10),
 
@@ -676,7 +902,7 @@ class _RankingListItem extends StatelessWidget {
           AvatarWithMedal(
             avatarUrl: entry.avatarUrl,
             medalAsset: level.medalAsset,
-            size: 48,
+            size: 44,
           ),
           const SizedBox(width: 12),
 
@@ -688,7 +914,7 @@ class _RankingListItem extends StatelessWidget {
                 Text(
                   entry.userName,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight:
                         isCurrentUser ? FontWeight.w700 : FontWeight.w500,
                     color: AppColors.primaryDark,
@@ -700,7 +926,7 @@ class _RankingListItem extends StatelessWidget {
                 Text(
                   level.label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: AppColors.secondaryDark,
                     fontFamily: 'Poppins',
                   ),
@@ -713,17 +939,15 @@ class _RankingListItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: isTop3
-                  ? positionColor?.withAlpha(25)
-                  : AppColors.green.withAlpha(20),
+              color: AppColors.green.withAlpha(20),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               '${entry.seasonPoints.toStringAsFixed(0)} pts',
-              style: TextStyle(
-                fontSize: 14,
+              style: const TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: isTop3 ? positionColor : AppColors.green,
+                color: AppColors.green,
                 fontFamily: 'Poppins',
               ),
             ),
