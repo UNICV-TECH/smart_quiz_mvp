@@ -215,12 +215,15 @@ class _GlobalRankingTabState extends State<_GlobalRankingTab>
       return _buildEmptyState('Nenhum aluno pontuou ainda nesta temporada.');
     }
 
+    final ranking = vm.globalRanking.reversed.toList();
+
     return RefreshIndicator(
       onRefresh: _loadData,
       color: AppColors.green,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        itemCount: vm.globalRanking.length + _userOutsideTop(vm, userId),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+        itemCount: ranking.length + _userOutsideTop(vm, userId),
         itemBuilder: (context, index) {
           // Show user card at the top if outside top 50
           final userRank = vm.userGlobalRank;
@@ -230,7 +233,7 @@ class _GlobalRankingTabState extends State<_GlobalRankingTab>
 
           final adjustedIndex =
               _isUserOutsideRanking(vm, userId) ? index - 1 : index;
-          final entry = vm.globalRanking[adjustedIndex];
+          final entry = ranking[adjustedIndex];
           final isCurrentUser = entry.userId == userId;
 
           return Padding(
@@ -403,18 +406,23 @@ class _CourseRankingTabState extends State<_CourseRankingTab>
                           onRefresh: () =>
                               _onCourseSelected(_selectedCourseId!),
                           color: AppColors.green,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 8),
-                            itemCount: vm.courseRanking.length,
-                            itemBuilder: (context, index) {
-                              final entry = vm.courseRanking[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _RankingListItem(
-                                  entry: entry,
-                                  isCurrentUser: entry.userId == userId,
-                                ),
+                          child: Builder(
+                            builder: (context) {
+                              final ranking = vm.courseRanking.reversed.toList();
+                              return ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+                                itemCount: ranking.length,
+                                itemBuilder: (context, index) {
+                                  final entry = ranking[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: _RankingListItem(
+                                      entry: entry,
+                                      isCurrentUser: entry.userId == userId,
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
@@ -564,18 +572,23 @@ class _TemplateRankingTabState extends State<_TemplateRankingTab>
                           onRefresh: () =>
                               _onTemplateSelected(_selectedTemplateId!),
                           color: AppColors.green,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 8),
-                            itemCount: vm.templateRanking.length,
-                            itemBuilder: (context, index) {
-                              final entry = vm.templateRanking[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _RankingListItem(
-                                  entry: entry,
-                                  isCurrentUser: entry.userId == userId,
-                                ),
+                          child: Builder(
+                            builder: (context) {
+                              final ranking = vm.templateRanking.reversed.toList();
+                              return ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+                                itemCount: ranking.length,
+                                itemBuilder: (context, index) {
+                                  final entry = ranking[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: _RankingListItem(
+                                      entry: entry,
+                                      isCurrentUser: entry.userId == userId,
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
