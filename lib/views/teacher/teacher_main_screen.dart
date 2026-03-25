@@ -188,7 +188,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
 
   Widget _buildMenuHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       decoration: const BoxDecoration(
         color: Color(0xFF2E7D32),
         borderRadius: BorderRadius.only(
@@ -199,11 +199,10 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
-            height: 200,
             child: Image.asset(
-              'assets/images/SmartQuiz.png',
-              width: 500,
-              height: 500,
+              'assets/images/SmartQuiz_branca.png',
+              width: 250,
+              height: 150,
               fit: BoxFit.contain,
             ),
           ),

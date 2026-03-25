@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/auth_user.dart' as local;
@@ -148,6 +149,15 @@ class SessionManager extends ChangeNotifier {
     return isUnauthorized;
   }
 
+  /// Schedules notifyListeners() for the next frame to avoid triggering
+  /// GoRouter redirects during the widget build/disposal phase, which
+  /// causes "_dependents.isEmpty is not true" assertions.
+  void _safeNotifyListeners() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+  }
+
   @override
   void dispose() {
     _authSubscription?.cancel();
@@ -159,22 +169,28 @@ class SessionManager extends ChangeNotifier {
       final authEvent = event.event;
       if (authEvent == AuthChangeEvent.signedOut) {
         _updateFromSession(null);
-        notifyListeners();
+        _safeNotifyListeners();
         return;
       }
 
       if (authEvent == AuthChangeEvent.passwordRecovery) {
         _updateFromSession(event.session);
         _pendingPasswordRecovery = true;
-        notifyListeners();
+        _safeNotifyListeners();
         return;
       }
 
       if (authEvent == AuthChangeEvent.signedIn ||
           authEvent == AuthChangeEvent.tokenRefreshed ||
           authEvent == AuthChangeEvent.userUpdated) {
+        // Skip if setAuthenticatedUser() already handled this user
+        // to avoid duplicate _fetchUserRole calls and race conditions
+        final sessionUserId = event.session?.user.id;
+        if (_currentUser != null && _currentUser!.id == sessionUserId) {
+          return;
+        }
         _updateFromSession(event.session);
-        notifyListeners();
+        _safeNotifyListeners();
       }
     });
   }
@@ -210,7 +226,8 @@ class SessionManager extends ChangeNotifier {
           .eq('id', userId)
           .maybeSingle();
 
-      if (response != null && _currentUser != null) {
+      // Guard: only update if this user is still the current user
+      if (response != null && _currentUser != null && _currentUser!.id == userId) {
         final isActive = response['is_active'] as bool? ?? true;
 
         if (!isActive) {
@@ -222,7 +239,7 @@ class SessionManager extends ChangeNotifier {
 
         final role = UserRole.fromString(response['role'] as String?);
         _currentUser = _currentUser!.copyWith(role: role);
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (error) {
       debugPrint('SessionManager: erro ao buscar role do usuario: $error');
