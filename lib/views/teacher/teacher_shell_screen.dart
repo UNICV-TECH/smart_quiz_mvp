@@ -62,8 +62,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
     return Scaffold(
       body: Column(
         children: [
-          if (isAdminViewing)
-            _buildAdminBanner(context, sessionManager),
+          if (isAdminViewing) _buildAdminBanner(context, sessionManager),
           Expanded(
             child: Row(
               children: [
@@ -200,7 +199,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
           SizedBox(
             height: 200,
             child: Image.asset(
-              'assets/images/SmartQuiz.png',
+              'assets/images/SmartQuiz_branca.png',
               width: 500,
               height: 500,
               fit: BoxFit.contain,

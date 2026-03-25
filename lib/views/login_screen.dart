@@ -112,9 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 42),
                           Center(
                             child: Image.asset(
-                              'assets/images/SmartQuiz.png',
-                              width: 400,
-                              height: 400,
+                              'assets/images/SmartQuiz_branca.png',
+                              width: 300,
+                              height: 150,
                               fit: BoxFit.contain,
                             ),
                           ),

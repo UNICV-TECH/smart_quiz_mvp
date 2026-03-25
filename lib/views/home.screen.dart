@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             Center(
                               child: Image.asset(
-                                'assets/images/SmartQuiz.png',
+                                'assets/images/SmartQuiz_branca.png',
                                 width: 220,
                                 fit: BoxFit.contain,
                               ),
@@ -171,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 child: Text(
                                   firstName != null
                                       ? 'Olá, $firstName!'
-                                      
                                       : 'Olá!',
                                   style: const TextStyle(
                                     fontSize: 26,
