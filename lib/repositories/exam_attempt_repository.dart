@@ -7,6 +7,7 @@ abstract class ExamAttemptRepository {
     required String examId,
     required String courseId,
     required int questionCount,
+    bool isRetake = false,
   });
 
   Future<void> insertResponses({

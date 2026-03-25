@@ -232,34 +232,70 @@ class _ExamDetailViewBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color:
-                            performanceColor.withAlpha((0.12 * 255).round()),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            performanceIcon,
-                            size: 14,
-                            color: performanceColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _getPerformanceBadge(percentage),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: performanceColor,
-                              fontFamily: 'Poppins',
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        if (attempt.isRetake)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.indigo
+                                  .withAlpha((0.12 * 255).round()),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.replay,
+                                  size: 12,
+                                  color: AppColors.indigo,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  'Prova refeita',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.indigo,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: performanceColor
+                                .withAlpha((0.12 * 255).round()),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                performanceIcon,
+                                size: 14,
+                                color: performanceColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _getPerformanceBadge(percentage),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: performanceColor,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text(

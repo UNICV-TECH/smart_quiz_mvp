@@ -21,6 +21,7 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
     required String courseId,
     required int questionCount,
     required DateTime startedAt,
+    bool isRetake = false,
   }) async {
     createAttemptCalls += 1;
     final attemptId = 'attempt_$createAttemptCalls';

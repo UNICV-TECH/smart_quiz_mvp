@@ -65,6 +65,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
       (widget.results['gamificationPreviousPoints'] as num?)?.toDouble() ?? 0;
   bool get _gamificationDidImprove =>
       widget.results['gamificationDidImprove'] as bool? ?? false;
+  bool get _isRetake => widget.results['isRetake'] as bool? ?? false;
 
   @override
   void initState() {
@@ -258,6 +259,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       didImprove: _gamificationDidImprove,
                       gamificationSaved: _gamificationSaved,
                       questionCount: _totalQuestions,
+                      isRetake: _isRetake,
                     ),
                   ),
                 ),
@@ -637,6 +639,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
     required this.didImprove,
     required this.gamificationSaved,
     required this.questionCount,
+    this.isRetake = false,
   });
 
   final double basePoints;
@@ -648,6 +651,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
   final bool didImprove;
   final bool gamificationSaved;
   final int questionCount;
+  final bool isRetake;
 
   @override
   Widget build(BuildContext context) {
@@ -659,6 +663,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
       hasTimeBonus: hasTimeBonus,
       didImprove: didImprove,
       gamificationSaved: gamificationSaved,
+      isRetake: isRetake,
     );
 
     final recordTimeMinutes =

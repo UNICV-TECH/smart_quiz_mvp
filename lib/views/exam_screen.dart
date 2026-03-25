@@ -619,11 +619,14 @@ class _ExamScreenState extends State<ExamScreen> {
   Future<void> _submitExam(ExamViewModel viewModel) async {
     try {
       final results = await viewModel.finalize();
+      results['isRetake'] = viewModel.isRetake;
 
       if (!mounted) return;
 
       // Gamification persistence (non-blocking)
-      final gamRepo = context.read<GamificationRepository?>();
+      // Retakes do NOT award ranking points — only history is saved
+      final gamRepo =
+          viewModel.isRetake ? null : context.read<GamificationRepository?>();
       if (gamRepo != null) {
         try {
           final season = await gamRepo.getOrCreateActiveSeason();

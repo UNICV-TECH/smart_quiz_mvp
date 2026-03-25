@@ -69,7 +69,11 @@ class GamificationCalculator {
     required bool hasTimeBonus,
     required bool didImprove,
     bool gamificationSaved = true,
+    bool isRetake = false,
   }) {
+    if (isRetake) {
+      return 'Prova refeita! Pontos não contabilizados no ranking.';
+    }
     if (!gamificationSaved) {
       return 'Seus pontos não puderam ser salvos. Tente novamente mais tarde.';
     }

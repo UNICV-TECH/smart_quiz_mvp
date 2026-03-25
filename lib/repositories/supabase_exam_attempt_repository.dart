@@ -17,6 +17,7 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
     required String examId,
     required String courseId,
     required int questionCount,
+    bool isRetake = false,
   }) async {
     try {
       final response = await _client
@@ -27,6 +28,7 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
             'course_id': courseId,
             'question_count': questionCount,
             'status': 'in_progress',
+            'is_retake': isRetake,
           })
           .select()
           .single();
@@ -129,6 +131,7 @@ class SupabaseExamAttemptRepository implements ExamAttemptRepository {
                 totalScore: (json['total_score'] as num?)?.toDouble(),
                 percentageScore: (json['percentage_score'] as num?)?.toDouble(),
                 status: json['status'] as String,
+                isRetake: json['is_retake'] as bool? ?? false,
               ))
           .toList();
 

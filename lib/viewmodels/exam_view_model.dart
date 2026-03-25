@@ -109,6 +109,7 @@ class ExamViewModel extends ChangeNotifier {
       courseId: courseId,
       questionCount: questionCount,
       startedAt: startTime,
+      isRetake: isRetake,
     );
     // Só atualizar _startedAt se ainda não estava setado
     _startedAt ??= startTime;
@@ -549,6 +550,7 @@ abstract class ExamRemoteDataSource {
     required String courseId,
     required int questionCount,
     required DateTime startedAt,
+    bool isRetake = false,
   });
 
   Future<void> ensureUserRecord(String userId);
@@ -627,6 +629,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
     required String courseId,
     required int questionCount,
     required DateTime startedAt,
+    bool isRetake = false,
   }) async {
     await _ensureUserRecord(userId);
 
@@ -639,6 +642,7 @@ class SupabaseExamDataSource implements ExamRemoteDataSource {
           'question_count': questionCount,
           'started_at': startedAt.toIso8601String(),
           'status': 'in_progress',
+          'is_retake': isRetake,
         })
         .select('id')
         .single());
