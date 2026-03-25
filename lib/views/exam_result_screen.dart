@@ -6,7 +6,6 @@ import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_scoreCard.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/components/result_question_tile.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
