@@ -46,5 +46,13 @@ class SupabaseOptions {
     return '';
   }
 
+  static String get appBaseUrl {
+    const defineUrl = String.fromEnvironment('APP_BASE_URL');
+    if (defineUrl.isNotEmpty) {
+      return defineUrl;
+    }
+    return 'https://smart-quiz-mvp.vercel.app';
+  }
+
   static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 }

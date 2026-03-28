@@ -18,7 +18,7 @@ O projeto conecta acadêmicos e professores em um processo colaborativo, transfo
 ## Links
 
 - **Protótipo (Figma):** [Acessar protótipo](https://www.figma.com/design/GidS299VRzBeauUL8XFqjD/UniCV-Tech---Vers%C3%A3o-Principal?node-id=82-26&p=f&t=gxetva9GrY8AXUmv-0)
-- **Deploy (Vercel):** [smart-quiz-mvp.vercel.app](https://smart-quiz-mvp.vercel.app/)
+- **Deploy (Vercel):** [smartquiz.unicvtech.com.br](https://smartquiz.unicvtech.com.br/)
 - **Documentação Completa:** [`docs/DOCUMENTACAO_COMPLETA.md`](docs/DOCUMENTACAO_COMPLETA.md)
 
 ---

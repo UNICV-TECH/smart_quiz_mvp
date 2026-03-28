@@ -55,3 +55,5 @@ build/*/_composite.stamp
 build/*/gen_dart_plugin_registrant.stamp
 build/*/gen_localizations.stamp
 .vscode/dev.json
+.vercel
+.env*.local

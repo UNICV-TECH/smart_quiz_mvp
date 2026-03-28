@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../constants/supabase_options.dart';
 import 'auth_repository.dart';
 import 'auth_repository_types.dart';
 
@@ -95,7 +96,7 @@ class SupabaseAuthRepository implements AuthRepository {
 
       await _client.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'https://smart-quiz-mvp.vercel.app/',
+        redirectTo: '${SupabaseOptions.appBaseUrl}/reset-password/confirm',
       );
     } on AuthRepositoryException {
       rethrow;
