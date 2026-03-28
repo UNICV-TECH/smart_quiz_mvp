@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -r \"total_score\\\\|percentage_score\\\\|update_at\" /c/Users/debor/Desktop/Faculdade/unicvtec/unicvtec/smart_quiz_mvp/supabase/migrations/*.sql)"
-    ]
-  }
-}

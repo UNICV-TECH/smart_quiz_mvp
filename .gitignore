@@ -57,3 +57,9 @@ build/*/gen_localizations.stamp
 .vscode/dev.json
 .vercel
 .env*.local
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Supabase CLI temp files
+supabase/.temp/
