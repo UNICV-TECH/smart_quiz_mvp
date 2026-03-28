@@ -40,11 +40,21 @@ class _DefaultAccordionState extends State<DefaultAccordion> {
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(
           dividerColor: AppColors.transparent,
+          splashColor: AppColors.green.withValues(alpha: 0.08),
+          highlightColor: AppColors.green.withValues(alpha: 0.05),
+          hoverColor: AppColors.green.withValues(alpha: 0.04),
         ),
         child: ExpansionTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           leading: widget.icon != null

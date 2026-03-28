@@ -14,9 +14,9 @@ class AvatarWithMedal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final medalSize = size * 0.85;
+    final medalSize = size * 1.0;
     // Extra space so the medal overlay is not clipped by parent
-    final totalSize = medalAsset != null ? size + medalSize * 0.3 : size;
+    final totalSize = medalAsset != null ? size + medalSize * 0.35 : size;
     return SizedBox(
       width: totalSize,
       height: totalSize,
@@ -60,16 +60,21 @@ class AvatarWithMedal extends StatelessWidget {
           // Medal overlay (bottom-right)
           if (medalAsset != null)
             Positioned(
-              bottom: -4,
-              right: -4,
+              bottom: -6,
+              right: -6,
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x30000000),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+                      color: const Color(0x40000000),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                    BoxShadow(
+                      color: const Color(0x20FFD54F),
+                      blurRadius: 8,
+                      spreadRadius: 1,
                     ),
                   ],
                 ),

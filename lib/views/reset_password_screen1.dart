@@ -50,9 +50,8 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
     // Limite local de tentativas: 3 tentativas por hora por e-mail
     final now = DateTime.now();
     _attempts.putIfAbsent(email, () => []);
-    _attempts[email] = _attempts[email]!
-        .where((t) => now.difference(t).inHours < 1)
-        .toList();
+    _attempts[email] =
+        _attempts[email]!.where((t) => now.difference(t).inHours < 1).toList();
 
     if (_attempts[email]!.length >= 3) {
       setState(() {
@@ -142,9 +141,9 @@ class _ResetPasswordScreen1State extends State<ResetPasswordScreen1> {
                       // Logo centralizado
                       Center(
                         child: Image.asset(
-                          'assets/images/logo.webp',
-                          width: 256,
-                          height: 93,
+                          'assets/images/SmartQuiz_branca.png',
+                          width: 300,
+                          height: 150,
                           fit: BoxFit.contain,
                         ),
                       ),

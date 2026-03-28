@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:unicv_tech_mvp/models/exam_history.dart';
@@ -6,7 +7,6 @@ import 'package:unicv_tech_mvp/ui/components/default_radio_group.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_forward.dart';
 import 'package:unicv_tech_mvp/ui/components/default_question_navigation.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_exit_confirmation_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
@@ -37,10 +37,13 @@ class ExamScreen extends StatefulWidget {
 class _ExamScreenState extends State<ExamScreen> {
   int currentQuestionIndex = 0;
   final ScrollController _questionScrollController = ScrollController();
+  bool _showTimer = false;
+  final Stopwatch _stopwatch = Stopwatch();
 
   @override
   void initState() {
     super.initState();
+    _stopwatch.start();
     WebNavigationGuard.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = context.read<ExamViewModel>();
@@ -55,6 +58,7 @@ class _ExamScreenState extends State<ExamScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ExamViewModel>(
@@ -67,9 +71,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -90,9 +94,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -150,9 +154,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -221,9 +225,9 @@ class _ExamScreenState extends State<ExamScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
-                    Color(0xFFE8F5ED),
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
+                    AppColors.bgLightGreen,
                   ],
                 ),
               ),
@@ -257,14 +261,16 @@ class _ExamScreenState extends State<ExamScreen> {
                                 .map((ac) => ac.choiceText)
                                 .toList(),
                             selectedOption: _getSelectedOptionLetter(
-                                currentAnswer, currentExamQuestion.answerChoices),
+                                currentAnswer,
+                                currentExamQuestion.answerChoices),
                             onChanged: (option) {
                               // Mapear a letra selecionada (A, B, C, D) para o índice e então para o choiceKey real
-                              final selectedIndex =
-                                  option.codeUnitAt(0) - 65; // A=0, B=1, C=2, D=3
+                              final selectedIndex = option.codeUnitAt(0) -
+                                  65; // A=0, B=1, C=2, D=3
                               if (selectedIndex >= 0 &&
                                   selectedIndex <
-                                      currentExamQuestion.answerChoices.length) {
+                                      currentExamQuestion
+                                          .answerChoices.length) {
                                 final realChoiceKey = currentExamQuestion
                                     .answerChoices[selectedIndex].choiceKey;
                                 viewModel.selectAnswer(
@@ -295,23 +301,65 @@ class _ExamScreenState extends State<ExamScreen> {
   Widget _buildAppBar(double horizontalPadding, ExamViewModel viewModel) {
     return SafeArea(
       bottom: false,
-      child: Container(
-        padding:
-            EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8.0),
-        child: Row(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding, vertical: 4),
+        child: Column(
           children: [
-            DefaultButtonArrowBack(
-              onPressed: () => _showExitConfirmation(viewModel),
-            ),
-            Expanded(
-              child: Center(
-                child: logo.AppLogoWidget.asset(
-                  size: logo.AppLogoSize.small,
-                  logoPath: 'assets/images/logo_color.png',
+            Row(
+              children: [
+                DefaultButtonArrowBack(
+                  onPressed: () => _showExitConfirmation(viewModel),
                 ),
-              ),
+                Expanded(
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/SmartQuiz.png',
+                      width: 160,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                // Timer com olhinho para mostrar/ocultar
+                GestureDetector(
+                  onTap: () => setState(() => _showTimer = !_showTimer),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showTimer
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                          size: 18,
+                          color: AppColors.green,
+                        ),
+                        const SizedBox(width: 5),
+                        _showTimer
+                            ? _TimerText(
+                                stopwatch: _stopwatch,
+                              )
+                            : const Text(
+                                '--:--',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.green,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 40),
           ],
         ),
       ),
@@ -620,11 +668,14 @@ class _ExamScreenState extends State<ExamScreen> {
   Future<void> _submitExam(ExamViewModel viewModel) async {
     try {
       final results = await viewModel.finalize();
+      results['isRetake'] = viewModel.isRetake;
 
       if (!mounted) return;
 
       // Gamification persistence (non-blocking)
-      final gamRepo = context.read<GamificationRepository?>();
+      // Retakes do NOT award ranking points — only history is saved
+      final gamRepo =
+          viewModel.isRetake ? null : context.read<GamificationRepository?>();
       if (gamRepo != null) {
         try {
           final season = await gamRepo.getOrCreateActiveSeason();
@@ -645,22 +696,17 @@ class _ExamScreenState extends State<ExamScreen> {
             courseId: results['courseId'] as String,
             questionCount: results['totalQuestions'] as int,
             correctCount: results['correctCount'] as int,
-            percentageScore:
-                (results['percentageScore'] as num).toDouble(),
+            percentageScore: (results['percentageScore'] as num).toDouble(),
             durationSeconds: safeDuration,
-            basePoints:
-                (results['gamificationBasePoints'] as num).toDouble(),
-            timeBonus:
-                (results['gamificationTimeBonus'] as num).toDouble(),
-            totalPoints:
-                (results['gamificationTotalPoints'] as num).toDouble(),
+            basePoints: (results['gamificationBasePoints'] as num).toDouble(),
+            timeBonus: (results['gamificationTimeBonus'] as num).toDouble(),
+            totalPoints: (results['gamificationTotalPoints'] as num).toDouble(),
           );
           if (!mounted) return;
 
           results['gamificationAccumulatedPoints'] =
               saveResult.accumulatedPoints;
-          results['gamificationPreviousPoints'] =
-              saveResult.previousPoints;
+          results['gamificationPreviousPoints'] = saveResult.previousPoints;
           results['gamificationDidImprove'] = saveResult.didImprove;
           results['gamificationPointsSaved'] = saveResult.pointsSaved;
           results['gamificationSeasonName'] = season.name;
@@ -766,3 +812,48 @@ class _ExamScreenState extends State<ExamScreen> {
 }
 
 enum _SubmissionAction { retry, exit }
+
+class _TimerText extends StatefulWidget {
+  const _TimerText({required this.stopwatch});
+
+  final Stopwatch stopwatch;
+
+  @override
+  State<_TimerText> createState() => _TimerTextState();
+}
+
+class _TimerTextState extends State<_TimerText>
+    with SingleTickerProviderStateMixin {
+  late final Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker((_) {
+      if (mounted) setState(() {});
+    });
+    _ticker.start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final elapsed = widget.stopwatch.elapsed;
+    final minutes = elapsed.inMinutes.toString().padLeft(2, '0');
+    final seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
+    return Text(
+      '$minutes:$seconds',
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppColors.green,
+        fontFamily: 'Poppins',
+      ),
+    );
+  }
+}

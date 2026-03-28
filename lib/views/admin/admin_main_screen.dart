@@ -60,20 +60,21 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     switch (_selectedIndex) {
       case 0:
         return ChangeNotifierProvider(
-          create: (_) => AdminDashboardViewModel(adminRepository: adminRepo)
-            ..loadStats(),
+          create: (_) =>
+              AdminDashboardViewModel(adminRepository: adminRepo)..loadStats(),
           child: const AdminDashboardScreen(),
         );
       case 1:
         return ChangeNotifierProvider(
-          create: (_) => AdminUserManagementViewModel(adminRepository: adminRepo)
-            ..loadUsers(),
+          create: (_) =>
+              AdminUserManagementViewModel(adminRepository: adminRepo)
+                ..loadUsers(),
           child: const AdminUserListScreen(),
         );
       case 2:
         return ChangeNotifierProvider(
-          create: (_) => AdminContentViewModel(adminRepository: adminRepo)
-            ..loadContent(),
+          create: (_) =>
+              AdminContentViewModel(adminRepository: adminRepo)..loadContent(),
           child: const AdminContentScreen(),
         );
       default:
@@ -169,9 +170,10 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       child: Column(
         children: [
           SizedBox(
-            height: 72,
             child: Image.asset(
-              'assets/images/logo.webp',
+              'assets/images/SmartQuiz_branca.png',
+              width: 250,
+              height: 150,
               fit: BoxFit.contain,
             ),
           ),
@@ -233,7 +235,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                   title,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                     color: isSelected ? _goldColor : Colors.grey[800],
                   ),
                 ),

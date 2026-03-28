@@ -90,9 +90,9 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // Logo do app
                 Image.asset(
-                  'assets/images/logo.webp',
-                  width: 300,
-                  height: 300,
+                  'assets/images/SmartQuiz_branca.png',
+                  width: 380,
+                  height: 380,
                 ),
                 const SizedBox(height: 24)
               ],

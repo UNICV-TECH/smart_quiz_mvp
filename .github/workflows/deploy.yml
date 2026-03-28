@@ -86,17 +86,18 @@ jobs:
             --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
-      - name: Commit build files
+      - name: Deploy build files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add build/web -f
-          git diff --staged --quiet || git commit -m "chore: build web release [skip ci]"
+          # Salvar build gerado
+          cp -r build/web /tmp/web-build
+          # Descartar mudanças locais e sincronizar com remote
           git checkout -- .
           git clean -fd
-          git pull --rebase -X theirs || {
-            git checkout --theirs -- build/web/
-            git add build/web -f
-            GIT_EDITOR=true git rebase --continue
-          }
+          git pull --rebase origin main
+          # Restaurar build e commitar
+          cp -r /tmp/web-build build/web
+          git add build/web -f
+          git diff --staged --quiet || git commit -m "chore: build web release [skip ci]"
           git push

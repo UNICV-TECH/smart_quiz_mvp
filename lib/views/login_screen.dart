@@ -81,213 +81,216 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-      body: Stack(
-        children: [
-          // Imagem de fundo
-          Container(
-            width: size.width,
-            height: size.height,
-            decoration: const BoxDecoration(
-              color: AppColors.whiteBg,
-            ),
-            child: Image.asset(
-              'assets/images/fundo.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          // Conteúdo com scroll
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: size.height - MediaQuery.of(context).padding.top,
+          body: Stack(
+            children: [
+              // Imagem de fundo
+              Container(
+                width: size.width,
+                height: size.height,
+                decoration: const BoxDecoration(
+                  color: AppColors.whiteBg,
                 ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      // Logo a 42px do topo
-                      const SizedBox(height: 42),
-                      Center(
-                        child: Image.asset(
-                          'assets/images/logo.webp',
-                          width: 256,
-                          height: 93,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
+                child: Image.asset(
+                  'assets/images/fundo.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
 
-                      const Spacer(),
-
-                      // Container branco com formulário
-                      Container(
-                        width: size.width,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 26.0,
-                          vertical: 40.0,
-                        ),
-                        decoration: const BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(207),
+              // Conteúdo com scroll
+              SafeArea(
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight:
+                          size.height - MediaQuery.of(context).padding.top,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          // Logo a 42px do topo
+                          const SizedBox(height: 42),
+                          Center(
+                            child: Image.asset(
+                              'assets/images/SmartQuiz_branca.png',
+                              width: 300,
+                              height: 150,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                        ),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Título
-                              Center(
-                                child: Text(
-                                  AppStrings.loginTitle,
-                                  style: TextStyle(
-                                    color: AppColors.green,
-                                    fontSize: 40,
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+
+                          const Spacer(),
+
+                          // Container branco com formulário
+                          Container(
+                            width: size.width,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 26.0,
+                              vertical: 40.0,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(207),
                               ),
-
-                              const SizedBox(height: 30),
-
-                              // Campo E-mail
-                              ComponenteInput(
-                                controller: _emailController,
-                                labelText: AppStrings.emailLabel,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Informe seu e-mail';
-                                  }
-                                  final emailRegex =
-                                      RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                                  if (!emailRegex.hasMatch(value)) {
-                                    return 'Informe um e-mail válido';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // Campo Senha
-                              ComponentePasswordInput(
-                                controller: _passwordController,
-                                labelText: AppStrings.passwordLabel,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _handleLogin(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Informe sua senha';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Esqueceu a senha
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    context.go('/reset-password');
-                                  },
-                                  child: Text(
-                                    AppStrings.forgotPassword,
-                                    style: TextStyle(
-                                      color: AppColors.orange,
-                                      fontSize: 14,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 30),
-
-                              // Botão Login
-                              DefaultButtonOrange(
-                                texto: viewModel.isLoading
-                                    ? 'Entrando...'
-                                    : AppStrings.loginButton,
-                                onPressed:
-                                    viewModel.isLoading ? null : _handleLogin,
-                                tipo: viewModel.isLoading
-                                    ? BotaoTipo.desabilitado
-                                    : BotaoTipo.primario,
-                              ),
-
-                              if (viewModel.errorMessage != null) ...[
-                                const SizedBox(height: 16),
-                                DefaultInlineMessage(
-                                  message: viewModel.errorMessage!,
-                                  severity: FeedbackSeverity.error,
-                                  onDismissed: viewModel.clearFeedback,
-                                ),
-                              ],
-
-                              if (viewModel.successMessage != null) ...[
-                                const SizedBox(height: 16),
-                                DefaultInlineMessage(
-                                  message: viewModel.successMessage!,
-                                  severity: FeedbackSeverity.success,
-                                  onDismissed: viewModel.clearFeedback,
-                                ),
-                              ],
-
-                              const SizedBox(height: 20),
-
-                              // Link para Cadastro
-                              Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      AppStrings.dontHaveAccount,
+                            ),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Título
+                                  Center(
+                                    child: Text(
+                                      AppStrings.loginTitle,
                                       style: TextStyle(
-                                        color: AppColors.secondaryDark,
-                                        fontSize: 14,
-                                        fontFamily: 'Poppins',
+                                        color: AppColors.green,
+                                        fontSize: 40,
+                                        fontFamily: 'Open Sans',
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(width: 5),
-                                    GestureDetector(
+                                  ),
+
+                                  const SizedBox(height: 30),
+
+                                  // Campo E-mail
+                                  ComponenteInput(
+                                    controller: _emailController,
+                                    labelText: AppStrings.emailLabel,
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Informe seu e-mail';
+                                      }
+                                      final emailRegex =
+                                          RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                                      if (!emailRegex.hasMatch(value)) {
+                                        return 'Informe um e-mail válido';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // Campo Senha
+                                  ComponentePasswordInput(
+                                    controller: _passwordController,
+                                    labelText: AppStrings.passwordLabel,
+                                    textInputAction: TextInputAction.done,
+                                    onFieldSubmitted: (_) => _handleLogin(),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Informe sua senha';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  // Esqueceu a senha
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: GestureDetector(
                                       onTap: () {
-                                        context.go('/signup');
+                                        context.go('/reset-password');
                                       },
                                       child: Text(
-                                        AppStrings.signupLink,
+                                        AppStrings.forgotPassword,
                                         style: TextStyle(
                                           color: AppColors.orange,
                                           fontSize: 14,
                                           fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
 
-                              const SizedBox(height: 20),
-                            ],
+                                  const SizedBox(height: 30),
+
+                                  // Botão Login
+                                  DefaultButtonOrange(
+                                    texto: viewModel.isLoading
+                                        ? 'Entrando...'
+                                        : AppStrings.loginButton,
+                                    onPressed: viewModel.isLoading
+                                        ? null
+                                        : _handleLogin,
+                                    tipo: viewModel.isLoading
+                                        ? BotaoTipo.desabilitado
+                                        : BotaoTipo.primario,
+                                  ),
+
+                                  if (viewModel.errorMessage != null) ...[
+                                    const SizedBox(height: 16),
+                                    DefaultInlineMessage(
+                                      message: viewModel.errorMessage!,
+                                      severity: FeedbackSeverity.error,
+                                      onDismissed: viewModel.clearFeedback,
+                                    ),
+                                  ],
+
+                                  if (viewModel.successMessage != null) ...[
+                                    const SizedBox(height: 16),
+                                    DefaultInlineMessage(
+                                      message: viewModel.successMessage!,
+                                      severity: FeedbackSeverity.success,
+                                      onDismissed: viewModel.clearFeedback,
+                                    ),
+                                  ],
+
+                                  const SizedBox(height: 20),
+
+                                  // Link para Cadastro
+                                  Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          AppStrings.dontHaveAccount,
+                                          style: TextStyle(
+                                            color: AppColors.secondaryDark,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        GestureDetector(
+                                          onTap: () {
+                                            context.go('/signup');
+                                          },
+                                          child: Text(
+                                            AppStrings.signupLink,
+                                            style: TextStyle(
+                                              color: AppColors.orange,
+                                              fontSize: 14,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      ),
+        ),
       ),
     );
   }

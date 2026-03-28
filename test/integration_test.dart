@@ -35,6 +35,7 @@ class FakeExamDataSource implements ExamRemoteDataSource {
     required String courseId,
     required int questionCount,
     required DateTime startedAt,
+    bool isRetake = false,
   }) async {
     if (throwOnCreate) {
       throw Exception('Database error');

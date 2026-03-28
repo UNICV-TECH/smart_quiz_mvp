@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unicv_tech_mvp/models/gamification_level.dart';
@@ -6,11 +7,9 @@ import 'package:unicv_tech_mvp/ui/components/default_button_arrow_back.dart';
 import 'package:unicv_tech_mvp/ui/components/default_button_orange.dart';
 import 'package:unicv_tech_mvp/ui/components/default_feedback_dialog.dart';
 import 'package:unicv_tech_mvp/ui/components/default_scoreCard.dart';
-import 'package:unicv_tech_mvp/ui/components/default_Logo.dart' as logo;
 import 'package:unicv_tech_mvp/ui/components/feedback_severity.dart';
 import 'package:unicv_tech_mvp/ui/components/result_question_tile.dart';
 import 'package:unicv_tech_mvp/ui/theme/app_color.dart';
-import 'package:unicv_tech_mvp/ui/theme/string_text.dart';
 
 class ExamResultScreen extends StatefulWidget {
   const ExamResultScreen({
@@ -26,6 +25,7 @@ class ExamResultScreen extends StatefulWidget {
 
 class _ExamResultScreenState extends State<ExamResultScreen> {
   final ScrollController _scrollController = ScrollController();
+  late final ConfettiController _confettiController;
   late final List<Map<String, dynamic>> _questionsBreakdown;
   late final List<GlobalKey> _tileKeys;
 
@@ -66,10 +66,16 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
       (widget.results['gamificationPreviousPoints'] as num?)?.toDouble() ?? 0;
   bool get _gamificationDidImprove =>
       widget.results['gamificationDidImprove'] as bool? ?? false;
+  bool get _isRetake => widget.results['isRetake'] as bool? ?? false;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(
+      duration: _percentageScore >= 70
+          ? const Duration(seconds: 3)
+          : const Duration(seconds: 1),
+    );
     _questionsBreakdown = List<Map<String, dynamic>>.from(
       (widget.results['questionsBreakdown'] as List?) ?? const [],
     );
@@ -83,10 +89,16 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
     debugPrint('durationSeconds raw: ${widget.results['durationSeconds']}');
     debugPrint('durationSeconds processed: $_durationSeconds');
     debugPrint('duration formatted: ${_formatDuration(_durationSeconds)}');
+
+    // Disparar confete apos build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _confettiController.play();
+    });
   }
 
   @override
   void dispose() {
+    _confettiController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -157,83 +169,66 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFE8F5ED),
-              Color(0xFFE8F5ED),
-              Color(0xFFF4F9F1),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: Row(
-                    children: [
-                      DefaultButtonArrowBack(
-                        onPressed: () => context.go('/home'),
+      backgroundColor: AppColors.pageBg,
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Header verde compacto
+                SliverToBoxAdapter(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.headerGradientStart,
+                          AppColors.headerGradientMid,
+                          AppColors.headerGradientEnd,
+                        ],
                       ),
-                      Expanded(
-                        child: Center(
-                          child: logo.AppLogoWidget.asset(
-                            size: logo.AppLogoSize.small,
-                            logoPath: 'assets/images/logo_color.png',
-                          ),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                DefaultButtonArrowBack(
+                                  onPressed: () => context.go('/home'),
+                                  iconColor: Colors.white,
+                                ),
+                                const Spacer(),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: _SummaryCard(
+                                percentageScore: _percentageScore,
+                                correctCount: _correctCount,
+                                incorrectCount: _incorrectCount,
+                                unansweredCount: _unansweredCount,
+                                totalQuestions: _totalQuestions,
+                                durationLabel: _formatDuration(_durationSeconds),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 40),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        AppText(
-                          'Resultado do simulado',
-                          style: AppTextStyle.titleSmall,
-                          color: AppColors.primaryDark,
-                        ),
-                        SizedBox(height: 4),
-                        AppText(
-                          'Visualize seu desempenho e revise as questões',
-                          style: AppTextStyle.subtitleMedium,
-                          color: AppColors.secondaryDark,
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _SummaryCard(
-                    percentageScore: _percentageScore,
-                    correctCount: _correctCount,
-                    incorrectCount: _incorrectCount,
-                    unansweredCount: _unansweredCount,
-                    totalQuestions: _totalQuestions,
-                    durationLabel: _formatDuration(_durationSeconds),
-                  ),
-                ),
-              ),
               // Gamification: Level Up Card
               if (_gamificationSaved) ...[
                 SliverToBoxAdapter(
@@ -262,6 +257,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       didImprove: _gamificationDidImprove,
                       gamificationSaved: _gamificationSaved,
                       questionCount: _totalQuestions,
+                      isRetake: _isRetake,
                     ),
                   ),
                 ),
@@ -288,10 +284,8 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       (context, index) {
                         final item = _questionsBreakdown[index];
                         final isCorrect = item['isCorrect'] as bool? ?? false;
-                        final isAnswered =
-                            item['isAnswered'] as bool? ?? false;
-                        final isLast =
-                            index == _questionsBreakdown.length - 1;
+                        final isAnswered = item['isAnswered'] as bool? ?? false;
+                        final isLast = index == _questionsBreakdown.length - 1;
                         return Padding(
                           padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
                           child: Container(
@@ -353,7 +347,36 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
               ),
             ],
           ),
-        ),
+          ),
+          // Confete overlay
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              numberOfParticles: _percentageScore >= 70 ? 30 : 10,
+              maxBlastForce: _percentageScore >= 70 ? 25 : 12,
+              minBlastForce: 5,
+              emissionFrequency: 0.05,
+              gravity: 0.15,
+              colors: _percentageScore >= 70
+                  ? const [
+                      AppColors.gold,
+                      AppColors.goldDark,
+                      AppColors.green1,
+                      AppColors.orangeDeep,
+                      AppColors.gamificationDark,
+                      AppColors.goldYellow,
+                    ]
+                  : const [
+                      AppColors.gamificationLight,
+                      AppColors.gamificationLighter,
+                      AppColors.greyShade400,
+                    ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -378,81 +401,53 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E7DE), width: 1.5),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 18,
-            offset: Offset(0, 12),
+    return Column(
+      children: [
+        // Porcentagem e frases centralizadas
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.2),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.5),
+              width: 2,
+            ),
           ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF6AB37E), Color(0xFF3F8B3A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '${percentageScore.toStringAsFixed(0)}%',
-                      maxLines: 1,
-                      softWrap: false,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Você acertou $correctCount de $totalQuestions questões',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppColors.primaryDark,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tempo total: $durationLabel',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.secondaryDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          alignment: Alignment.center,
+          child: Text(
+            '${percentageScore.toStringAsFixed(0)}%',
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Poppins',
+            ),
           ),
-          const SizedBox(height: 12),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Voce acertou $correctCount de $totalQuestions questoes',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tempo total: $durationLabel',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontFamily: 'Poppins',
+          ),
+        ),
+        const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -460,9 +455,9 @@ class _SummaryCard extends StatelessWidget {
                 child: DefaultScorecard(
                   icon: Icons.check_circle_outline,
                   score: correctCount,
-                  iconColor: const Color(0xFF3F8B3A),
-                  scoreColor: const Color(0xFF3F8B3A),
-                  backgroundColor: const Color(0xFFE5F4E3),
+                  iconColor: AppColors.scoreCorrect,
+                  scoreColor: AppColors.scoreCorrect,
+                  backgroundColor: AppColors.scoreBgCorrect,
                   height: 60,
                   iconSize: 24,
                   padding:
@@ -473,9 +468,9 @@ class _SummaryCard extends StatelessWidget {
                 child: DefaultScorecard(
                   icon: Icons.cancel_outlined,
                   score: incorrectCount,
-                  iconColor: const Color(0xFFD9503F),
-                  scoreColor: const Color(0xFFD9503F),
-                  backgroundColor: const Color(0xFFF9E5E3),
+                  iconColor: AppColors.scoreIncorrect,
+                  scoreColor: AppColors.scoreIncorrect,
+                  backgroundColor: AppColors.scoreBgIncorrect,
                   height: 60,
                   iconSize: 24,
                   padding:
@@ -488,7 +483,7 @@ class _SummaryCard extends StatelessWidget {
                   score: unansweredCount,
                   iconColor: AppColors.secondaryDark,
                   scoreColor: AppColors.secondaryDark,
-                  backgroundColor: const Color(0xFFF1F3F0),
+                  backgroundColor: AppColors.scoreBgUnanswered,
                   height: 60,
                   iconSize: 24,
                   padding:
@@ -498,7 +493,6 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
     );
   }
 }
@@ -569,15 +563,15 @@ class _LevelUpCardState extends State<_LevelUpCard>
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFFF8E1), Color(0xFFFFF3E0)],
+              colors: [AppColors.goldBgStart, AppColors.goldBgEnd],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFFFD54F), width: 2),
+            border: Border.all(color: AppColors.goldLight, width: 2),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x30FFD54F),
+                color: AppColors.goldShadow,
                 blurRadius: 16,
                 offset: Offset(0, 6),
               ),
@@ -587,7 +581,7 @@ class _LevelUpCardState extends State<_LevelUpCard>
             children: [
               const Icon(
                 Icons.emoji_events,
-                color: Color(0xFFFFA000),
+                color: AppColors.goldDark,
                 size: 52,
               ),
               const SizedBox(height: 12),
@@ -597,7 +591,7 @@ class _LevelUpCardState extends State<_LevelUpCard>
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF5D4037),
+                  color: AppColors.levelUpBrown,
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -607,7 +601,7 @@ class _LevelUpCardState extends State<_LevelUpCard>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x30FFD54F),
+                      color: AppColors.goldShadow,
                       blurRadius: 16,
                       offset: Offset(0, 4),
                     ),
@@ -620,7 +614,7 @@ class _LevelUpCardState extends State<_LevelUpCard>
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.military_tech,
                     size: 120,
-                    color: Color(0xFFFFA000),
+                    color: AppColors.goldDark,
                   ),
                 ),
               ),
@@ -643,6 +637,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
     required this.didImprove,
     required this.gamificationSaved,
     required this.questionCount,
+    this.isRetake = false,
   });
 
   final double basePoints;
@@ -654,6 +649,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
   final bool didImprove;
   final bool gamificationSaved;
   final int questionCount;
+  final bool isRetake;
 
   @override
   Widget build(BuildContext context) {
@@ -665,6 +661,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
       hasTimeBonus: hasTimeBonus,
       didImprove: didImprove,
       gamificationSaved: gamificationSaved,
+      isRetake: isRetake,
     );
 
     final recordTimeMinutes =
@@ -673,9 +670,9 @@ class _GamificationFeedbackCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8F5ED),
+        color: AppColors.bgLightGreen,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
+        border: Border.all(color: AppColors.gamificationBorder, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,7 +680,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
           // Motivational message
           Row(
             children: [
-              const Icon(Icons.star, color: Color(0xFFFFA000), size: 24),
+              const Icon(Icons.star, color: AppColors.goldDark, size: 24),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -691,7 +688,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2E7D32),
+                    color: AppColors.gamificationDark,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -721,13 +718,13 @@ class _GamificationFeedbackCard extends StatelessWidget {
                   'Complete em menos de ${recordTimeMinutes.toStringAsFixed(0)} min para ganhar bônus!',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF558B2F),
+                    color: AppColors.gamificationOlive,
                     fontFamily: 'Poppins',
                     fontStyle: FontStyle.italic,
                   ),
                 ),
               ),
-            const Divider(height: 20, color: Color(0xFFC8E6C9)),
+            const Divider(height: 20, color: AppColors.gamificationBorder),
             _buildPointRow(
               'Total ganho',
               '+${totalPoints.toStringAsFixed(1)} pts',
@@ -746,7 +743,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x18000000),
+                        color: AppColors.shadowDark,
                         blurRadius: 6,
                         offset: Offset(0, 2),
                       ),
@@ -759,7 +756,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.military_tech,
                       size: 56,
-                      color: Color(0xFF4CAF50),
+                      color: AppColors.green1,
                     ),
                   ),
                 ),
@@ -773,7 +770,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF2E7D32),
+                          color: AppColors.gamificationDark,
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -782,7 +779,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                         level.pointsLabel(accumulatedPoints),
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF558B2F),
+                          color: AppColors.gamificationOlive,
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -797,7 +794,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: level.progressInLevel(accumulatedPoints),
                 minHeight: 10,
-                backgroundColor: const Color(0xFFC8E6C9),
+                backgroundColor: AppColors.gamificationBorder,
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(AppColors.green),
               ),
@@ -823,7 +820,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
             icon,
             size: 18,
             color:
-                highlight ? const Color(0xFFFFA000) : const Color(0xFF4CAF50),
+                highlight ? AppColors.goldDark : AppColors.green1,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -832,7 +829,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
-                color: const Color(0xFF2E7D32),
+                color: AppColors.gamificationDark,
                 fontFamily: 'Poppins',
               ),
             ),
@@ -842,9 +839,8 @@ class _GamificationFeedbackCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: highlight
-                  ? const Color(0xFFFFA000)
-                  : const Color(0xFF2E7D32),
+              color:
+                  highlight ? AppColors.goldDark : AppColors.gamificationDark,
               fontFamily: 'Poppins',
             ),
           ),

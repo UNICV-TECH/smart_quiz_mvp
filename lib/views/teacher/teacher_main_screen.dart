@@ -61,8 +61,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     return Scaffold(
       body: Column(
         children: [
-          if (_isAdmin)
-            _buildAdminReturnBanner(),
+          if (_isAdmin) _buildAdminReturnBanner(),
           Expanded(
             child: Row(
               children: [
@@ -186,10 +185,9 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
       ),
     );
   }
-
   Widget _buildMenuHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       decoration: const BoxDecoration(
         color: Color(0xFF2E7D32),
         borderRadius: BorderRadius.only(
@@ -200,9 +198,10 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
-            height: 72,
             child: Image.asset(
-              'assets/images/logo.webp',
+              'assets/images/SmartQuiz_branca.png',
+              width: 250,
+              height: 150,
               fit: BoxFit.contain,
             ),
           ),

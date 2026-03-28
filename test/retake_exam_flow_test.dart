@@ -21,6 +21,7 @@ class _FakeExamDataSource implements ExamRemoteDataSource {
     required String courseId,
     required int questionCount,
     required DateTime startedAt,
+    bool isRetake = false,
   }) async {
     createAttemptCalls += 1;
     final attemptId = 'attempt_$createAttemptCalls';
@@ -286,10 +287,17 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      // Use pump with duration instead of pumpAndSettle because
+      // ConfettiWidget has a continuous animation that never settles
+      await tester.pump(const Duration(seconds: 1));
 
-      await tester.tap(find.text('Refazer prova'));
-      await tester.pumpAndSettle();
+      // Ensure the button is visible (may need scrolling on smaller viewports)
+      final retakeButton = find.text('Refazer prova');
+      await tester.ensureVisible(retakeButton);
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(retakeButton);
+      await tester.pump(const Duration(seconds: 1));
 
       expect(navigatedPath, isNotNull);
       final uri = Uri.parse(navigatedPath!);

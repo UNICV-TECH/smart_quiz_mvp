@@ -80,8 +80,66 @@ class AppColors {
 
   static const fosco = Color.fromRGBO(0, 0, 0, 0.2);
 
-  //navbar 
+  //navbar
   static const greenNavBar = Color(0xFF38553A);
 
+  // ── Cores das telas gamificadas ──────────────────────────
 
+  // Fundo de pagina
+  static const Color pageBg = Color(0xFFF5F7F3);
+
+  // Header gradiente verde
+  static const Color headerGradientStart = Color(0xFF2F4A2B);
+  static const Color headerGradientMid = Color(0xFF3B5C34);
+  static const Color headerGradientEnd = Color(0xFF4D7B58);
+
+  // Fundo verde claro (exam screen)
+  static const Color bgLightGreen = Color(0xFFE8F5ED);
+
+  // Verdes de gamificacao
+  static const Color gamificationDark = Color(0xFF2E7D32);
+  static const Color gamificationOlive = Color(0xFF558B2F);
+  static const Color gamificationLight = Color(0xFF81C784);
+  static const Color gamificationLighter = Color(0xFFA5D6A7);
+  static const Color gamificationBright = Color(0xFF66BB6A);
+  static const Color gamificationBorder = Color(0xFFC8E6C9);
+  static const Color gamificationBgLight = Color(0xFFE8F5E9);
+  static const Color gamificationBgPale = Color(0xFFF1F8E9);
+
+  // Resultado - scorecards
+  static const Color scoreCorrect = Color(0xFF3F8B3A);
+  static const Color scoreBgCorrect = Color(0xFFE5F4E3);
+  static const Color scoreIncorrect = Color(0xFFD9503F);
+  static const Color scoreBgIncorrect = Color(0xFFF9E5E3);
+  static const Color scoreBgUnanswered = Color(0xFFF1F3F0);
+
+  // Dourado / level up
+  static const Color gold = Color(0xFFFFD700);
+  static const Color goldDark = Color(0xFFFFA000);
+  static const Color goldLight = Color(0xFFFFD54F);
+  static const Color goldYellow = Color(0xFFFFEB3B);
+  static const Color goldBgStart = Color(0xFFFFF8E1);
+  static const Color goldBgEnd = Color(0xFFFFF3E0);
+  static const Color goldShadow = Color(0x30FFD54F);
+  static const Color levelUpBrown = Color(0xFF5D4037);
+  static const Color orangeDeep = Color(0xFFFF6F00);
+
+  // Stats cards (perfil)
+  static const Color statGold = Color(0xFFFFB300);
+  static const Color statBlue = Color(0xFF42A5F5);
+  static const Color statBgBlue = Color(0xFFE3F2FD);
+
+  // Texto
+  static const Color textDark = Color(0xFF2E2E2E);
+  static const Color textMediumGrey = Color(0xFF888888);
+  static const Color textSubtle = Color(0xFF999999);
+  static const Color textGrey = Color(0xFF9E9E9E);
+  static const Color borderLight = Color(0xFFE8E8E8);
+
+  // Sombras
+  static const Color shadowLight = Color(0x0D000000);
+  static const Color shadowMedium = Color(0x0A000000);
+  static const Color shadowSmall = Color(0x08000000);
+  static const Color shadowDark = Color(0x18000000);
+  static const Color shadowGreen = Color(0x404CAF50);
 }

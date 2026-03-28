@@ -58,6 +58,7 @@ class ExamAttemptHistory {
     required this.totalScore,
     required this.percentageScore,
     required this.status,
+    this.isRetake = false,
   });
 
   final String id;
@@ -70,4 +71,5 @@ class ExamAttemptHistory {
   final double? totalScore;
   final double? percentageScore;
   final String status;
+  final bool isRetake;
 }

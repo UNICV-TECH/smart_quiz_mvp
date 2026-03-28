@@ -97,9 +97,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(height: 42),
                       Center(
                         child: Image.asset(
-                          'assets/images/logo.webp',
-                          width: 256,
-                          height: 93,
+                          'assets/images/SmartQuiz_branca.png',
+                          width: 300,
+                          height: 150,
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -165,7 +165,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.nameLabel,
                                     keyboardType: TextInputType.name,
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Por favor, insira seu nome';
                                       }
                                       return null;
@@ -183,7 +184,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                     labelText: AppStrings.emailLabel,
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Por favor, insira seu email';
                                       }
                                       final emailRegex =
