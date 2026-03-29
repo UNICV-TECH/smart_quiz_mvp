@@ -20,12 +20,18 @@ class AdminContentViewModel extends ChangeNotifier {
   List<ExamTemplate> _templates = [];
   List<AdminCourseEntry> _courses = [];
 
+  // Sort state for questions
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
   // Getters
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<AdminQuestionEntry> get questions => List.unmodifiable(_questions);
   List<ExamTemplate> get templates => List.unmodifiable(_templates);
   List<AdminCourseEntry> get courses => List.unmodifiable(_courses);
+  int get sortColumnIndex => _sortColumnIndex;
+  bool get sortAscending => _sortAscending;
 
   // Load all content
   Future<void> loadContent() async {
@@ -53,6 +59,36 @@ class AdminContentViewModel extends ChangeNotifier {
 
   Future<void> refresh() async {
     await loadContent();
+  }
+
+  void sortQuestions(int columnIndex, bool ascending) {
+    _sortColumnIndex = columnIndex;
+    _sortAscending = ascending;
+
+    _questions.sort((a, b) {
+      int result;
+      switch (columnIndex) {
+        case 0: // Enunciado
+          result = a.enunciation.toLowerCase().compareTo(b.enunciation.toLowerCase());
+        case 1: // Curso
+          result = a.courseName.toLowerCase().compareTo(b.courseName.toLowerCase());
+        case 2: // Professor
+          final nameA = a.teacherName.isEmpty ? a.teacherEmail : a.teacherName;
+          final nameB = b.teacherName.isEmpty ? b.teacherEmail : b.teacherName;
+          result = nameA.toLowerCase().compareTo(nameB.toLowerCase());
+        case 3: // Dificuldade
+          result = (a.difficultyLevel ?? '').compareTo(b.difficultyLevel ?? '');
+        case 4: // Respostas
+          result = a.answerCount.compareTo(b.answerCount);
+        case 5: // Status
+          result = (a.isActive ? 1 : 0).compareTo(b.isActive ? 1 : 0);
+        default:
+          result = 0;
+      }
+      return ascending ? result : -result;
+    });
+
+    notifyListeners();
   }
 
   // Helper methods

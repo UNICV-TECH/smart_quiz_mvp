@@ -122,14 +122,35 @@ class AdminContentScreen extends StatelessWidget {
           ],
         ),
         child: DataTable(
+          sortColumnIndex: viewModel.sortColumnIndex,
+          sortAscending: viewModel.sortAscending,
           headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
-          columns: const [
-            DataColumn(label: Text('Enunciado', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Curso', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Professor', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Dificuldade', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Respostas', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+          columns: [
+            DataColumn(
+              label: const Text('Enunciado', style: TextStyle(fontWeight: FontWeight.bold)),
+              onSort: viewModel.sortQuestions,
+            ),
+            DataColumn(
+              label: const Text('Curso', style: TextStyle(fontWeight: FontWeight.bold)),
+              onSort: viewModel.sortQuestions,
+            ),
+            DataColumn(
+              label: const Text('Professor', style: TextStyle(fontWeight: FontWeight.bold)),
+              onSort: viewModel.sortQuestions,
+            ),
+            DataColumn(
+              label: const Text('Dificuldade', style: TextStyle(fontWeight: FontWeight.bold)),
+              onSort: viewModel.sortQuestions,
+            ),
+            DataColumn(
+              label: const Text('Respostas', style: TextStyle(fontWeight: FontWeight.bold)),
+              numeric: true,
+              onSort: viewModel.sortQuestions,
+            ),
+            DataColumn(
+              label: const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+              onSort: viewModel.sortQuestions,
+            ),
           ],
           rows: viewModel.questions.map((question) {
             final enunciation = question.enunciation.length > 50

@@ -6,8 +6,11 @@ class TeacherQuestion {
   final String? difficultyLevel;
   final double points;
   final bool isActive;
+  final bool isEnade;
   final String? categoryName;
+  final String? subjectName;
   final String? courseName;
+  final String? teacherName;
   final int answerCount;
   final int supportingTextCount;
   final DateTime createdAt;
@@ -18,8 +21,11 @@ class TeacherQuestion {
     this.difficultyLevel,
     this.points = 1.0,
     this.isActive = true,
+    this.isEnade = false,
     this.categoryName,
+    this.subjectName,
     this.courseName,
+    this.teacherName,
     this.answerCount = 0,
     this.supportingTextCount = 0,
     required this.createdAt,
@@ -32,8 +38,11 @@ class TeacherQuestion {
       difficultyLevel: json['difficulty_level'] as String?,
       points: (json['points'] as num?)?.toDouble() ?? 1.0,
       isActive: json['is_active'] as bool? ?? true,
+      isEnade: json['is_enade'] as bool? ?? false,
       categoryName: json['category_name'] as String?,
+      subjectName: json['subject_name'] as String?,
       courseName: json['course_name'] as String?,
+      teacherName: json['teacher_name'] as String?,
       answerCount: (json['answer_count'] as num?)?.toInt() ?? 0,
       supportingTextCount: (json['supporting_text_count'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),

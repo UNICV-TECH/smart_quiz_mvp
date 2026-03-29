@@ -232,15 +232,21 @@ class FullUpdateQuestionRequest {
 
 /// Filter options for fetching teacher questions
 class TeacherQuestionsFilter {
-  final String teacherId;
+  final String? teacherId;
   final String? courseId;
   final String? categoryId;
-  final bool activeOnly;
+  final String? subjectId;
+  /// null = all, true = active only, false = inactive only
+  final bool? activeOnly;
+  /// 'enade', 'teacher', or null for all
+  final String? origin;
 
   const TeacherQuestionsFilter({
-    required this.teacherId,
+    this.teacherId,
     this.courseId,
     this.categoryId,
-    this.activeOnly = true,
+    this.subjectId,
+    this.activeOnly,
+    this.origin,
   });
 }

@@ -29,6 +29,6 @@ class AdminQuestionsFilter {
   const AdminQuestionsFilter({
     this.courseId,
     this.teacherId,
-    this.activeOnly = true,
+    this.activeOnly = false,
   });
 }
