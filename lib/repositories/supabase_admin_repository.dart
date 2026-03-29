@@ -164,11 +164,12 @@ class SupabaseAdminRepository implements AdminRepository {
   Future<List<AdminQuestionEntry>> listQuestions(
       AdminQuestionsFilter filter) async {
     try {
-      final response = await _client.rpc('admin_list_questions', params: {
-        'p_course_id': filter.courseId,
-        'p_teacher_id': filter.teacherId,
+      final params = <String, dynamic>{
         'p_active_only': filter.activeOnly,
-      });
+      };
+      if (filter.courseId != null) params['p_course_id'] = filter.courseId;
+      if (filter.teacherId != null) params['p_teacher_id'] = filter.teacherId;
+      final response = await _client.rpc('admin_list_questions', params: params);
       return (response as List)
           .map((json) =>
               AdminQuestionEntry.fromJson(json as Map<String, dynamic>))

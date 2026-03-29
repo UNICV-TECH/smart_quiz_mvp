@@ -183,12 +183,14 @@ class SupabaseTeacherRepository implements TeacherRepository {
   Future<List<TeacherQuestion>> fetchTeacherQuestions(
       TeacherQuestionsFilter filter) async {
     try {
-      final response = await _client.rpc('get_teacher_questions', params: {
-        'p_teacher_id': filter.teacherId,
-        'p_course_id': filter.courseId,
-        'p_category_id': filter.categoryId,
-        'p_active_only': filter.activeOnly,
-      });
+      final params = <String, dynamic>{};
+      if (filter.teacherId != null) params['p_teacher_id'] = filter.teacherId;
+      if (filter.courseId != null) params['p_course_id'] = filter.courseId;
+      if (filter.categoryId != null) params['p_category_id'] = filter.categoryId;
+      if (filter.subjectId != null) params['p_subject_id'] = filter.subjectId;
+      if (filter.activeOnly != null) params['p_active_only'] = filter.activeOnly;
+      if (filter.origin != null) params['p_origin'] = filter.origin;
+      final response = await _client.rpc('get_teacher_questions', params: params);
 
       return (response as List)
           .map((json) => TeacherQuestion.fromJson(json as Map<String, dynamic>))
@@ -306,6 +308,23 @@ class SupabaseTeacherRepository implements TeacherRepository {
     } catch (error) {
       throw TeacherRepositoryException(
         'Erro ao deletar questao: ${error.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<void> toggleQuestionActive(String questionId, bool isActive) async {
+    try {
+      await _client
+          .from('question')
+          .update({
+            'is_active': isActive,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', questionId);
+    } catch (error) {
+      throw TeacherRepositoryException(
+        'Erro ao alterar status da questao: ${error.toString()}',
       );
     }
   }

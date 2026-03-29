@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/course.dart';
 import '../../models/question_category.dart';
+import '../../models/subject.dart';
 import '../../models/teacher_question.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/course_repository_types.dart' as course_repo;
@@ -10,14 +11,11 @@ import '../../repositories/teacher_repository_types.dart';
 
 class QuestionListViewModel extends ChangeNotifier {
   QuestionListViewModel({
-    required String teacherId,
     required TeacherRepository teacherRepository,
     required CourseRepository courseRepository,
-  })  : _teacherId = teacherId,
-        _teacherRepository = teacherRepository,
+  })  : _teacherRepository = teacherRepository,
         _courseRepository = courseRepository;
 
-  final String _teacherId;
   final TeacherRepository _teacherRepository;
   final CourseRepository _courseRepository;
 
@@ -27,30 +25,44 @@ class QuestionListViewModel extends ChangeNotifier {
   String? _successMessage;
 
   // Data
-  List<TeacherQuestion> _questions = [];
+  List<TeacherQuestion> _allQuestions = [];
   List<Course> _courses = [];
+  List<Subject> _subjects = [];
   List<QuestionCategory> _categories = [];
 
   // Filters
   String? _filterCourseId;
+  String? _filterSubjectId;
   String? _filterCategoryId;
   bool _showInactiveOnly = false;
+  /// null = all, 'enade', 'teacher'
+  String? _filterOrigin;
 
   // Getters
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
-  List<TeacherQuestion> get questions => List.unmodifiable(_questions);
+  List<TeacherQuestion> get questions {
+    if (_showInactiveOnly) {
+      return List.unmodifiable(_allQuestions.where((q) => !q.isActive));
+    }
+    return List.unmodifiable(_allQuestions.where((q) => q.isActive));
+  }
+
   List<Course> get courses => List.unmodifiable(_courses);
+  List<Subject> get subjects => List.unmodifiable(_subjects);
   List<QuestionCategory> get categories => List.unmodifiable(_categories);
 
   String? get filterCourseId => _filterCourseId;
+  String? get filterSubjectId => _filterSubjectId;
   String? get filterCategoryId => _filterCategoryId;
   bool get showInactiveOnly => _showInactiveOnly;
+  String? get filterOrigin => _filterOrigin;
 
-  int get totalQuestions => _questions.length;
-  int get activeQuestions => _questions.where((q) => q.isActive).length;
+  int get totalQuestions => _allQuestions.length;
+  int get activeQuestions => _allQuestions.where((q) => q.isActive).length;
+  int get inactiveQuestions => _allQuestions.where((q) => !q.isActive).length;
 
   // Load data
   Future<void> loadInitialData() async {
@@ -78,17 +90,29 @@ class QuestionListViewModel extends ChangeNotifier {
 
     try {
       final filter = TeacherQuestionsFilter(
-        teacherId: _teacherId,
         courseId: _filterCourseId,
+        subjectId: _filterSubjectId,
         categoryId: _filterCategoryId,
-        activeOnly: !_showInactiveOnly,
+        origin: _filterOrigin,
       );
-      _questions = await _teacherRepository.fetchTeacherQuestions(filter);
+      _allQuestions = await _teacherRepository.fetchTeacherQuestions(filter);
     } catch (error) {
       _setError('Erro ao carregar questoes: $error');
-      _questions = [];
+      _allQuestions = [];
     } finally {
       _setLoading(false);
+    }
+  }
+
+  Future<void> loadSubjects(String courseId) async {
+    _subjects = [];
+    notifyListeners();
+
+    try {
+      _subjects = await _teacherRepository.fetchSubjects(courseId: courseId);
+      notifyListeners();
+    } catch (error) {
+      debugPrint('Erro ao carregar materias: $error');
     }
   }
 
@@ -109,13 +133,23 @@ class QuestionListViewModel extends ChangeNotifier {
   void setFilterCourse(String? courseId) {
     if (_filterCourseId == courseId) return;
     _filterCourseId = courseId;
+    _filterSubjectId = null;
     _filterCategoryId = null;
+    _subjects = [];
     _categories = [];
     notifyListeners();
 
     if (courseId != null) {
+      loadSubjects(courseId);
       loadCategories(courseId);
     }
+    loadQuestions();
+  }
+
+  void setFilterSubject(String? subjectId) {
+    if (_filterSubjectId == subjectId) return;
+    _filterSubjectId = subjectId;
+    notifyListeners();
     loadQuestions();
   }
 
@@ -126,26 +160,68 @@ class QuestionListViewModel extends ChangeNotifier {
     loadQuestions();
   }
 
-  void toggleShowInactive() {
-    _showInactiveOnly = !_showInactiveOnly;
+  void setFilterOrigin(String? origin) {
+    if (_filterOrigin == origin) return;
+    _filterOrigin = origin;
     notifyListeners();
     loadQuestions();
   }
 
+  void toggleShowInactive() {
+    _showInactiveOnly = !_showInactiveOnly;
+    notifyListeners();
+  }
+
   void clearFilters() {
     _filterCourseId = null;
+    _filterSubjectId = null;
     _filterCategoryId = null;
+    _filterOrigin = null;
     _showInactiveOnly = false;
+    _subjects = [];
     _categories = [];
     notifyListeners();
     loadQuestions();
   }
 
   // Actions
+  Future<bool> toggleQuestionActive(String questionId, bool currentActive) async {
+    try {
+      final newActive = !currentActive;
+      await _teacherRepository.toggleQuestionActive(questionId, newActive);
+      _allQuestions = _allQuestions.map((q) {
+        if (q.id == questionId) {
+          return TeacherQuestion(
+            id: q.id,
+            enunciation: q.enunciation,
+            difficultyLevel: q.difficultyLevel,
+            points: q.points,
+            isActive: newActive,
+            isEnade: q.isEnade,
+            categoryName: q.categoryName,
+            subjectName: q.subjectName,
+            courseName: q.courseName,
+            teacherName: q.teacherName,
+            answerCount: q.answerCount,
+            supportingTextCount: q.supportingTextCount,
+            createdAt: q.createdAt,
+          );
+        }
+        return q;
+      }).toList();
+      _setSuccess(newActive ? 'Questao ativada!' : 'Questao desativada!');
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _setError('Erro ao alterar status: $error');
+      return false;
+    }
+  }
+
   Future<bool> deleteQuestion(String questionId) async {
     try {
       await _teacherRepository.deleteQuestion(questionId);
-      _questions = _questions.where((q) => q.id != questionId).toList();
+      _allQuestions = _allQuestions.where((q) => q.id != questionId).toList();
       _setSuccess('Questao removida com sucesso!');
       notifyListeners();
       return true;

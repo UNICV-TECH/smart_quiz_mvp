@@ -64,6 +64,9 @@ abstract class TeacherRepository {
   /// Delete a question (soft delete by setting is_active = false)
   Future<void> deleteQuestion(String questionId);
 
+  /// Toggle question active status
+  Future<void> toggleQuestionActive(String questionId, bool isActive);
+
   // ============================================
   // Exam Templates
   // ============================================
