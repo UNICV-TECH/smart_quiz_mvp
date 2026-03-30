@@ -157,20 +157,29 @@ export async function login(page: Page, email: string, password: string): Promis
   await page.keyboard.type(password, { delay: 15 });
   await page.waitForTimeout(500);
 
-  // Step 5: Click the "Entrar" login button via Flutter semantics
+  // Step 5: Click the LAST "Entrar" button in semantics.
+  // Flutter may keep stale nodes from the welcome screen in the DOM,
+  // so the first "Entrar" might be the welcome button (navigates back).
+  // The login form's "Entrar" is always the last one.
   await page.evaluate(() => {
-    const nodes = document.querySelectorAll('flt-semantics[role="button"]');
-    for (const n of nodes) {
-      if (n.textContent?.trim() === 'Entrar') { (n as HTMLElement).click(); break; }
+    const nodes = [...document.querySelectorAll('flt-semantics[role="button"]')];
+    const entrarButtons = nodes.filter(n => n.textContent?.trim() === 'Entrar');
+    if (entrarButtons.length > 0) {
+      (entrarButtons[entrarButtons.length - 1] as HTMLElement).click();
     }
   });
 
-  // Wait for Flutter auth + navigation (can take several seconds)
-  await page.waitForTimeout(6000);
+  // Poll for URL change instead of fixed wait (max 12 seconds)
+  let loginSucceeded = false;
+  for (let i = 0; i < 24; i++) {
+    await page.waitForTimeout(500);
+    const url = page.url();
+    if (!url.includes('/login') && !url.includes('/welcome')) {
+      loginSucceeded = true;
+      break;
+    }
+  }
 
-  // Check if we successfully navigated away from the login page
-  const currentUrl = page.url();
-  const loginSucceeded = !currentUrl.includes('/login') && !currentUrl.includes('/welcome');
   return loginSucceeded;
 }
 
