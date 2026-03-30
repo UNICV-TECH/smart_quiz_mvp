@@ -79,7 +79,7 @@ class TeacherDashboardViewModel extends ChangeNotifier {
       _questionStats = results[0] as List<TeacherQuestionStats>;
       _examStats = results[1] as List<TeacherExamStats>;
     } catch (error) {
-      _setError('Erro ao carregar estatisticas: $error');
+      _setError('Erro ao carregar estatísticas: $error');
       _questionStats = [];
       _examStats = [];
     } finally {

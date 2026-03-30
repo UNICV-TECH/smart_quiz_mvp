@@ -59,7 +59,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'Historico de Provas',
+                              'Histórico de Provas',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
@@ -71,7 +71,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Acompanhe sua evolucao e conquistas',
+                          'Acompanhe sua evolução e conquistas',
                           style: TextStyle(
                             fontSize: 14,
                             color: AppColors.secondaryDark
@@ -274,7 +274,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Complete provas para desbloquear seu historico e acompanhar sua evolucao',
+              'Complete provas para desbloquear seu histórico e acompanhar sua evolução',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -314,7 +314,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
 
     final completedDate = attempt.completedAt != null
         ? _formatDateTime(attempt.completedAt!)
-        : 'Data nao disponivel';
+        : 'Data não disponível';
 
     final duration = attempt.durationSeconds != null
         ? _formatDuration(Duration(seconds: attempt.durationSeconds!))
@@ -518,7 +518,7 @@ class _ExamHistoryViewBody extends StatelessWidget {
                 Expanded(
                   child: _buildStatChip(
                     Icons.question_answer_outlined,
-                    '${attempt.questionCount} questoes',
+                    '${attempt.questionCount} questões',
                   ),
                 ),
                 if (attempt.totalScore != null) ...[
@@ -645,9 +645,9 @@ class _ExamHistoryViewBody extends StatelessWidget {
 
   String _getPerformanceBadge(double percentage) {
     if (percentage >= 90) return 'Excelente!';
-    if (percentage >= 80) return 'Otimo!';
+    if (percentage >= 80) return 'Ótimo!';
     if (percentage >= 70) return 'Aprovado';
-    if (percentage >= 50) return 'Quase la!';
+    if (percentage >= 50) return 'Quase lá!';
     return 'Tente de novo';
   }
 

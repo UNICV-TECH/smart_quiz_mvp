@@ -97,7 +97,7 @@ class QuestionListViewModel extends ChangeNotifier {
       );
       _allQuestions = await _teacherRepository.fetchTeacherQuestions(filter);
     } catch (error) {
-      _setError('Erro ao carregar questoes: $error');
+      _setError('Erro ao carregar questões: $error');
       _allQuestions = [];
     } finally {
       _setLoading(false);
@@ -222,11 +222,11 @@ class QuestionListViewModel extends ChangeNotifier {
     try {
       await _teacherRepository.deleteQuestion(questionId);
       _allQuestions = _allQuestions.where((q) => q.id != questionId).toList();
-      _setSuccess('Questao removida com sucesso!');
+      _setSuccess('Questão removida com sucesso!');
       notifyListeners();
       return true;
     } catch (error) {
-      _setError('Erro ao remover questao: $error');
+      _setError('Erro ao remover questão: $error');
       return false;
     }
   }

@@ -262,7 +262,7 @@ class CreateQuestionViewModel extends ChangeNotifier {
       return 'Selecione os pontos';
     }
     if (_enunciation.trim().isEmpty) {
-      return 'Digite o enunciado da questao';
+      return 'Digite o enunciado da questão';
     }
     final filledChoices =
         _answerChoices.where((c) => c.content.trim().isNotEmpty).length;
@@ -305,11 +305,11 @@ class CreateQuestionViewModel extends ChangeNotifier {
 
       await _teacherRepository.createQuestion(request);
 
-      _setSuccess('Questao criada com sucesso!');
+      _setSuccess('Questão criada com sucesso!');
       _resetForm();
       return true;
     } catch (error) {
-      _setError('Erro ao salvar questao: $error');
+      _setError('Erro ao salvar questão: $error');
       return false;
     } finally {
       _setSaving(false);

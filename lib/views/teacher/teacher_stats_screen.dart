@@ -6,7 +6,7 @@ import '../../services/session_manager.dart';
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/teacher_dashboard_view_model.dart';
 
-/// Tela de estatisticas do professor
+/// Tela de estatísticas do professor
 class TeacherStatsScreen extends StatelessWidget {
   const TeacherStatsScreen({super.key});
 
@@ -18,7 +18,7 @@ class TeacherStatsScreen extends StatelessWidget {
 
     if (teacherRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -60,7 +60,7 @@ class _StatsContent extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Visao geral das suas atividades',
+                'Visão geral das suas atividades',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -124,7 +124,7 @@ class _StatsContent extends StatelessWidget {
         // Question stats by course
         if (viewModel.questionStats.isNotEmpty) ...[
           const Text(
-            'Questoes por Curso',
+            'Questões por Curso',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -158,7 +158,7 @@ class _StatsContent extends StatelessWidget {
       children: [
         Expanded(
           child: _SummaryCard(
-            title: 'Total de Questoes',
+            title: 'Total de Questões',
             value: viewModel.totalQuestions.toString(),
             subtitle: '${viewModel.activeQuestions} ativas',
             icon: Icons.quiz_outlined,
@@ -188,7 +188,7 @@ class _StatsContent extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: _SummaryCard(
-            title: 'Taxa de Aprovacao',
+            title: 'Taxa de Aprovação',
             value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
             subtitle: 'Media: ${viewModel.overallAvgScore.toStringAsFixed(1)} pts',
             icon: Icons.trending_up,
@@ -492,7 +492,7 @@ class _ExamStatsCard extends StatelessWidget {
                 Icons.check_circle_outline,
               ),
               _buildMetric(
-                'Taxa de aprovacao',
+                'Taxa de aprovação',
                 '${passRate.toStringAsFixed(1)}%',
                 Icons.trending_up,
               ),

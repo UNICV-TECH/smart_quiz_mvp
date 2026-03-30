@@ -8,7 +8,7 @@ import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/question_list_view_model.dart';
 
-/// Tela de listagem de questoes do professor
+/// Tela de listagem de questões do professor
 class TeacherQuestionListScreen extends StatelessWidget {
   const TeacherQuestionListScreen({super.key});
 
@@ -19,7 +19,7 @@ class TeacherQuestionListScreen extends StatelessWidget {
 
     if (teacherRepo == null || courseRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -86,7 +86,7 @@ class _QuestionListContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Banco de Questoes',
+                  'Banco de Questões',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -95,7 +95,7 @@ class _QuestionListContent extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Gerencie todas as questoes cadastradas',
+                  'Gerencie todas as questões cadastradas',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey,
@@ -326,7 +326,7 @@ class _QuestionListContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma questao encontrada',
+            'Nenhuma questão encontrada',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -335,7 +335,7 @@ class _QuestionListContent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Crie sua primeira questao no menu "Nova Questao"',
+            'Crie sua primeira questão no menu "Nova Questão"',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -391,10 +391,10 @@ class _QuestionListContent extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusao'),
+        title: const Text('Confirmar exclusão'),
         content: const Text(
-          'Tem certeza que deseja excluir esta questao? '
-          'Esta acao nao pode ser desfeita.',
+          'Tem certeza que deseja excluir esta questão? '
+          'Esta ação não pode ser desfeita.',
         ),
         actions: [
           TextButton(

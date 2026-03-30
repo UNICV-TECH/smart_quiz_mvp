@@ -197,7 +197,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .toList();
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao carregar questoes: ${error.toString()}',
+        'Erro ao carregar questões: ${error.toString()}',
       );
     }
   }
@@ -213,7 +213,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
       return response as String;
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao criar questao: ${error.toString()}',
+        'Erro ao criar questão: ${error.toString()}',
       );
     }
   }
@@ -227,7 +227,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .eq('id', request.questionId);
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao atualizar questao: ${error.toString()}',
+        'Erro ao atualizar questão: ${error.toString()}',
       );
     }
   }
@@ -276,7 +276,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
       );
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao carregar detalhes da questao: ${error.toString()}',
+        'Erro ao carregar detalhes da questão: ${error.toString()}',
       );
     }
   }
@@ -290,7 +290,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
       );
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao atualizar questao: ${error.toString()}',
+        'Erro ao atualizar questão: ${error.toString()}',
       );
     }
   }
@@ -307,7 +307,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .eq('id', questionId);
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao deletar questao: ${error.toString()}',
+        'Erro ao deletar questão: ${error.toString()}',
       );
     }
   }
@@ -484,7 +484,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .toList();
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao carregar questoes do template: ${error.toString()}',
+        'Erro ao carregar questões do template: ${error.toString()}',
       );
     }
   }
@@ -502,7 +502,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
       return ExamTemplateQuestion.fromJson(response);
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao adicionar questao ao template: ${error.toString()}',
+        'Erro ao adicionar questão ao template: ${error.toString()}',
       );
     }
   }
@@ -516,7 +516,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .eq('id', templateQuestionId);
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao remover questao do template: ${error.toString()}',
+        'Erro ao remover questão do template: ${error.toString()}',
       );
     }
   }
@@ -531,7 +531,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .eq('id', templateQuestionId);
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao atualizar ordem da questao: ${error.toString()}',
+        'Erro ao atualizar ordem da questão: ${error.toString()}',
       );
     }
   }
@@ -610,7 +610,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .toList();
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao carregar estatisticas de questoes: ${error.toString()}',
+        'Erro ao carregar estatísticas de questões: ${error.toString()}',
       );
     }
   }
@@ -629,7 +629,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .toList();
     } catch (error) {
       throw TeacherRepositoryException(
-        'Erro ao carregar estatisticas de provas: ${error.toString()}',
+        'Erro ao carregar estatísticas de provas: ${error.toString()}',
       );
     }
   }

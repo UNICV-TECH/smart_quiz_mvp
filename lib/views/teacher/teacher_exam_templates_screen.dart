@@ -20,7 +20,7 @@ class TeacherExamTemplatesScreen extends StatelessWidget {
 
     if (teacherRepo == null || courseRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -295,10 +295,10 @@ class _ExamTemplatesContent extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusao'),
+        title: const Text('Confirmar exclusão'),
         content: const Text(
           'Tem certeza que deseja excluir este template? '
-          'Esta acao nao pode ser desfeita.',
+          'Esta ação não pode ser desfeita.',
         ),
         actions: [
           TextButton(
@@ -412,7 +412,7 @@ class _TemplateCard extends StatelessWidget {
                   const SizedBox(width: 16),
                 ],
                 _buildInfoChip(
-                    Icons.format_list_numbered, '$questionCount questoes'),
+                    Icons.format_list_numbered, '$questionCount questões'),
                 const SizedBox(width: 16),
                 _buildInfoChip(
                   Icons.timer_outlined,
@@ -422,7 +422,7 @@ class _TemplateCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 _buildInfoChip(Icons.check_circle_outline,
-                    'Aprovacao: ${passingScore.toInt()}%'),
+                    'Aprovação: ${passingScore.toInt()}%'),
               ],
             ),
             const SizedBox(height: 16),
@@ -635,11 +635,11 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             tabs: const [
               Tab(
                 icon: Icon(Icons.info_outline, size: 20),
-                text: 'Informacoes',
+                text: 'Informações',
               ),
               Tab(
                 icon: Icon(Icons.quiz_outlined, size: 20),
-                text: 'Questoes',
+                text: 'Questões',
               ),
             ],
             labelColor: const Color(0xFF2E7D32),
@@ -669,7 +669,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
           TextField(
             controller: _descriptionController,
             decoration: const InputDecoration(
-              labelText: 'Descricao',
+              labelText: 'Descrição',
               border: OutlineInputBorder(),
             ),
             maxLines: 2,
@@ -692,7 +692,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
           ),
           const SizedBox(height: 24),
           const Text(
-            'Configuracoes da Prova',
+            'Configurações da Prova',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -705,7 +705,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                 child: TextFormField(
                   initialValue: viewModel.questionCount.toString(),
                   decoration: const InputDecoration(
-                    labelText: 'Numero de questoes',
+                    labelText: 'Número de questões',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -741,7 +741,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   initialValue:
                       viewModel.passingScorePercentage.toString(),
                   decoration: const InputDecoration(
-                    labelText: 'Nota de aprovacao (%)',
+                    labelText: 'Nota de aprovação (%)',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -761,7 +761,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             runSpacing: 8,
             children: [
               _buildToggle(
-                'Embaralhar questoes',
+                'Embaralhar questões',
                 viewModel.shuffleQuestions,
                 viewModel.setShuffleQuestions,
               ),
@@ -776,7 +776,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                 viewModel.setShowCorrectAnswers,
               ),
               _buildToggle(
-                'Permitir revisao',
+                'Permitir revisão',
                 viewModel.allowReview,
                 viewModel.setAllowReview,
               ),
@@ -801,7 +801,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             ),
             const SizedBox(height: 4),
             Text(
-              'para adicionar questoes',
+              'para adicionar questões',
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
@@ -823,7 +823,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   color: Colors.grey[600], size: 20),
               const SizedBox(width: 8),
               Text(
-                '${viewModel.templateQuestions.length} questao(oes) no template',
+                '${viewModel.templateQuestions.length} questão(ões) no template',
                 style: const TextStyle(
                     fontSize: 15, fontWeight: FontWeight.w500),
               ),
@@ -831,7 +831,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
               ElevatedButton.icon(
                 onPressed: () => _showQuestionSelector(viewModel),
                 icon: const Icon(Icons.add, size: 20),
-                label: const Text('Adicionar Questoes'),
+                label: const Text('Adicionar Questões'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green,
                   foregroundColor: Colors.white,
@@ -853,12 +853,12 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                           size: 48, color: Colors.grey[300]),
                       const SizedBox(height: 12),
                       Text(
-                        'Nenhuma questao adicionada',
+                        'Nenhuma questão adicionada',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Clique em "Adicionar Questoes" para comecar',
+                        'Clique em "Adicionar Questões" para começar',
                         style: TextStyle(
                             fontSize: 13, color: Colors.grey[500]),
                       ),
@@ -889,7 +889,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                         ),
                         title: Text(
                           question.questionEnunciation ??
-                              'Questao ${index + 1}',
+                              'Questão ${index + 1}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 14),
@@ -1073,7 +1073,7 @@ class _QuestionSelectorDialog extends StatelessWidget {
                   const Icon(Icons.playlist_add, color: Color(0xFF2E7D32)),
                   const SizedBox(width: 12),
                   const Text(
-                    'Selecionar Questoes',
+                    'Selecionar Questões',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1081,7 +1081,7 @@ class _QuestionSelectorDialog extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '${available.length} disponivel(is)',
+                    '${available.length} disponível(is)',
                     style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   ),
                   const SizedBox(width: 12),
@@ -1102,7 +1102,7 @@ class _QuestionSelectorDialog extends StatelessWidget {
                               size: 48, color: Colors.grey[300]),
                           const SizedBox(height: 12),
                           Text(
-                            'Nenhuma questao disponivel',
+                            'Nenhuma questão disponível',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 4),
@@ -1110,7 +1110,7 @@ class _QuestionSelectorDialog extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 32),
                             child: Text(
-                              'Todas as questoes ja foram adicionadas ou nao ha questoes para este curso',
+                              'Todas as questões já foram adicionadas ou não há questões para este curso',
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[500]),
                               textAlign: TextAlign.center,

@@ -128,7 +128,7 @@ class _ProfileViewBodyState extends State<_ProfileViewBody>
   Future<void> _saveName(ProfileViewModel viewModel) async {
     final newName = _nameController.text.trim();
     if (newName.isEmpty) {
-      _showSnackBar('Nome nao pode estar vazio', isError: true);
+      _showSnackBar('Nome não pode estar vazio', isError: true);
       return;
     }
     if (newName == viewModel.user?.name) {
@@ -186,7 +186,7 @@ class _ProfileViewBodyState extends State<_ProfileViewBody>
           if (user == null) {
             return const Center(
               child: Text(
-                'Usuario nao encontrado.',
+                'Usuário não encontrado.',
                 style: TextStyle(fontFamily: 'Poppins', color: Colors.black54),
               ),
             );
@@ -745,7 +745,7 @@ class _ProfileViewBodyState extends State<_ProfileViewBody>
               Icon(Icons.history_rounded, size: 20, color: AppColors.gamificationOlive),
               SizedBox(width: 8),
               Text(
-                'Historico de Temporadas',
+                'Histórico de Temporadas',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -868,7 +868,7 @@ class _ProfileViewBodyState extends State<_ProfileViewBody>
           _buildMenuItem(
             icon: Icons.help_outline_rounded,
             title: AppStrings.help,
-            subtitle: 'Duvidas e suporte',
+            subtitle: 'Dúvidas e suporte',
             onTap: () => context.push('/help'),
           ),
           const SizedBox(height: 10),
@@ -1014,7 +1014,7 @@ class _ProfileViewBodyState extends State<_ProfileViewBody>
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text(
-            'Confirmar saida',
+            'Confirmar saída',
             style: TextStyle(
               fontFamily: 'Poppins',
               fontWeight: FontWeight.bold,

@@ -428,7 +428,7 @@ class _SummaryCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'Voce acertou $correctCount de $totalQuestions questoes',
+          'Você acertou $correctCount de $totalQuestions questões',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 16,
