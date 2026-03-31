@@ -219,3 +219,4 @@ A documentação técnica completa está disponível em [`docs/DOCUMENTACAO_COMP
 ---
 
 > **Projeto de Ensino — Centro Universitário UniCV** | Edição 2025/26
+
