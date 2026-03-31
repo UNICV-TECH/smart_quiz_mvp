@@ -34512,7 +34512,7 @@ lT(){var s,r
 try{$.b1u().ga5V().h(0,"SUPABASE_ANON_KEY")
 s=""
 if(J.bH(s)!==0)return s}catch(r){}return"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ycW92b3Bid2ZkZmZ1bWh0Y2F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2MjMxMzUsImV4cCI6MjA3MTE5OTEzNX0.b0dRbLEragykIlsBjtjzUk8FDt5SpuNspYY3-6bnOIc"},
-bjL(){return"https://smart-quiz-mvp.vercel.app"},
+bjL(){return"https://smartquiz.unicvtech.com.br"},
 bfA(a){var s,r,q,p,o=null,n=v.G.window.localStorage.getItem("smart_quiz_exam_"+a)
 if(n==null)return o
 try{s=t.P.a(B.aA.uL(n,o))
