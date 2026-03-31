@@ -1,6 +1,6 @@
 {
-    "name": "Smart Quiz",
-    "short_name": "Smart Quiz",
+    "name": "unicv_tech_mvp",
+    "short_name": "unicv_tech_mvp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
