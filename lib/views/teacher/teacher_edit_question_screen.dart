@@ -240,13 +240,13 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
               ),
             ),
             const SizedBox(height: 16),
-            Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SelectPesquisa(
+            Builder(
+              builder: (context) {
+                final isMobile = MediaQuery.of(context).size.width < 768;
+                if (isMobile) {
+                  return Column(
+                    children: [
+                      SelectPesquisa(
                         label: 'Curso',
                         options: courseOptions,
                         value: viewModel.selectedCourseId,
@@ -254,10 +254,8 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
                         placeholder: 'Selecione o curso',
                         onChanged: viewModel.setCourse,
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SelectPesquisa(
+                      const SizedBox(height: 12),
+                      SelectPesquisa(
                         label: 'Matéria',
                         options: subjectOptions,
                         value: viewModel.selectedSubjectId,
@@ -268,10 +266,8 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
                         onChanged: viewModel.setSubject,
                         enabled: viewModel.selectedCourseId != null,
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SelectPesquisa(
+                      const SizedBox(height: 12),
+                      SelectPesquisa(
                         label: 'Categoria',
                         options: categoryOptions,
                         value: viewModel.selectedCategoryId,
@@ -282,56 +278,148 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
                         onChanged: viewModel.setCategory,
                         enabled: viewModel.selectedSubjectId != null,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SelectPesquisa(
+                              label: 'Dificuldade',
+                              options: const [
+                                SelectOption(value: 'easy', label: 'Facil'),
+                                SelectOption(value: 'medium', label: 'Medio'),
+                                SelectOption(value: 'hard', label: 'Dificil'),
+                              ],
+                              value: viewModel.difficultyLevel,
+                              required: true,
+                              placeholder: 'Selecione a dificuldade',
+                              onChanged: (value) {
+                                if (value != null) {
+                                  viewModel.setDifficultyLevel(value);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SelectPesquisa(
+                              label: 'Pontos',
+                              options: const [
+                                SelectOption(value: '0.5', label: '0.5 pontos'),
+                                SelectOption(value: '1.0', label: '1.0 ponto'),
+                                SelectOption(value: '1.5', label: '1.5 pontos'),
+                                SelectOption(value: '2.0', label: '2.0 pontos'),
+                                SelectOption(value: '2.5', label: '2.5 pontos'),
+                                SelectOption(value: '3.0', label: '3.0 pontos'),
+                              ],
+                              value: viewModel.points.toString(),
+                              required: true,
+                              placeholder: 'Selecione os pontos',
+                              onChanged: (value) {
+                                if (value != null) {
+                                  viewModel.setPoints(double.parse(value));
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return Column(
                   children: [
-                    Expanded(
-                      child: SelectPesquisa(
-                        label: 'Dificuldade',
-                        options: const [
-                          SelectOption(value: 'easy', label: 'Facil'),
-                          SelectOption(value: 'medium', label: 'Medio'),
-                          SelectOption(value: 'hard', label: 'Dificil'),
-                        ],
-                        value: viewModel.difficultyLevel,
-                        required: true,
-                        placeholder: 'Selecione a dificuldade',
-                        onChanged: (value) {
-                          if (value != null) {
-                            viewModel.setDifficultyLevel(value);
-                          }
-                        },
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: SelectPesquisa(
+                            label: 'Curso',
+                            options: courseOptions,
+                            value: viewModel.selectedCourseId,
+                            required: true,
+                            placeholder: 'Selecione o curso',
+                            onChanged: viewModel.setCourse,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: SelectPesquisa(
+                            label: 'Matéria',
+                            options: subjectOptions,
+                            value: viewModel.selectedSubjectId,
+                            required: false,
+                            placeholder: viewModel.selectedCourseId != null
+                                ? 'Selecione a matéria'
+                                : 'Selecione um curso primeiro',
+                            onChanged: viewModel.setSubject,
+                            enabled: viewModel.selectedCourseId != null,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: SelectPesquisa(
+                            label: 'Categoria',
+                            options: categoryOptions,
+                            value: viewModel.selectedCategoryId,
+                            required: false,
+                            placeholder: viewModel.selectedSubjectId != null
+                                ? 'Selecione a categoria'
+                                : 'Selecione uma matéria primeiro',
+                            onChanged: viewModel.setCategory,
+                            enabled: viewModel.selectedSubjectId != null,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SelectPesquisa(
-                        label: 'Pontos',
-                        options: const [
-                          SelectOption(value: '0.5', label: '0.5 pontos'),
-                          SelectOption(value: '1.0', label: '1.0 ponto'),
-                          SelectOption(value: '1.5', label: '1.5 pontos'),
-                          SelectOption(value: '2.0', label: '2.0 pontos'),
-                          SelectOption(value: '2.5', label: '2.5 pontos'),
-                          SelectOption(value: '3.0', label: '3.0 pontos'),
-                        ],
-                        value: viewModel.points.toString(),
-                        required: true,
-                        placeholder: 'Selecione os pontos',
-                        onChanged: (value) {
-                          if (value != null) {
-                            viewModel.setPoints(double.parse(value));
-                          }
-                        },
-                      ),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: SelectPesquisa(
+                            label: 'Dificuldade',
+                            options: const [
+                              SelectOption(value: 'easy', label: 'Facil'),
+                              SelectOption(value: 'medium', label: 'Medio'),
+                              SelectOption(value: 'hard', label: 'Dificil'),
+                            ],
+                            value: viewModel.difficultyLevel,
+                            required: true,
+                            placeholder: 'Selecione a dificuldade',
+                            onChanged: (value) {
+                              if (value != null) {
+                                viewModel.setDifficultyLevel(value);
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: SelectPesquisa(
+                            label: 'Pontos',
+                            options: const [
+                              SelectOption(value: '0.5', label: '0.5 pontos'),
+                              SelectOption(value: '1.0', label: '1.0 ponto'),
+                              SelectOption(value: '1.5', label: '1.5 pontos'),
+                              SelectOption(value: '2.0', label: '2.0 pontos'),
+                              SelectOption(value: '2.5', label: '2.5 pontos'),
+                              SelectOption(value: '3.0', label: '3.0 pontos'),
+                            ],
+                            value: viewModel.points.toString(),
+                            required: true,
+                            placeholder: 'Selecione os pontos',
+                            onChanged: (value) {
+                              if (value != null) {
+                                viewModel.setPoints(double.parse(value));
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ],
         ),

@@ -158,7 +158,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
 
   Widget _buildTeacherSideMenu({bool closeable = false}) {
     return Container(
-      width: 280,
+      width: closeable ? null : 280,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -219,8 +219,9 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
   }
 
   Widget _buildMenuHeader() {
+    final isMobile = _isMobile(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isMobile ? 12 : 20),
       decoration: const BoxDecoration(
         color: Color(0xFF2E7D32),
         borderRadius: BorderRadius.only(
@@ -230,15 +231,13 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
       child: Column(
         children: [
           SizedBox(
-            height: 200,
+            height: isMobile ? 80 : 150,
             child: Image.asset(
               'assets/images/SmartQuiz_branca.png',
-              width: 500,
-              height: 500,
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           const Text(
             'Menu do Professor',
             style: TextStyle(

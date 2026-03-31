@@ -338,25 +338,27 @@ class _CourseStatsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              stats.courseName,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+          Text(
+            stats.courseName,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
-          _statChip('Questões', stats.totalQuestions.toString()),
-          const SizedBox(width: 12),
-          _statChip('Templates', stats.totalTemplates.toString()),
-          const SizedBox(width: 12),
-          _statChip('Provas', stats.totalAttempts.toString()),
-          const SizedBox(width: 12),
-          _statChip('Média', '${stats.avgScore.toStringAsFixed(1)}%'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              _statChip('Questões', stats.totalQuestions.toString()),
+              _statChip('Templates', stats.totalTemplates.toString()),
+              _statChip('Provas', stats.totalAttempts.toString()),
+              _statChip('Média', '${stats.avgScore.toStringAsFixed(1)}%'),
+            ],
+          ),
         ],
       ),
     );

@@ -594,11 +594,15 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
   Widget build(BuildContext context) {
     final viewModel = context.watch<ExamTemplateViewModel>();
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 80,
+        vertical: isMobile ? 16 : 40,
+      ),
       child: SizedBox(
-        width: 900,
-        height: 700,
+        width: isMobile ? double.infinity : 900,
+        height: isMobile ? MediaQuery.of(context).size.height * 0.9 : 700,
         child: Column(
           children: [
             _buildHeader(viewModel),
@@ -678,8 +682,9 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
   }
 
   Widget _buildInfoTab(ExamTemplateViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -725,9 +730,12 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             ),
           ),
           const SizedBox(height: 16),
-          Row(
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
             children: [
-              Expanded(
+              SizedBox(
+                width: isMobile ? double.infinity : 200,
                 child: TextFormField(
                   initialValue: viewModel.questionCount.toString(),
                   decoration: const InputDecoration(
@@ -743,8 +751,8 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   },
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              SizedBox(
+                width: isMobile ? double.infinity : 200,
                 child: TextFormField(
                   initialValue:
                       viewModel.timeLimitMinutes?.toString() ?? '',
@@ -761,8 +769,8 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   },
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
+              SizedBox(
+                width: isMobile ? double.infinity : 200,
                 child: TextFormField(
                   initialValue:
                       viewModel.passingScorePercentage.toString(),
@@ -843,17 +851,25 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Icon(Icons.format_list_numbered,
-                  color: Colors.grey[600], size: 20),
-              const SizedBox(width: 8),
-              Text(
-                '${viewModel.templateQuestions.length} questão(ões) no template',
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w500),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.format_list_numbered,
+                      color: Colors.grey[600], size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${viewModel.templateQuestions.length} questão(ões) no template',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
-              const Spacer(),
               ElevatedButton.icon(
                 onPressed: () => _showQuestionSelector(viewModel),
                 icon: const Icon(Icons.add, size: 20),
@@ -1080,11 +1096,15 @@ class _QuestionSelectorDialog extends StatelessWidget {
         .where((q) => !templateQuestionIds.contains(q.id))
         .toList();
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 120,
+        vertical: isMobile ? 24 : 60,
+      ),
       child: SizedBox(
-        width: 700,
-        height: 500,
+        width: isMobile ? double.infinity : 700,
+        height: isMobile ? MediaQuery.of(context).size.height * 0.8 : 500,
         child: Column(
           children: [
             Container(
