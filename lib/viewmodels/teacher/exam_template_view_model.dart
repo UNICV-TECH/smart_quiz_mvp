@@ -248,7 +248,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
   // CRUD operations
   Future<bool> saveTemplate() async {
     if (!isFormValid) {
-      _setError('Preencha todos os campos obrigatorios');
+      _setError('Preencha todos os campos obrigatórios');
       return false;
     }
 
@@ -382,7 +382,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
-      _setError('Erro ao adicionar questao: $error');
+      _setError('Erro ao adicionar questão: $error');
       return false;
     }
   }
@@ -395,7 +395,7 @@ class ExamTemplateViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
-      _setError('Erro ao remover questao: $error');
+      _setError('Erro ao remover questão: $error');
       return false;
     }
   }

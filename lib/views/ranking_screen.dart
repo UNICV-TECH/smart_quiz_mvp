@@ -489,7 +489,7 @@ Widget _buildUserPositionCard(RankingEntry entry) {
         const Icon(Icons.person, color: AppColors.green, size: 20),
         const SizedBox(width: 8),
         Text(
-          'Voce: #${entry.rankPosition} — ${entry.seasonPoints.toStringAsFixed(0)} pts',
+          'Você: #${entry.rankPosition} — ${entry.seasonPoints.toStringAsFixed(0)} pts',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,

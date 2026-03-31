@@ -12,7 +12,7 @@ import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/create_question_view_model.dart';
 
-/// Tela de criacao de questoes que se integra ao menu lateral do professor
+/// Tela de criação de questões que se integra ao menu lateral do professor
 class TeacherScreenCreateQuestion extends StatelessWidget {
   const TeacherScreenCreateQuestion({super.key});
 
@@ -25,7 +25,7 @@ class TeacherScreenCreateQuestion extends StatelessWidget {
 
     if (teacherRepo == null || courseRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -200,7 +200,7 @@ class _CreateQuestionContentState extends State<_CreateQuestionContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Contexto da Questao',
+              'Contexto da Questão',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -409,7 +409,7 @@ class _CreateQuestionContentState extends State<_CreateQuestionContent> {
               _webGuardActive = false;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Questao salva com sucesso!'),
+                  content: Text('Questão salva com sucesso!'),
                   backgroundColor: AppColors.green,
                   duration: Duration(seconds: 2),
                 ),

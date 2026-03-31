@@ -123,7 +123,7 @@ class _ExamDetailViewBody extends StatelessWidget {
     if (viewModel.questions.isEmpty) {
       return const Center(
         child: Text(
-          'Nenhuma questao encontrada',
+          'Nenhuma questão encontrada',
           style: TextStyle(
             fontFamily: 'Poppins',
             color: Colors.black54,
@@ -152,7 +152,7 @@ class _ExamDetailViewBody extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Questoes',
+                'Questões',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -404,7 +404,7 @@ class _ExamDetailViewBody extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             Icons.timer_outlined,
-            'Duracao',
+            'Duração',
             duration,
             AppColors.indigo,
           ),
@@ -413,7 +413,7 @@ class _ExamDetailViewBody extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             Icons.question_answer_outlined,
-            'Questoes',
+            'Questões',
             '${attempt.questionCount}',
             AppColors.orange,
           ),
@@ -523,9 +523,9 @@ class _ExamDetailViewBody extends StatelessWidget {
 
   String _getPerformanceBadge(double percentage) {
     if (percentage >= 90) return 'Excelente!';
-    if (percentage >= 80) return 'Otimo!';
+    if (percentage >= 80) return 'Ótimo!';
     if (percentage >= 70) return 'Aprovado';
-    if (percentage >= 50) return 'Quase la!';
+    if (percentage >= 50) return 'Quase lá!';
     return 'Tente de novo';
   }
 
@@ -538,11 +538,11 @@ class _ExamDetailViewBody extends StatelessWidget {
   }
 
   String _getMotivationalMessage(double percentage) {
-    if (percentage >= 90) return 'Performance incrivel! Continue assim!';
-    if (percentage >= 80) return 'Voce esta arrasando nos estudos!';
-    if (percentage >= 70) return 'Bom trabalho! Voce foi aprovado!';
-    if (percentage >= 50) return 'Quase la! Um pouco mais de estudo!';
-    return 'Nao desista! A pratica leva a perfeicao!';
+    if (percentage >= 90) return 'Performance incrível! Continue assim!';
+    if (percentage >= 80) return 'Você está arrasando nos estudos!';
+    if (percentage >= 70) return 'Bom trabalho! Você foi aprovado!';
+    if (percentage >= 50) return 'Quase lá! Um pouco mais de estudo!';
+    return 'Não desista! A prática leva à perfeição!';
   }
 
   String _formatDuration(Duration duration) {
@@ -728,7 +728,7 @@ class _QuestionAccordionState extends State<_QuestionAccordion> {
           ),
         ),
         title: Text(
-          'Questao ${widget.questionNumber}',
+          'Questão ${widget.questionNumber}',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -757,7 +757,7 @@ class _QuestionAccordionState extends State<_QuestionAccordion> {
               if (selectedChoiceKey != null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  '• Voce marcou: $selectedChoiceKey',
+                  '• Você marcou: $selectedChoiceKey',
                   style: TextStyle(
                     fontSize: 13,
                     color: AppColors.secondaryDark
@@ -944,7 +944,7 @@ class _QuestionAccordionState extends State<_QuestionAccordion> {
                 Expanded(
                   child: Text(
                     isCorrect
-                        ? 'Voce acertou esta questao!'
+                        ? 'Você acertou esta questão!'
                         : 'Resposta correta: ${correctChoice.choiceKey}',
                     style: TextStyle(
                       fontSize: 12,

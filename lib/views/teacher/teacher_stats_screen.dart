@@ -6,7 +6,7 @@ import '../../services/session_manager.dart';
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/teacher_dashboard_view_model.dart';
 
-/// Tela de estatisticas do professor
+/// Tela de estatísticas do professor
 class TeacherStatsScreen extends StatelessWidget {
   const TeacherStatsScreen({super.key});
 
@@ -18,7 +18,7 @@ class TeacherStatsScreen extends StatelessWidget {
 
     if (teacherRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -61,7 +61,7 @@ class _StatsContent extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Visao geral das suas atividades',
+                'Visão geral das suas atividades',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -125,7 +125,7 @@ class _StatsContent extends StatelessWidget {
         // Question stats by course
         if (viewModel.questionStats.isNotEmpty) ...[
           const Text(
-            'Questoes por Curso',
+            'Questões por Curso',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -155,11 +155,19 @@ class _StatsContent extends StatelessWidget {
   }
 
   Widget _buildSummaryCards(TeacherDashboardViewModel viewModel) {
+<<<<<<< HEAD
     return LayoutBuilder(
       builder: (context, constraints) {
         final cards = [
           _SummaryCard(
             title: 'Total de Questoes',
+=======
+    return Row(
+      children: [
+        Expanded(
+          child: _SummaryCard(
+            title: 'Total de Questões',
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             value: viewModel.totalQuestions.toString(),
             subtitle: '${viewModel.activeQuestions} ativas',
             icon: Icons.quiz_outlined,
@@ -179,8 +187,16 @@ class _StatsContent extends StatelessWidget {
             icon: Icons.people_outlined,
             color: Colors.purple,
           ),
+<<<<<<< HEAD
           _SummaryCard(
             title: 'Taxa de Aprovacao',
+=======
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _SummaryCard(
+            title: 'Taxa de Aprovação',
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
             subtitle: 'Media: ${viewModel.overallAvgScore.toStringAsFixed(1)} pts',
             icon: Icons.trending_up,
@@ -510,6 +526,7 @@ class _ExamStatsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+<<<<<<< HEAD
           LayoutBuilder(
             builder: (context, constraints) {
               final metrics = [
@@ -544,6 +561,31 @@ class _ExamStatsCard extends StatelessWidget {
               }
               return Row(children: metrics);
             },
+=======
+          Row(
+            children: [
+              _buildMetric(
+                'Provas realizadas',
+                totalExamsTaken.toString(),
+                Icons.assignment_turned_in_outlined,
+              ),
+              _buildMetric(
+                'Media de pontos',
+                avgScore.toStringAsFixed(1),
+                Icons.score_outlined,
+              ),
+              _buildMetric(
+                'Aprovados',
+                totalPassed.toString(),
+                Icons.check_circle_outline,
+              ),
+              _buildMetric(
+                'Taxa de aprovação',
+                '${passRate.toStringAsFixed(1)}%',
+                Icons.trending_up,
+              ),
+            ],
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
           ),
         ],
       ),

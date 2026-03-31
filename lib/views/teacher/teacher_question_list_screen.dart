@@ -8,7 +8,7 @@ import '../../ui/components/default_input_select.dart' hide Preview;
 import '../../ui/theme/app_color.dart';
 import '../../viewmodels/teacher/question_list_view_model.dart';
 
-/// Tela de listagem de questoes do professor
+/// Tela de listagem de questões do professor
 class TeacherQuestionListScreen extends StatelessWidget {
   const TeacherQuestionListScreen({super.key});
 
@@ -19,7 +19,7 @@ class TeacherQuestionListScreen extends StatelessWidget {
 
     if (teacherRepo == null || courseRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
@@ -82,17 +82,27 @@ class _QuestionListContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+<<<<<<< HEAD
           Row(
             children: [
               const Expanded(
                 child: Text(
                   'Banco de Questoes',
+=======
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Banco de Questões',
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2E7D32),
                   ),
                 ),
+<<<<<<< HEAD
               ),
               IconButton(
                 onPressed: viewModel.loadQuestions,
@@ -107,6 +117,17 @@ class _QuestionListContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
+=======
+                SizedBox(height: 4),
+                Text(
+                  'Gerencie todas as questões cadastradas',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             ),
           ),
           const SizedBox(height: 12),
@@ -130,6 +151,19 @@ class _QuestionListContent extends StatelessWidget {
                 Colors.grey,
               ),
             ],
+          ),
+          const SizedBox(width: 12),
+          _buildStatChip(
+            'Inativas',
+            viewModel.inactiveQuestions.toString(),
+            Colors.grey,
+          ),
+          const SizedBox(width: 12),
+          IconButton(
+            onPressed: viewModel.loadQuestions,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Recarregar questoes',
+            color: const Color(0xFF2E7D32),
           ),
         ],
       ),
@@ -419,12 +453,25 @@ class _QuestionListContent extends StatelessWidget {
     final courseOptions = viewModel.courses
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
+<<<<<<< HEAD
     final subjectOptions = viewModel.subjects
         .map((s) => SelectOption(value: s.id, label: s.name))
         .toList();
+=======
+
+    final subjectOptions = viewModel.subjects
+        .map((s) => SelectOption(value: s.id, label: s.name))
+        .toList();
+
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
     final categoryOptions = viewModel.categories
         .map((c) => SelectOption(value: c.id, label: c.name))
         .toList();
+    const originOptions = [
+      SelectOption(value: 'enade', label: 'ENADE'),
+      SelectOption(value: 'teacher', label: 'Professor'),
+    ];
+
     const originOptions = [
       SelectOption(value: 'enade', label: 'ENADE'),
       SelectOption(value: 'teacher', label: 'Professor'),
@@ -485,6 +532,10 @@ class _QuestionListContent extends StatelessWidget {
               onChanged: viewModel.setFilterOrigin,
             ),
           ),
+<<<<<<< HEAD
+=======
+          // Toggle for inactive questions
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -506,7 +557,16 @@ class _QuestionListContent extends StatelessWidget {
               ),
             ],
           ),
+<<<<<<< HEAD
           if (hasFilters)
+=======
+          // Clear filters button
+          if (viewModel.filterCourseId != null ||
+              viewModel.filterSubjectId != null ||
+              viewModel.filterCategoryId != null ||
+              viewModel.filterOrigin != null ||
+              viewModel.showInactiveOnly)
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             TextButton.icon(
               onPressed: viewModel.clearFilters,
               icon: const Icon(Icons.clear, size: 18),
@@ -566,7 +626,7 @@ class _QuestionListContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma questao encontrada',
+            'Nenhuma questão encontrada',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -575,7 +635,7 @@ class _QuestionListContent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Crie sua primeira questao no menu "Nova Questao"',
+            'Crie sua primeira questão no menu "Nova Questão"',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -631,10 +691,10 @@ class _QuestionListContent extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmar exclusao'),
+        title: const Text('Confirmar exclusão'),
         content: const Text(
-          'Tem certeza que deseja excluir esta questao? '
-          'Esta acao nao pode ser desfeita.',
+          'Tem certeza que deseja excluir esta questão? '
+          'Esta ação não pode ser desfeita.',
         ),
         actions: [
           TextButton(
@@ -720,11 +780,24 @@ class _QuestionCard extends StatelessWidget {
                   isEnade ? 'ENADE' : 'Professor',
                   isEnade ? const Color(0xFF1565C0) : const Color(0xFF00897B),
                 ),
+<<<<<<< HEAD
                 if (courseName != null)
                   _buildBadge(courseName!, Colors.blue),
                 if (subjectName != null)
                   _buildBadge(subjectName!, Colors.teal),
                 if (categoryName != null)
+=======
+                if (courseName != null) ...[
+                  const SizedBox(width: 8),
+                  _buildBadge(courseName!, Colors.blue),
+                ],
+                if (subjectName != null) ...[
+                  const SizedBox(width: 8),
+                  _buildBadge(subjectName!, Colors.teal),
+                ],
+                if (categoryName != null) ...[
+                  const SizedBox(width: 8),
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
                   _buildBadge(categoryName!, Colors.purple),
                 _buildBadge(
                   difficultyLevel,
@@ -746,11 +819,16 @@ class _QuestionCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+<<<<<<< HEAD
             // Bottom row: metadata
             Wrap(
               spacing: 12,
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
+=======
+            // Bottom row: metadata and actions
+            Row(
+>>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -851,6 +929,71 @@ class _QuestionCard extends StatelessWidget {
                   tooltip: 'Excluir questao',
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(8),
+                ),
+                if (teacherName != null) ...[
+                  const SizedBox(width: 16),
+                  Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    teacherName!,
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
+                ],
+                const Spacer(),
+                // Toggle active/inactive
+                Tooltip(
+                  message: isActive ? 'Desativar questao' : 'Ativar questao',
+                  child: InkWell(
+                    onTap: onToggleActive,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? AppColors.green.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isActive
+                              ? AppColors.green.withValues(alpha: 0.3)
+                              : Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isActive
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            size: 16,
+                            color: isActive ? AppColors.green : Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isActive ? 'Ativa' : 'Inativa',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isActive ? AppColors.green : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                  onPressed: onEdit,
+                  tooltip: 'Editar questao',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: onDelete,
+                  tooltip: 'Excluir questao',
                 ),
               ],
             ),

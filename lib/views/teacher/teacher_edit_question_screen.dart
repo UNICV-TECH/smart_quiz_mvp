@@ -28,7 +28,7 @@ class TeacherEditQuestionScreen extends StatelessWidget {
     if (teacherRepo == null || courseRepo == null) {
       return const Scaffold(
         body: Center(
-          child: Text('Erro: conexao com o servidor nao disponivel'),
+          child: Text('Erro: conexão com o servidor não disponível'),
         ),
       );
     }
@@ -110,7 +110,7 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Questao'),
+        title: const Text('Editar Questão'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 1,
@@ -229,7 +229,7 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Contexto da Questao',
+              'Contexto da Questão',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -411,7 +411,7 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
               _hasChanges = false;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Questao atualizada com sucesso!'),
+                  content: Text('Questão atualizada com sucesso!'),
                   backgroundColor: AppColors.green,
                   duration: Duration(seconds: 2),
                 ),

@@ -17,7 +17,7 @@ class TeacherCategoryListScreen extends StatelessWidget {
 
     if (teacherRepo == null || courseRepo == null) {
       return const Center(
-        child: Text('Erro: conexao com o servidor nao disponivel'),
+        child: Text('Erro: conexão com o servidor não disponível'),
       );
     }
 
