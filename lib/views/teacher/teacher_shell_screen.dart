@@ -43,6 +43,8 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
       formProtection.markSaved();
     }
 
+    if (!mounted) return;
+
     if (_isMobile(context)) {
       Navigator.of(context).pop();
     }
