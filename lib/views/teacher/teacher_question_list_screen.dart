@@ -72,49 +72,64 @@ class _QuestionListContent extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, QuestionListViewModel viewModel) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width < 800 ? 12 : 24),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(color: Color(0xFFEEEEEE)),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Banco de Questões',
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Banco de Questoes',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2E7D32),
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Gerencie todas as questões cadastradas',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+              ),
+              IconButton(
+                onPressed: viewModel.loadQuestions,
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Recarregar questoes',
+                color: const Color(0xFF2E7D32),
+              ),
+            ],
+          ),
+          const Text(
+            'Gerencie todas as questoes cadastradas',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
             ),
           ),
-          // Stats
-          _buildStatChip(
-            'Total',
-            viewModel.totalQuestions.toString(),
-            Colors.blue,
-          ),
-          const SizedBox(width: 12),
-          _buildStatChip(
-            'Ativas',
-            viewModel.activeQuestions.toString(),
-            AppColors.green,
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              _buildStatChip(
+                'Total',
+                viewModel.totalQuestions.toString(),
+                Colors.blue,
+              ),
+              _buildStatChip(
+                'Ativas',
+                viewModel.activeQuestions.toString(),
+                AppColors.green,
+              ),
+              _buildStatChip(
+                'Inativas',
+                viewModel.inactiveQuestions.toString(),
+                Colors.grey,
+              ),
+            ],
           ),
           const SizedBox(width: 12),
           _buildStatChip(
@@ -167,18 +182,262 @@ class _QuestionListContent extends StatelessWidget {
   }
 
   Widget _buildFilters(BuildContext context, QuestionListViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
+    final hasFilters = viewModel.filterCourseId != null ||
+        viewModel.filterSubjectId != null ||
+        viewModel.filterCategoryId != null ||
+        viewModel.filterOrigin != null ||
+        viewModel.showInactiveOnly;
+
+    if (isMobile) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showFilterBottomSheet(context, viewModel),
+                icon: Badge(
+                  isLabelVisible: hasFilters,
+                  backgroundColor: AppColors.green,
+                  smallSize: 8,
+                  child: const Icon(Icons.filter_list, size: 20),
+                ),
+                label: Text(hasFilters ? 'Filtros ativos' : 'Filtros'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor:
+                      hasFilters ? AppColors.green : Colors.grey[700],
+                  side: BorderSide(
+                    color: hasFilters
+                        ? AppColors.green
+                        : Colors.grey[300]!,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            if (hasFilters) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: viewModel.clearFilters,
+                icon: const Icon(Icons.clear, size: 20),
+                tooltip: 'Limpar filtros',
+                style: IconButton.styleFrom(
+                  foregroundColor: Colors.grey[600],
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return _buildDesktopFilters(context, viewModel, hasFilters);
+  }
+
+  void _showFilterBottomSheet(
+      BuildContext context, QuestionListViewModel viewModel) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return ChangeNotifierProvider.value(
+          value: viewModel,
+          child: Consumer<QuestionListViewModel>(
+            builder: (context, vm, _) {
+              final courseOptions = vm.courses
+                  .map((c) => SelectOption(value: c.id, label: c.title))
+                  .toList();
+              final subjectOptions = vm.subjects
+                  .map((s) => SelectOption(value: s.id, label: s.name))
+                  .toList();
+              final categoryOptions = vm.categories
+                  .map((c) => SelectOption(value: c.id, label: c.name))
+                  .toList();
+              const originOptions = [
+                SelectOption(value: 'enade', label: 'ENADE'),
+                SelectOption(value: 'teacher', label: 'Professor'),
+              ];
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.75,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Handle bar
+                      Container(
+                        margin: const EdgeInsets.only(top: 12),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      // Title
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.filter_list,
+                                color: Color(0xFF2E7D32)),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Filtros',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () {
+                                vm.clearFilters();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Limpar'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      // Filter fields
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SelectPesquisa(
+                                label: 'Curso',
+                                options: courseOptions,
+                                value: vm.filterCourseId,
+                                placeholder: 'Todos os cursos',
+                                onChanged: vm.setFilterCourse,
+                              ),
+                              const SizedBox(height: 16),
+                              SelectPesquisa(
+                                label: 'Materia',
+                                options: subjectOptions,
+                                value: vm.filterSubjectId,
+                                placeholder: 'Todas as materias',
+                                onChanged: vm.setFilterSubject,
+                                enabled: vm.filterCourseId != null,
+                              ),
+                              const SizedBox(height: 16),
+                              SelectPesquisa(
+                                label: 'Categoria',
+                                options: categoryOptions,
+                                value: vm.filterCategoryId,
+                                placeholder: 'Todas as categorias',
+                                onChanged: vm.setFilterCategory,
+                                enabled: vm.filterCourseId != null,
+                              ),
+                              const SizedBox(height: 16),
+                              SelectPesquisa(
+                                label: 'Origem',
+                                options: originOptions,
+                                value: vm.filterOrigin,
+                                placeholder: 'Todas as origens',
+                                onChanged: vm.setFilterOrigin,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Mostrar inativas',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Switch(
+                                    value: vm.showInactiveOnly,
+                                    onChanged: (_) =>
+                                        vm.toggleShowInactive(),
+                                    activeTrackColor: AppColors.green
+                                        .withValues(alpha: 0.5),
+                                    thumbColor:
+                                        WidgetStateProperty.resolveWith(
+                                            (states) {
+                                      if (states
+                                          .contains(WidgetState.selected)) {
+                                        return AppColors.green;
+                                      }
+                                      return null;
+                                    }),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Apply button
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2E7D32),
+                              foregroundColor: Colors.white,
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Aplicar Filtros',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDesktopFilters(BuildContext context,
+      QuestionListViewModel viewModel, bool hasFilters) {
     final courseOptions = viewModel.courses
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
-
     final subjectOptions = viewModel.subjects
         .map((s) => SelectOption(value: s.id, label: s.name))
         .toList();
-
     final categoryOptions = viewModel.categories
         .map((c) => SelectOption(value: c.id, label: c.name))
         .toList();
-
     const originOptions = [
       SelectOption(value: 'enade', label: 'ENADE'),
       SelectOption(value: 'teacher', label: 'Professor'),
@@ -261,12 +520,7 @@ class _QuestionListContent extends StatelessWidget {
               ),
             ],
           ),
-          // Clear filters button
-          if (viewModel.filterCourseId != null ||
-              viewModel.filterSubjectId != null ||
-              viewModel.filterCategoryId != null ||
-              viewModel.filterOrigin != null ||
-              viewModel.showInactiveOnly)
+          if (hasFilters)
             TextButton.icon(
               onPressed: viewModel.clearFilters,
               icon: const Icon(Icons.clear, size: 18),
@@ -349,7 +603,7 @@ class _QuestionListContent extends StatelessWidget {
   Widget _buildQuestionList(
       BuildContext context, QuestionListViewModel viewModel) {
     return ListView.builder(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(MediaQuery.of(context).size.width < 800 ? 12 : 24),
       itemCount: viewModel.questions.length,
       itemBuilder: (context, index) {
         final question = viewModel.questions[index];
@@ -471,31 +725,25 @@ class _QuestionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: badges and actions
-            Row(
+            // Top row: badges
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _buildBadge(
                   isEnade ? 'ENADE' : 'Professor',
                   isEnade ? const Color(0xFF1565C0) : const Color(0xFF00897B),
                 ),
-                if (courseName != null) ...[
-                  const SizedBox(width: 8),
+                if (courseName != null)
                   _buildBadge(courseName!, Colors.blue),
-                ],
-                if (subjectName != null) ...[
-                  const SizedBox(width: 8),
+                if (subjectName != null)
                   _buildBadge(subjectName!, Colors.teal),
-                ],
-                if (categoryName != null) ...[
-                  const SizedBox(width: 8),
+                if (categoryName != null)
                   _buildBadge(categoryName!, Colors.purple),
-                ],
-                const Spacer(),
                 _buildBadge(
                   difficultyLevel,
                   _getDifficultyColor(difficultyLevel),
                 ),
-                const SizedBox(width: 8),
                 _buildBadge('$points pts', Colors.orange),
               ],
             ),
@@ -512,22 +760,111 @@ class _QuestionCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Bottom row: metadata and actions
-            Row(
+            // Bottom row: metadata
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Icon(Icons.format_list_bulleted,
-                    size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '$answerCount alternativas',
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.format_list_bulleted,
+                        size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$answerCount alternativas',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  _formatDate(createdAt),
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDate(createdAt),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+                if (teacherName != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        teacherName!,
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Actions
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Tooltip(
+                  message: isActive ? 'Desativar questao' : 'Ativar questao',
+                  child: InkWell(
+                    onTap: onToggleActive,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? AppColors.green.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isActive
+                              ? AppColors.green.withValues(alpha: 0.3)
+                              : Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isActive
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            size: 16,
+                            color: isActive ? AppColors.green : Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isActive ? 'Ativa' : 'Inativa',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isActive ? AppColors.green : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                  onPressed: onEdit,
+                  tooltip: 'Editar questao',
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(8),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: onDelete,
+                  tooltip: 'Excluir questao',
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(8),
                 ),
                 if (teacherName != null) ...[
                   const SizedBox(width: 16),

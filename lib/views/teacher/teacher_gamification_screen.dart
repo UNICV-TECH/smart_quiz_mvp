@@ -53,7 +53,7 @@ class _TeacherGamificationBody extends StatelessWidget {
           children: [
             // Header
             const Padding(
-              padding: EdgeInsets.fromLTRB(32, 24, 32, 0),
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: Text(
                 'Gamificação',
                 style: TextStyle(
@@ -65,7 +65,7 @@ class _TeacherGamificationBody extends StatelessWidget {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.fromLTRB(32, 4, 32, 16),
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: Text(
                 'Ranking e estatísticas dos seus templates',
                 style: TextStyle(
@@ -78,7 +78,7 @@ class _TeacherGamificationBody extends StatelessWidget {
 
             // Template dropdown
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -169,7 +169,7 @@ class _TeacherGamificationBody extends StatelessWidget {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

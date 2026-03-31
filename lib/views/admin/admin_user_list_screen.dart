@@ -89,50 +89,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
           const SizedBox(height: 12),
 
           // Filter chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildFilterChip(
-                  label: 'Todos',
-                  isSelected: viewModel.roleFilter == null,
-                  onSelected: (_) => viewModel.setRoleFilter(null),
-                ),
-                _buildFilterChip(
-                  label: 'Alunos',
-                  isSelected: viewModel.roleFilter == 'student',
-                  onSelected: (_) => viewModel.setRoleFilter('student'),
-                ),
-                _buildFilterChip(
-                  label: 'Professores',
-                  isSelected: viewModel.roleFilter == 'teacher',
-                  onSelected: (_) => viewModel.setRoleFilter('teacher'),
-                ),
-                _buildFilterChip(
-                  label: 'Admins',
-                  isSelected: viewModel.roleFilter == 'admin',
-                  onSelected: (_) => viewModel.setRoleFilter('admin'),
-                ),
-                const SizedBox(width: 16),
-                _buildFilterChip(
-                  label: 'Ativos',
-                  isSelected: viewModel.activeFilter == true,
-                  onSelected: (_) => viewModel.setActiveFilter(
-                    viewModel.activeFilter == true ? null : true,
-                  ),
-                ),
-                _buildFilterChip(
-                  label: 'Inativos',
-                  isSelected: viewModel.activeFilter == false,
-                  onSelected: (_) => viewModel.setActiveFilter(
-                    viewModel.activeFilter == false ? null : false,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildFilterSection(viewModel),
 
           const SizedBox(height: 8),
 
@@ -213,6 +170,270 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
     );
   }
 
+  Widget _buildFilterSection(AdminUserManagementViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final hasFilters =
+        viewModel.roleFilter != null || viewModel.activeFilter != null;
+
+    if (isMobile) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () =>
+                    _showFilterBottomSheet(context, viewModel),
+                icon: Badge(
+                  isLabelVisible: hasFilters,
+                  backgroundColor: _goldColor,
+                  smallSize: 8,
+                  child: const Icon(Icons.filter_list, size: 20),
+                ),
+                label: Text(hasFilters ? 'Filtros ativos' : 'Filtros'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor:
+                      hasFilters ? _goldColor : Colors.grey[700],
+                  side: BorderSide(
+                    color: hasFilters ? _goldColor : Colors.grey[300]!,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            if (hasFilters) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  viewModel.setRoleFilter(null);
+                  viewModel.setActiveFilter(null);
+                },
+                icon: const Icon(Icons.clear, size: 20),
+                tooltip: 'Limpar filtros',
+                style:
+                    IconButton.styleFrom(foregroundColor: Colors.grey[600]),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _buildFilterChip(
+            label: 'Todos',
+            isSelected: viewModel.roleFilter == null,
+            onSelected: (_) => viewModel.setRoleFilter(null),
+          ),
+          _buildFilterChip(
+            label: 'Alunos',
+            isSelected: viewModel.roleFilter == 'student',
+            onSelected: (_) => viewModel.setRoleFilter('student'),
+          ),
+          _buildFilterChip(
+            label: 'Professores',
+            isSelected: viewModel.roleFilter == 'teacher',
+            onSelected: (_) => viewModel.setRoleFilter('teacher'),
+          ),
+          _buildFilterChip(
+            label: 'Admins',
+            isSelected: viewModel.roleFilter == 'admin',
+            onSelected: (_) => viewModel.setRoleFilter('admin'),
+          ),
+          const SizedBox(width: 16),
+          _buildFilterChip(
+            label: 'Ativos',
+            isSelected: viewModel.activeFilter == true,
+            onSelected: (_) => viewModel.setActiveFilter(
+              viewModel.activeFilter == true ? null : true,
+            ),
+          ),
+          _buildFilterChip(
+            label: 'Inativos',
+            isSelected: viewModel.activeFilter == false,
+            onSelected: (_) => viewModel.setActiveFilter(
+              viewModel.activeFilter == false ? null : false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet(
+      BuildContext context, AdminUserManagementViewModel viewModel) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return ChangeNotifierProvider.value(
+          value: viewModel,
+          child: Consumer<AdminUserManagementViewModel>(
+            builder: (context, vm, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.filter_list, color: _goldColor),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Filtros',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            vm.setRoleFilter(null);
+                            vm.setActiveFilter(null);
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Limpar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Papel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildFilterChip(
+                              label: 'Todos',
+                              isSelected: vm.roleFilter == null,
+                              onSelected: (_) =>
+                                  vm.setRoleFilter(null),
+                            ),
+                            _buildFilterChip(
+                              label: 'Alunos',
+                              isSelected: vm.roleFilter == 'student',
+                              onSelected: (_) =>
+                                  vm.setRoleFilter('student'),
+                            ),
+                            _buildFilterChip(
+                              label: 'Professores',
+                              isSelected: vm.roleFilter == 'teacher',
+                              onSelected: (_) =>
+                                  vm.setRoleFilter('teacher'),
+                            ),
+                            _buildFilterChip(
+                              label: 'Admins',
+                              isSelected: vm.roleFilter == 'admin',
+                              onSelected: (_) =>
+                                  vm.setRoleFilter('admin'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Status',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildFilterChip(
+                              label: 'Todos',
+                              isSelected: vm.activeFilter == null,
+                              onSelected: (_) =>
+                                  vm.setActiveFilter(null),
+                            ),
+                            _buildFilterChip(
+                              label: 'Ativos',
+                              isSelected: vm.activeFilter == true,
+                              onSelected: (_) => vm.setActiveFilter(
+                                vm.activeFilter == true
+                                    ? null
+                                    : true,
+                              ),
+                            ),
+                            _buildFilterChip(
+                              label: 'Inativos',
+                              isSelected: vm.activeFilter == false,
+                              onSelected: (_) => vm.setActiveFilter(
+                                vm.activeFilter == false
+                                    ? null
+                                    : false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _goldColor,
+                          foregroundColor: Colors.white,
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Aplicar Filtros',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildFilterChip({
     required String label,
     required bool isSelected,
@@ -250,7 +471,9 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
             ),
           ],
         ),
-        child: DataTable(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
           headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
           columns: const [
             DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -274,6 +497,7 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
               ],
             );
           }).toList(),
+        ),
         ),
       ),
     );
@@ -387,8 +611,8 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              content: SizedBox(
-                width: 400,
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
                 child: Form(
                   key: formKey,
                   child: Column(

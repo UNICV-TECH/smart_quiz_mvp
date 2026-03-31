@@ -25,7 +25,8 @@ class AdminDashboardScreen extends StatelessWidget {
                   onRefresh: viewModel.refresh,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(
+                        MediaQuery.of(context).size.width < 800 ? 12 : 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -321,26 +322,45 @@ class _CourseStatsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              stats.courseName,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile = constraints.maxWidth < 500;
+          final title = Text(
+            stats.courseName,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
-          ),
-          _statChip('Questões', stats.totalQuestions.toString()),
-          const SizedBox(width: 12),
-          _statChip('Templates', stats.totalTemplates.toString()),
-          const SizedBox(width: 12),
-          _statChip('Provas', stats.totalAttempts.toString()),
-          const SizedBox(width: 12),
-          _statChip('Média', '${stats.avgScore.toStringAsFixed(1)}%'),
-        ],
+          );
+          final chips = Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              _statChip('Questões', stats.totalQuestions.toString()),
+              _statChip('Templates', stats.totalTemplates.toString()),
+              _statChip('Provas', stats.totalAttempts.toString()),
+              _statChip('Média', '${stats.avgScore.toStringAsFixed(1)}%'),
+            ],
+          );
+
+          if (isMobile) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                title,
+                const SizedBox(height: 8),
+                chips,
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(flex: 3, child: title),
+              chips,
+            ],
+          );
+        },
       ),
     );
   }
