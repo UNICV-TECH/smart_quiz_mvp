@@ -94,8 +94,13 @@ class _CreateQuestionContentState extends State<_CreateQuestionContent> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<CreateQuestionViewModel>();
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 32,
+        vertical: isMobile ? 16 : 32,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1100),

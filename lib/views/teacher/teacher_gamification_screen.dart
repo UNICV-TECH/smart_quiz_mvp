@@ -52,21 +52,31 @@ class _TeacherGamificationBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            const Padding(
-              padding: EdgeInsets.fromLTRB(32, 24, 32, 0),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                MediaQuery.of(context).size.width < 768 ? 16 : 32,
+                MediaQuery.of(context).size.width < 768 ? 16 : 24,
+                MediaQuery.of(context).size.width < 768 ? 16 : 32,
+                0,
+              ),
               child: Text(
                 'Gamificação',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: MediaQuery.of(context).size.width < 768 ? 20 : 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
+                  color: const Color(0xFF2E7D32),
                   fontFamily: 'Poppins',
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(32, 4, 32, 16),
-              child: Text(
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                MediaQuery.of(context).size.width < 768 ? 16 : 32,
+                4,
+                MediaQuery.of(context).size.width < 768 ? 16 : 32,
+                16,
+              ),
+              child: const Text(
                 'Ranking e estatísticas dos seus templates',
                 style: TextStyle(
                   fontSize: 14,

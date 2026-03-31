@@ -40,6 +40,10 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
     }
 
     widget.navigationShell.goBranch(branchIndex);
+
+    if (mounted && _isMobile(context)) {
+      _scaffoldKey.currentState?.closeDrawer();
+    }
   }
 
   Map<String, dynamic> get _userData {
@@ -53,25 +57,54 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
     };
   }
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
+
   @override
   Widget build(BuildContext context) {
     final sessionManager = context.watch<SessionManager>();
     final isAdminViewing =
         sessionManager.isAdmin && sessionManager.viewingAsTeacher;
+    final isMobile = _isMobile(context);
 
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: isMobile
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+              title: const Text(
+                'Smart Quiz - Professor',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              backgroundColor: const Color(0xFF2E7D32),
+              foregroundColor: Colors.white,
+              elevation: 1,
+            )
+          : null,
+      drawer: isMobile
+          ? Drawer(
+              child: _buildTeacherSideMenu(closeable: true),
+            )
+          : null,
       body: Column(
         children: [
           if (isAdminViewing) _buildAdminBanner(context, sessionManager),
           Expanded(
-            child: Row(
-              children: [
-                _buildTeacherSideMenu(),
-                Expanded(
-                  child: widget.navigationShell,
-                ),
-              ],
-            ),
+            child: isMobile
+                ? widget.navigationShell
+                : Row(
+                    children: [
+                      _buildTeacherSideMenu(),
+                      Expanded(
+                        child: widget.navigationShell,
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -123,7 +156,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
     );
   }
 
-  Widget _buildTeacherSideMenu() {
+  Widget _buildTeacherSideMenu({bool closeable = false}) {
     return Container(
       width: 280,
       decoration: BoxDecoration(

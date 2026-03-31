@@ -238,7 +238,6 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -250,30 +249,38 @@ class _AdminUserListScreenState extends State<AdminUserListScreen> {
             ),
           ],
         ),
-        child: DataTable(
-          headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
-          columns: const [
-            DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('E-mail', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Papel', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Provas', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Média', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Ações', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: viewModel.users.map((user) {
-            return DataRow(
-              cells: [
-                DataCell(Text(user.name.isEmpty ? '(sem nome)' : user.name)),
-                DataCell(Text(user.email)),
-                DataCell(_buildRoleDropdown(context, viewModel, user)),
-                DataCell(_buildStatusBadge(user.isActive)),
-                DataCell(Text(user.examCount.toString())),
-                DataCell(Text('${user.avgScore.toStringAsFixed(1)}%')),
-                DataCell(_buildActions(context, viewModel, user)),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width - 48,
+            ),
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
+              columns: const [
+                DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('E-mail', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Papel', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Provas', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Média', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Ações', style: TextStyle(fontWeight: FontWeight.bold))),
               ],
-            );
-          }).toList(),
+              rows: viewModel.users.map((user) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(user.name.isEmpty ? '(sem nome)' : user.name)),
+                    DataCell(Text(user.email)),
+                    DataCell(_buildRoleDropdown(context, viewModel, user)),
+                    DataCell(_buildStatusBadge(user.isActive)),
+                    DataCell(Text(user.examCount.toString())),
+                    DataCell(Text('${user.avgScore.toStringAsFixed(1)}%')),
+                    DataCell(_buildActions(context, viewModel, user)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );

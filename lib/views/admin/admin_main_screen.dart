@@ -21,9 +21,13 @@ class AdminMainScreen extends StatefulWidget {
 
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const _goldColor = Color(0xFFB8860B);
   static const _goldLight = Color(0xFFFFF8E1);
+
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
 
   Map<String, dynamic> get _userData {
     final sessionManager = context.watch<SessionManager>();
@@ -35,6 +39,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     };
   }
 
+  void _selectIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (_isMobile(context)) {
+      _scaffoldKey.currentState?.closeDrawer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final adminRepo = context.read<AdminRepository?>();
@@ -44,15 +57,36 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       );
     }
 
+    final isMobile = _isMobile(context);
+
     return Scaffold(
-      body: Row(
-        children: [
-          _buildSideMenu(),
-          Expanded(
-            child: _buildContent(adminRepo),
-          ),
-        ],
-      ),
+      key: _scaffoldKey,
+      appBar: isMobile
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+              title: const Text(
+                'Smart Quiz - Admin',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              backgroundColor: _goldColor,
+              foregroundColor: Colors.white,
+              elevation: 1,
+            )
+          : null,
+      drawer: isMobile ? Drawer(child: _buildSideMenu()) : null,
+      body: isMobile
+          ? _buildContent(adminRepo)
+          : Row(
+              children: [
+                _buildSideMenu(),
+                Expanded(
+                  child: _buildContent(adminRepo),
+                ),
+              ],
+            ),
     );
   }
 
@@ -134,6 +168,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     title: 'Painel Professor',
                     index: -1,
                     onTap: () {
+                      if (_isMobile(context)) {
+                        _scaffoldKey.currentState?.closeDrawer();
+                      }
                       context.read<SessionManager>().enterTeacherView();
                       context.go('/teacher/templates');
                     },
@@ -144,6 +181,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                     title: 'Painel Aluno',
                     index: -2,
                     onTap: () {
+                      if (_isMobile(context)) {
+                        _scaffoldKey.currentState?.closeDrawer();
+                      }
                       context.read<SessionManager>().enterStudentView();
                       context.go('/home');
                     },
@@ -204,11 +244,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap ??
-            () {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+            () => _selectIndex(index),
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -88,35 +88,52 @@ class AdminDashboardScreen extends StatelessWidget {
 
   Widget _buildSummaryCards(AdminDashboardViewModel viewModel) {
     final stats = viewModel.platformStats;
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      children: [
-        _SummaryCard(
-          title: 'Total Usuários',
-          value: stats.totalUsers.toString(),
-          icon: Icons.people,
-          color: const Color(0xFF42A5F5),
-        ),
-        _SummaryCard(
-          title: 'Questões',
-          value: stats.totalQuestions.toString(),
-          icon: Icons.quiz,
-          color: const Color(0xFF66BB6A),
-        ),
-        _SummaryCard(
-          title: 'Provas Realizadas',
-          value: stats.totalAttempts.toString(),
-          icon: Icons.assignment,
-          color: const Color(0xFFFF7043),
-        ),
-        _SummaryCard(
-          title: 'Taxa Aprovação',
-          value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
-          icon: Icons.check_circle,
-          color: const Color(0xFF9575CD),
-        ),
-      ],
+    final cards = [
+      _SummaryCard(
+        title: 'Total Usuários',
+        value: stats.totalUsers.toString(),
+        icon: Icons.people,
+        color: const Color(0xFF42A5F5),
+      ),
+      _SummaryCard(
+        title: 'Questões',
+        value: stats.totalQuestions.toString(),
+        icon: Icons.quiz,
+        color: const Color(0xFF66BB6A),
+      ),
+      _SummaryCard(
+        title: 'Provas Realizadas',
+        value: stats.totalAttempts.toString(),
+        icon: Icons.assignment,
+        color: const Color(0xFFFF7043),
+      ),
+      _SummaryCard(
+        title: 'Taxa Aprovação',
+        value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
+        icon: Icons.check_circle,
+        color: const Color(0xFF9575CD),
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 500) {
+          // Mobile: 2 columns
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: cards.map((card) => SizedBox(
+              width: (constraints.maxWidth - 12) / 2,
+              child: card,
+            )).toList(),
+          );
+        }
+        return Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: cards,
+        );
+      },
     );
   }
 

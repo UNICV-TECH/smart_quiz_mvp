@@ -64,28 +64,30 @@ class _CategoryListContent extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, CategoryListViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Categorias',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: isMobile ? 20 : 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
+                    color: const Color(0xFF2E7D32),
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   'Gerencie as categorias das matérias',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
@@ -96,11 +98,14 @@ class _CategoryListContent extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => _showCreateDialog(context, viewModel),
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('Nova Categoria'),
+              label: Text(isMobile ? 'Nova' : 'Nova Categoria'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2E7D32),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 12 : 20,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -111,7 +116,7 @@ class _CategoryListContent extends StatelessWidget {
     );
   }
 
-  Widget _buildFilters(BuildContext context, CategoryListViewModel viewModel) {
+  Widget _buildFilterContent(BuildContext context, CategoryListViewModel viewModel) {
     final courseOptions = viewModel.courses
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
@@ -120,39 +125,175 @@ class _CategoryListContent extends StatelessWidget {
         .map((s) => SelectOption(value: s.id, label: s.name))
         .toList();
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SelectPesquisa(
+            label: 'Curso',
+            options: courseOptions,
+            value: viewModel.selectedCourseId,
+            placeholder: 'Selecione um curso',
+            onChanged: viewModel.setFilterCourse,
+          ),
+          const SizedBox(height: 12),
+          SelectPesquisa(
+            label: 'Matéria',
+            options: subjectOptions,
+            value: viewModel.selectedSubjectId,
+            placeholder: viewModel.selectedCourseId != null
+                ? 'Todas as matérias'
+                : 'Selecione um curso primeiro',
+            onChanged: viewModel.setFilterSubject,
+            enabled: viewModel.selectedCourseId != null,
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: SelectPesquisa(
+            label: 'Curso',
+            options: courseOptions,
+            value: viewModel.selectedCourseId,
+            placeholder: 'Selecione um curso',
+            onChanged: viewModel.setFilterCourse,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: SelectPesquisa(
+            label: 'Matéria',
+            options: subjectOptions,
+            value: viewModel.selectedSubjectId,
+            placeholder: viewModel.selectedCourseId != null
+                ? 'Todas as matérias'
+                : 'Selecione um curso primeiro',
+            onChanged: viewModel.setFilterSubject,
+            enabled: viewModel.selectedCourseId != null,
+          ),
+        ),
+        const Spacer(),
+      ],
+    );
+  }
+
+  bool _hasActiveFilters(CategoryListViewModel viewModel) {
+    return viewModel.selectedCourseId != null || viewModel.selectedSubjectId != null;
+  }
+
+  void _showFiltersModal(BuildContext context, CategoryListViewModel viewModel) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (modalContext) {
+        return ChangeNotifierProvider.value(
+          value: viewModel,
+          child: Consumer<CategoryListViewModel>(
+            builder: (ctx, vm, _) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 16,
+                  bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Filtros',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2E7D32),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFilterContent(ctx, vm),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Aplicar'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilters(BuildContext context, CategoryListViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    if (isMobile) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+        ),
+        child: OutlinedButton.icon(
+          onPressed: () => _showFiltersModal(context, viewModel),
+          icon: const Icon(Icons.filter_list, size: 20),
+          label: Text(
+            _hasActiveFilters(viewModel) ? 'Filtros ativos' : 'Filtros',
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _hasActiveFilters(viewModel)
+                ? const Color(0xFF2E7D32)
+                : Colors.grey[700],
+            side: BorderSide(
+              color: _hasActiveFilters(viewModel)
+                  ? const Color(0xFF2E7D32)
+                  : Colors.grey[400]!,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: SelectPesquisa(
-              label: 'Curso',
-              options: courseOptions,
-              value: viewModel.selectedCourseId,
-              placeholder: 'Selecione um curso',
-              onChanged: viewModel.setFilterCourse,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: SelectPesquisa(
-              label: 'Matéria',
-              options: subjectOptions,
-              value: viewModel.selectedSubjectId,
-              placeholder: viewModel.selectedCourseId != null
-                  ? 'Todas as matérias'
-                  : 'Selecione um curso primeiro',
-              onChanged: viewModel.setFilterSubject,
-              enabled: viewModel.selectedCourseId != null,
-            ),
-          ),
-          const Spacer(),
-        ],
-      ),
+      child: _buildFilterContent(context, viewModel),
     );
   }
 
@@ -466,7 +607,10 @@ class _CategoryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         name,
@@ -476,14 +620,10 @@ class _CategoryCard extends StatelessWidget {
                           color: Colors.black87,
                         ),
                       ),
-                      if (courseName != null) ...[
-                        const SizedBox(width: 12),
+                      if (courseName != null)
                         _buildBadge(courseName!, Colors.blue),
-                      ],
-                      if (subjectName != null) ...[
-                        const SizedBox(width: 8),
+                      if (subjectName != null)
                         _buildBadge(subjectName!, const Color(0xFF2E7D32)),
-                      ],
                     ],
                   ),
                   if (description != null && description!.isNotEmpty) ...[
