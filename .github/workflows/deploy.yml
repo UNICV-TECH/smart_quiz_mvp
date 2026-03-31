@@ -97,8 +97,9 @@ jobs:
           git checkout -- .
           git clean -fd
           git pull --rebase origin main
-          # Restaurar build e commitar
-          cp -r /tmp/web-build build/web
+          # Remover build antigo e restaurar build novo
+          rm -rf build/web
+          mv /tmp/web-build build/web
           git add build/web -f
           git diff --staged --quiet || git commit -m "chore: build web release [skip ci]"
           git push
