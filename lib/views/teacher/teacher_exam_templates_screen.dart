@@ -845,7 +845,6 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-<<<<<<< HEAD
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -858,15 +857,6 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                         fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                 ],
-=======
-              Icon(Icons.format_list_numbered,
-                  color: Colors.grey[600], size: 20),
-              const SizedBox(width: 8),
-              Text(
-                '${viewModel.templateQuestions.length} questão(ões) no template',
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w500),
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
               ),
               ElevatedButton.icon(
                 onPressed: () => _showQuestionSelector(viewModel),

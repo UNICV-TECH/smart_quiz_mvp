@@ -82,27 +82,17 @@ class _QuestionListContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-<<<<<<< HEAD
           Row(
             children: [
               const Expanded(
                 child: Text(
                   'Banco de Questoes',
-=======
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Banco de Questões',
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2E7D32),
                   ),
                 ),
-<<<<<<< HEAD
               ),
               IconButton(
                 onPressed: viewModel.loadQuestions,
@@ -117,17 +107,6 @@ class _QuestionListContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
-=======
-                SizedBox(height: 4),
-                Text(
-                  'Gerencie todas as questões cadastradas',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             ),
           ),
           const SizedBox(height: 12),
@@ -453,25 +432,12 @@ class _QuestionListContent extends StatelessWidget {
     final courseOptions = viewModel.courses
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
-<<<<<<< HEAD
     final subjectOptions = viewModel.subjects
         .map((s) => SelectOption(value: s.id, label: s.name))
         .toList();
-=======
-
-    final subjectOptions = viewModel.subjects
-        .map((s) => SelectOption(value: s.id, label: s.name))
-        .toList();
-
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
     final categoryOptions = viewModel.categories
         .map((c) => SelectOption(value: c.id, label: c.name))
         .toList();
-    const originOptions = [
-      SelectOption(value: 'enade', label: 'ENADE'),
-      SelectOption(value: 'teacher', label: 'Professor'),
-    ];
-
     const originOptions = [
       SelectOption(value: 'enade', label: 'ENADE'),
       SelectOption(value: 'teacher', label: 'Professor'),
@@ -532,10 +498,7 @@ class _QuestionListContent extends StatelessWidget {
               onChanged: viewModel.setFilterOrigin,
             ),
           ),
-<<<<<<< HEAD
-=======
           // Toggle for inactive questions
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -557,16 +520,7 @@ class _QuestionListContent extends StatelessWidget {
               ),
             ],
           ),
-<<<<<<< HEAD
           if (hasFilters)
-=======
-          // Clear filters button
-          if (viewModel.filterCourseId != null ||
-              viewModel.filterSubjectId != null ||
-              viewModel.filterCategoryId != null ||
-              viewModel.filterOrigin != null ||
-              viewModel.showInactiveOnly)
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
             TextButton.icon(
               onPressed: viewModel.clearFilters,
               icon: const Icon(Icons.clear, size: 18),
@@ -780,24 +734,11 @@ class _QuestionCard extends StatelessWidget {
                   isEnade ? 'ENADE' : 'Professor',
                   isEnade ? const Color(0xFF1565C0) : const Color(0xFF00897B),
                 ),
-<<<<<<< HEAD
                 if (courseName != null)
                   _buildBadge(courseName!, Colors.blue),
                 if (subjectName != null)
                   _buildBadge(subjectName!, Colors.teal),
                 if (categoryName != null)
-=======
-                if (courseName != null) ...[
-                  const SizedBox(width: 8),
-                  _buildBadge(courseName!, Colors.blue),
-                ],
-                if (subjectName != null) ...[
-                  const SizedBox(width: 8),
-                  _buildBadge(subjectName!, Colors.teal),
-                ],
-                if (categoryName != null) ...[
-                  const SizedBox(width: 8),
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
                   _buildBadge(categoryName!, Colors.purple),
                 _buildBadge(
                   difficultyLevel,
@@ -819,16 +760,11 @@ class _QuestionCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-<<<<<<< HEAD
             // Bottom row: metadata
             Wrap(
               spacing: 12,
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
-=======
-            // Bottom row: metadata and actions
-            Row(
->>>>>>> 0fdd1bbc10f6000dc33ac41f1c649250e3c7f575
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,

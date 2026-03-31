@@ -329,23 +329,6 @@ class SupabaseTeacherRepository implements TeacherRepository {
     }
   }
 
-  @override
-  Future<void> toggleQuestionActive(String questionId, bool isActive) async {
-    try {
-      await _client
-          .from('question')
-          .update({
-            'is_active': isActive,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', questionId);
-    } catch (error) {
-      throw TeacherRepositoryException(
-        'Erro ao alterar status da questao: ${error.toString()}',
-      );
-    }
-  }
-
   // ============================================
   // Exam Templates
   // ============================================
