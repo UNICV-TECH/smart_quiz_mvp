@@ -118,7 +118,10 @@ class _EditQuestionContentState extends State<_EditQuestionContent> {
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width < 768 ? 16 : 32,
+                vertical: MediaQuery.of(context).size.width < 768 ? 16 : 32,
+              ),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1100),

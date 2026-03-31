@@ -87,9 +87,9 @@ class AdminContentScreen extends StatelessWidget {
                   ? const Center(child: CircularProgressIndicator())
                   : TabBarView(
                       children: [
-                        _buildQuestionsTab(viewModel),
-                        _buildTemplatesTab(viewModel),
-                        _buildCoursesTab(viewModel),
+                        _buildQuestionsTab(context, viewModel),
+                        _buildTemplatesTab(context, viewModel),
+                        _buildCoursesTab(context, viewModel),
                       ],
                     ),
             ),
@@ -99,7 +99,7 @@ class AdminContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuestionsTab(AdminContentViewModel viewModel) {
+  Widget _buildQuestionsTab(BuildContext context, AdminContentViewModel viewModel) {
     if (viewModel.questions.isEmpty) {
       return const Center(
         child: Text('Nenhuma questão encontrada', style: TextStyle(color: Colors.grey)),
@@ -109,7 +109,6 @@ class AdminContentScreen extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -121,72 +120,80 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: DataTable(
-          sortColumnIndex: viewModel.sortColumnIndex,
-          sortAscending: viewModel.sortAscending,
-          headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
-          columns: [
-            DataColumn(
-              label: const Text('Enunciado', style: TextStyle(fontWeight: FontWeight.bold)),
-              onSort: viewModel.sortQuestions,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width - 48,
             ),
-            DataColumn(
-              label: const Text('Curso', style: TextStyle(fontWeight: FontWeight.bold)),
-              onSort: viewModel.sortQuestions,
-            ),
-            DataColumn(
-              label: const Text('Professor', style: TextStyle(fontWeight: FontWeight.bold)),
-              onSort: viewModel.sortQuestions,
-            ),
-            DataColumn(
-              label: const Text('Dificuldade', style: TextStyle(fontWeight: FontWeight.bold)),
-              onSort: viewModel.sortQuestions,
-            ),
-            DataColumn(
-              label: const Text('Respostas', style: TextStyle(fontWeight: FontWeight.bold)),
-              numeric: true,
-              onSort: viewModel.sortQuestions,
-            ),
-            DataColumn(
-              label: const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-              onSort: viewModel.sortQuestions,
-            ),
-          ],
-          rows: viewModel.questions.map((question) {
-            final enunciation = question.enunciation.length > 50
-                ? '${question.enunciation.substring(0, 50)}...'
-                : question.enunciation;
-            return DataRow(
-              cells: [
-                DataCell(
-                  Tooltip(
-                    message: question.enunciation,
-                    child: Text(enunciation),
-                  ),
+            child: DataTable(
+              sortColumnIndex: viewModel.sortColumnIndex,
+              sortAscending: viewModel.sortAscending,
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
+              columns: [
+                DataColumn(
+                  label: const Text('Enunciado', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onSort: viewModel.sortQuestions,
                 ),
-                DataCell(Text(question.courseName)),
-                DataCell(
-                  Tooltip(
-                    message: question.teacherEmail,
-                    child: Text(
-                      question.teacherName.isEmpty
-                          ? question.teacherEmail
-                          : question.teacherName,
-                    ),
-                  ),
+                DataColumn(
+                  label: const Text('Curso', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onSort: viewModel.sortQuestions,
                 ),
-                DataCell(Text(question.difficultyLevel ?? '-')),
-                DataCell(Text(question.answerCount.toString())),
-                DataCell(_buildStatusBadge(question.isActive)),
+                DataColumn(
+                  label: const Text('Professor', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onSort: viewModel.sortQuestions,
+                ),
+                DataColumn(
+                  label: const Text('Dificuldade', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onSort: viewModel.sortQuestions,
+                ),
+                DataColumn(
+                  label: const Text('Respostas', style: TextStyle(fontWeight: FontWeight.bold)),
+                  numeric: true,
+                  onSort: viewModel.sortQuestions,
+                ),
+                DataColumn(
+                  label: const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onSort: viewModel.sortQuestions,
+                ),
               ],
-            );
-          }).toList(),
+              rows: viewModel.questions.map((question) {
+                final enunciation = question.enunciation.length > 50
+                    ? '${question.enunciation.substring(0, 50)}...'
+                    : question.enunciation;
+                return DataRow(
+                  cells: [
+                    DataCell(
+                      Tooltip(
+                        message: question.enunciation,
+                        child: Text(enunciation),
+                      ),
+                    ),
+                    DataCell(Text(question.courseName)),
+                    DataCell(
+                      Tooltip(
+                        message: question.teacherEmail,
+                        child: Text(
+                          question.teacherName.isEmpty
+                              ? question.teacherEmail
+                              : question.teacherName,
+                        ),
+                      ),
+                    ),
+                    DataCell(Text(question.difficultyLevel ?? '-')),
+                    DataCell(Text(question.answerCount.toString())),
+                    DataCell(_buildStatusBadge(question.isActive)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTemplatesTab(AdminContentViewModel viewModel) {
+  Widget _buildTemplatesTab(BuildContext context, AdminContentViewModel viewModel) {
     if (viewModel.templates.isEmpty) {
       return const Center(
         child: Text('Nenhum template encontrado', style: TextStyle(color: Colors.grey)),
@@ -196,7 +203,6 @@ class AdminContentScreen extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -208,30 +214,38 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: DataTable(
-          headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
-          columns: const [
-            DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Curso', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Questões', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Publicado', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: viewModel.templates.map((template) {
-            return DataRow(
-              cells: [
-                DataCell(Text(template.name)),
-                DataCell(Text(template.courseName ?? '-')),
-                DataCell(Text(template.questionCount.toString())),
-                DataCell(_buildStatusBadge(template.isPublished)),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width - 48,
+            ),
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
+              columns: const [
+                DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Curso', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Questões', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Publicado', style: TextStyle(fontWeight: FontWeight.bold))),
               ],
-            );
-          }).toList(),
+              rows: viewModel.templates.map((template) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(template.name)),
+                    DataCell(Text(template.courseName ?? '-')),
+                    DataCell(Text(template.questionCount.toString())),
+                    DataCell(_buildStatusBadge(template.isPublished)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCoursesTab(AdminContentViewModel viewModel) {
+  Widget _buildCoursesTab(BuildContext context, AdminContentViewModel viewModel) {
     if (viewModel.courses.isEmpty) {
       return const Center(
         child: Text('Nenhum curso encontrado', style: TextStyle(color: Colors.grey)),
@@ -241,7 +255,6 @@ class AdminContentScreen extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -253,20 +266,28 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: DataTable(
-          headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
-          columns: const [
-            DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Descrição', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: viewModel.courses.map((course) {
-            return DataRow(
-              cells: [
-                DataCell(Text(course.name)),
-                DataCell(Text(course.description ?? '-')),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width - 48,
+            ),
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
+              columns: const [
+                DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Descrição', style: TextStyle(fontWeight: FontWeight.bold))),
               ],
-            );
-          }).toList(),
+              rows: viewModel.courses.map((course) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(course.name)),
+                    DataCell(Text(course.description ?? '-')),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
     );

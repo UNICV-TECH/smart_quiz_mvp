@@ -154,48 +154,58 @@ class _StatsContent extends StatelessWidget {
   }
 
   Widget _buildSummaryCards(TeacherDashboardViewModel viewModel) {
-    return Row(
-      children: [
-        Expanded(
-          child: _SummaryCard(
-            title: 'Total de Questões',
-            value: viewModel.totalQuestions.toString(),
-            subtitle: '${viewModel.activeQuestions} ativas',
-            icon: Icons.quiz_outlined,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _SummaryCard(
-            title: 'Templates de Prova',
-            value: viewModel.totalTemplates.toString(),
-            subtitle: '${viewModel.publishedTemplates} publicados',
-            icon: Icons.assignment_outlined,
-            color: AppColors.green,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _SummaryCard(
-            title: 'Provas Realizadas',
-            value: viewModel.totalExamsTaken.toString(),
-            subtitle: '${viewModel.totalPassed} aprovados',
-            icon: Icons.people_outlined,
-            color: Colors.purple,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _SummaryCard(
-            title: 'Taxa de Aprovação',
-            value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
-            subtitle: 'Media: ${viewModel.overallAvgScore.toStringAsFixed(1)} pts',
-            icon: Icons.trending_up,
-            color: Colors.orange,
-          ),
-        ),
-      ],
+    final cards = [
+      _SummaryCard(
+        title: 'Total de Questões',
+        value: viewModel.totalQuestions.toString(),
+        subtitle: '${viewModel.activeQuestions} ativas',
+        icon: Icons.quiz_outlined,
+        color: Colors.blue,
+      ),
+      _SummaryCard(
+        title: 'Templates de Prova',
+        value: viewModel.totalTemplates.toString(),
+        subtitle: '${viewModel.publishedTemplates} publicados',
+        icon: Icons.assignment_outlined,
+        color: AppColors.green,
+      ),
+      _SummaryCard(
+        title: 'Provas Realizadas',
+        value: viewModel.totalExamsTaken.toString(),
+        subtitle: '${viewModel.totalPassed} aprovados',
+        icon: Icons.people_outlined,
+        color: Colors.purple,
+      ),
+      _SummaryCard(
+        title: 'Taxa de Aprovação',
+        value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
+        subtitle: 'Media: ${viewModel.overallAvgScore.toStringAsFixed(1)} pts',
+        icon: Icons.trending_up,
+        color: Colors.orange,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          // Mobile: 2 columns grid
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: cards.map((card) => SizedBox(
+              width: (constraints.maxWidth - 12) / 2,
+              child: card,
+            )).toList(),
+          );
+        }
+        // Desktop: single row
+        return Row(
+          children: cards
+              .expand((card) => [Expanded(child: card), const SizedBox(width: 16)])
+              .toList()
+            ..removeLast(),
+        );
+      },
     );
   }
 
@@ -342,35 +352,35 @@ class _QuestionStatsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  courseName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$categoriesUsed categorias utilizadas',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+          Text(
+            courseName,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
           ),
-          _buildStatColumn('Total', totalQuestions.toString()),
-          _buildStatColumn('Ativas', activeQuestions.toString()),
-          _buildStatColumn('Pontos', avgPoints.toStringAsFixed(1)),
+          const SizedBox(height: 4),
+          Text(
+            '$categoriesUsed categorias utilizadas',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              _buildStatColumn('Total', totalQuestions.toString()),
+              _buildStatColumn('Ativas', activeQuestions.toString()),
+              _buildStatColumn('Pontos', avgPoints.toStringAsFixed(1)),
+            ],
+          ),
         ],
       ),
     );
@@ -474,7 +484,9 @@ class _ExamStatsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
+          Wrap(
+            spacing: 16,
+            runSpacing: 12,
             children: [
               _buildMetric(
                 'Provas realizadas',
@@ -504,33 +516,32 @@ class _ExamStatsCard extends StatelessWidget {
   }
 
   Widget _buildMetric(String label, String value, IconData icon) {
-    return Expanded(
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey[600],
-                ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[600],
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

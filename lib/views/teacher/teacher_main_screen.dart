@@ -25,6 +25,10 @@ class TeacherMainScreen extends StatefulWidget {
 class _TeacherMainScreenState extends State<TeacherMainScreen> {
   int _selectedIndex = 0;
   bool _isQuestionMenuExpanded = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
 
   // Dados do usuário obtidos do SessionManager
   Map<String, dynamic> get _userData {
@@ -56,21 +60,51 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     return sessionManager.isAdmin;
   }
 
+  void _selectIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (_isMobile(context)) {
+      _scaffoldKey.currentState?.closeDrawer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isMobile = _isMobile(context);
+
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: isMobile
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
+              title: const Text(
+                'Smart Quiz - Professor',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              backgroundColor: const Color(0xFF2E7D32),
+              foregroundColor: Colors.white,
+              elevation: 1,
+            )
+          : null,
+      drawer: isMobile ? Drawer(child: _buildTeacherSideMenu()) : null,
       body: Column(
         children: [
           if (_isAdmin) _buildAdminReturnBanner(),
           Expanded(
-            child: Row(
-              children: [
-                _buildTeacherSideMenu(),
-                Expanded(
-                  child: _screens[_selectedIndex],
-                ),
-              ],
-            ),
+            child: isMobile
+                ? _screens[_selectedIndex]
+                : Row(
+                    children: [
+                      _buildTeacherSideMenu(),
+                      Expanded(
+                        child: _screens[_selectedIndex],
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -234,11 +268,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         color: isSelected ? const Color(0xFFE8F5E9) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          onTap: () {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
+          onTap: () => _selectIndex(index),
           borderRadius: BorderRadius.circular(8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -391,11 +421,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
       color: isSelected ? const Color(0xFFE8F5E9) : Colors.transparent,
       borderRadius: BorderRadius.circular(6),
       child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        onTap: () => _selectIndex(index),
         borderRadius: BorderRadius.circular(6),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

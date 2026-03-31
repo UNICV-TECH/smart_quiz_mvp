@@ -70,63 +70,91 @@ class _ExamTemplatesContent extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, ExamTemplateViewModel viewModel) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(color: Color(0xFFEEEEEE)),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Templates de Prova',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Templates de Prova',
+                      style: TextStyle(
+                        fontSize: isMobile ? 20 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2E7D32),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Crie e gerencie seus modelos de prova',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isMobile) ...[
+                _buildStatChip(
+                  'Publicados',
+                  viewModel.publishedCount.toString(),
+                  AppColors.green,
+                ),
+                const SizedBox(width: 12),
+                _buildStatChip(
+                  'Rascunhos',
+                  viewModel.draftCount.toString(),
+                  Colors.orange,
+                ),
+                const SizedBox(width: 16),
+              ],
+              ElevatedButton.icon(
+                onPressed: () => _showTemplateEditor(context, viewModel),
+                icon: Icon(Icons.add, size: isMobile ? 18 : 24),
+                label: Text(isMobile ? 'Novo' : 'Novo Template'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 12 : 20,
+                    vertical: 12,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Crie e gerencie seus modelos de prova',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+              ),
+            ],
+          ),
+          if (isMobile) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildStatChip(
+                  'Publicados',
+                  viewModel.publishedCount.toString(),
+                  AppColors.green,
+                ),
+                const SizedBox(width: 12),
+                _buildStatChip(
+                  'Rascunhos',
+                  viewModel.draftCount.toString(),
+                  Colors.orange,
                 ),
               ],
             ),
-          ),
-          // Stats
-          _buildStatChip(
-            'Publicados',
-            viewModel.publishedCount.toString(),
-            AppColors.green,
-          ),
-          const SizedBox(width: 12),
-          _buildStatChip(
-            'Rascunhos',
-            viewModel.draftCount.toString(),
-            Colors.orange,
-          ),
-          const SizedBox(width: 16),
-          // New template button
-          ElevatedButton.icon(
-            onPressed: () => _showTemplateEditor(context, viewModel),
-            icon: const Icon(Icons.add),
-            label: const Text('Novo Template'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -405,22 +433,20 @@ class _TemplateCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Info row
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
               children: [
-                if (courseName != null) ...[
+                if (courseName != null)
                   _buildInfoChip(Icons.school_outlined, courseName!),
-                  const SizedBox(width: 16),
-                ],
                 _buildInfoChip(
                     Icons.format_list_numbered, '$questionCount questões'),
-                const SizedBox(width: 16),
                 _buildInfoChip(
                   Icons.timer_outlined,
                   timeLimitMinutes != null
                       ? '$timeLimitMinutes min'
                       : 'Sem limite',
                 ),
-                const SizedBox(width: 16),
                 _buildInfoChip(Icons.check_circle_outline,
                     'Aprovação: ${passingScore.toInt()}%'),
               ],
@@ -428,7 +454,10 @@ class _TemplateCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Actions row
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   'Criado em ${_formatDate(createdAt)}',
@@ -437,13 +466,11 @@ class _TemplateCard extends StatelessWidget {
                     color: Colors.grey[500],
                   ),
                 ),
-                const Spacer(),
                 TextButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   label: const Text('Editar'),
                 ),
-                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: onPublish,
                   icon: Icon(
@@ -454,7 +481,6 @@ class _TemplateCard extends StatelessWidget {
                   ),
                   label: Text(isPublished ? 'Despublicar' : 'Publicar'),
                 ),
-                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline, size: 18),
