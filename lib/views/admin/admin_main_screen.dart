@@ -76,7 +76,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               elevation: 1,
             )
           : null,
-      drawer: isMobile ? Drawer(child: _buildSideMenu()) : null,
+      drawer: isMobile ? Drawer(child: _buildSideMenu(inDrawer: true)) : null,
       body: isMobile
           ? _buildContent(adminRepo)
           : Row(
@@ -116,9 +116,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     }
   }
 
-  Widget _buildSideMenu() {
+  Widget _buildSideMenu({bool inDrawer = false}) {
     return Container(
-      width: 280,
+      width: inDrawer ? null : 280,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -199,8 +199,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   }
 
   Widget _buildMenuHeader() {
+    final isMobile = _isMobile(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isMobile ? 12 : 20),
       decoration: const BoxDecoration(
         color: _goldColor,
         borderRadius: BorderRadius.only(
@@ -210,14 +211,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       child: Column(
         children: [
           SizedBox(
+            height: isMobile ? 80 : 150,
             child: Image.asset(
               'assets/images/SmartQuiz_branca.png',
-              width: 250,
-              height: 150,
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           const Text(
             'Painel Admin',
             style: TextStyle(

@@ -90,7 +90,7 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
               elevation: 1,
             )
           : null,
-      drawer: isMobile ? Drawer(child: _buildTeacherSideMenu()) : null,
+      drawer: isMobile ? Drawer(child: _buildTeacherSideMenu(inDrawer: true)) : null,
       body: Column(
         children: [
           if (_isAdmin) _buildAdminReturnBanner(),
@@ -139,9 +139,9 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     );
   }
 
-  Widget _buildTeacherSideMenu() {
+  Widget _buildTeacherSideMenu({bool inDrawer = false}) {
     return Container(
-      width: 280,
+      width: inDrawer ? null : 280,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -220,8 +220,9 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
     );
   }
   Widget _buildMenuHeader() {
+    final isMobile = _isMobile(context);
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(isMobile ? 12 : 10),
       decoration: const BoxDecoration(
         color: Color(0xFF2E7D32),
         borderRadius: BorderRadius.only(
@@ -232,10 +233,9 @@ class _TeacherMainScreenState extends State<TeacherMainScreen> {
         children: [
           // Logo da instituição
           SizedBox(
+            height: isMobile ? 80 : 150,
             child: Image.asset(
               'assets/images/SmartQuiz_branca.png',
-              width: 250,
-              height: 150,
               fit: BoxFit.contain,
             ),
           ),

@@ -88,7 +88,9 @@ class _TeacherGamificationBody extends StatelessWidget {
 
             // Template dropdown
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width < 768 ? 16 : 32,
+              ),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -178,8 +180,9 @@ class _TeacherGamificationBody extends StatelessWidget {
       );
     }
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -209,42 +212,51 @@ class _TeacherGamificationBody extends StatelessWidget {
   }
 
   Widget _buildStatsRow(TeacherGamificationViewModel vm) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _buildStatCard(
-          'Participantes',
-          vm.totalParticipants.toString(),
-          Icons.people,
-          const Color(0xFF1565C0),
-        ),
-        _buildStatCard(
-          'Média de Pontos',
-          vm.averagePoints.toStringAsFixed(1),
-          Icons.analytics,
-          const Color(0xFF2E7D32),
-        ),
-        _buildStatCard(
-          'Melhor Pontuação',
-          vm.bestScore.toStringAsFixed(1),
-          Icons.emoji_events,
-          const Color(0xFFFFA000),
-        ),
-        _buildStatCard(
-          'Menor Pontuação',
-          vm.worstScore.toStringAsFixed(1),
-          Icons.trending_down,
-          const Color(0xFFD32F2F),
-        ),
-      ],
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final cardWidth = constraints.maxWidth < 400
+          ? (constraints.maxWidth - 12) / 2
+          : 180.0;
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: [
+          _buildStatCard(
+            'Participantes',
+            vm.totalParticipants.toString(),
+            Icons.people,
+            const Color(0xFF1565C0),
+            width: cardWidth,
+          ),
+          _buildStatCard(
+            'Média de Pontos',
+            vm.averagePoints.toStringAsFixed(1),
+            Icons.analytics,
+            const Color(0xFF2E7D32),
+            width: cardWidth,
+          ),
+          _buildStatCard(
+            'Melhor Pontuação',
+            vm.bestScore.toStringAsFixed(1),
+            Icons.emoji_events,
+            const Color(0xFFFFA000),
+            width: cardWidth,
+          ),
+          _buildStatCard(
+            'Menor Pontuação',
+            vm.worstScore.toStringAsFixed(1),
+            Icons.trending_down,
+            const Color(0xFFD32F2F),
+            width: cardWidth,
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildStatCard(
-      String label, String value, IconData icon, Color color) {
+      String label, String value, IconData icon, Color color, {double width = 180}) {
     return Container(
-      width: 180,
+      width: width,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

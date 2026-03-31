@@ -244,50 +244,105 @@ class _CreateQuestionContentState extends State<_CreateQuestionContent> {
         .map((s) => SelectOption(value: s.id, label: s.name))
         .toList();
 
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    final courseSelect = SelectPesquisa(
+      label: 'Curso',
+      options: courseOptions,
+      value: viewModel.selectedCourseId,
+      required: true,
+      placeholder: 'Selecione o curso',
+      onChanged: viewModel.setCourse,
+    );
+    final subjectSelect = SelectPesquisa(
+      label: 'Matéria',
+      options: subjectOptions,
+      value: viewModel.selectedSubjectId,
+      required: false,
+      placeholder: viewModel.selectedCourseId != null
+          ? 'Selecione a matéria'
+          : 'Selecione um curso primeiro',
+      onChanged: viewModel.setSubject,
+      enabled: viewModel.selectedCourseId != null,
+    );
+    final categorySelect = SelectPesquisa(
+      label: 'Categoria',
+      options: categoryOptions,
+      value: viewModel.selectedCategoryId,
+      required: false,
+      placeholder: viewModel.selectedSubjectId != null
+          ? 'Selecione a categoria'
+          : 'Selecione uma matéria primeiro',
+      onChanged: viewModel.setCategory,
+      enabled: viewModel.selectedSubjectId != null,
+    );
+    final difficultySelect = SelectPesquisa(
+      label: 'Dificuldade',
+      options: const [
+        SelectOption(value: 'easy', label: 'Facil'),
+        SelectOption(value: 'medium', label: 'Medio'),
+        SelectOption(value: 'hard', label: 'Dificil'),
+      ],
+      value: viewModel.difficultyLevel,
+      required: true,
+      placeholder: 'Selecione a dificuldade',
+      onChanged: (value) {
+        if (value != null) {
+          viewModel.setDifficultyLevel(value);
+        }
+      },
+    );
+    final pointsSelect = SelectPesquisa(
+      label: 'Pontos',
+      options: const [
+        SelectOption(value: '0.5', label: '0.5 pontos'),
+        SelectOption(value: '1.0', label: '1.0 ponto'),
+        SelectOption(value: '1.5', label: '1.5 pontos'),
+        SelectOption(value: '2.0', label: '2.0 pontos'),
+        SelectOption(value: '2.5', label: '2.5 pontos'),
+        SelectOption(value: '3.0', label: '3.0 pontos'),
+      ],
+      value: viewModel.points.toString(),
+      required: true,
+      placeholder: 'Selecione os pontos',
+      onChanged: (value) {
+        if (value != null) {
+          viewModel.setPoints(double.parse(value));
+        }
+      },
+    );
+
+    if (isMobile) {
+      return Column(
+        children: [
+          courseSelect,
+          const SizedBox(height: 12),
+          subjectSelect,
+          const SizedBox(height: 12),
+          categorySelect,
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: difficultySelect),
+              const SizedBox(width: 12),
+              Expanded(child: pointsSelect),
+            ],
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         // Row 1: Course, Subject, Category
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SelectPesquisa(
-                label: 'Curso',
-                options: courseOptions,
-                value: viewModel.selectedCourseId,
-                required: true,
-                placeholder: 'Selecione o curso',
-                onChanged: viewModel.setCourse,
-              ),
-            ),
+            Expanded(child: courseSelect),
             const SizedBox(width: 16),
-            Expanded(
-              child: SelectPesquisa(
-                label: 'Matéria',
-                options: subjectOptions,
-                value: viewModel.selectedSubjectId,
-                required: false,
-                placeholder: viewModel.selectedCourseId != null
-                    ? 'Selecione a matéria'
-                    : 'Selecione um curso primeiro',
-                onChanged: viewModel.setSubject,
-                enabled: viewModel.selectedCourseId != null,
-              ),
-            ),
+            Expanded(child: subjectSelect),
             const SizedBox(width: 16),
-            Expanded(
-              child: SelectPesquisa(
-                label: 'Categoria',
-                options: categoryOptions,
-                value: viewModel.selectedCategoryId,
-                required: false,
-                placeholder: viewModel.selectedSubjectId != null
-                    ? 'Selecione a categoria'
-                    : 'Selecione uma matéria primeiro',
-                onChanged: viewModel.setCategory,
-                enabled: viewModel.selectedSubjectId != null,
-              ),
-            ),
+            Expanded(child: categorySelect),
           ],
         ),
         const SizedBox(height: 16),
@@ -296,46 +351,9 @@ class _CreateQuestionContentState extends State<_CreateQuestionContent> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SelectPesquisa(
-                label: 'Dificuldade',
-                options: const [
-                  SelectOption(value: 'easy', label: 'Facil'),
-                  SelectOption(value: 'medium', label: 'Medio'),
-                  SelectOption(value: 'hard', label: 'Dificil'),
-                ],
-                value: viewModel.difficultyLevel,
-                required: true,
-                placeholder: 'Selecione a dificuldade',
-                onChanged: (value) {
-                  if (value != null) {
-                    viewModel.setDifficultyLevel(value);
-                  }
-                },
-              ),
-            ),
+            Expanded(child: difficultySelect),
             const SizedBox(width: 16),
-            Expanded(
-              child: SelectPesquisa(
-                label: 'Pontos',
-                options: const [
-                  SelectOption(value: '0.5', label: '0.5 pontos'),
-                  SelectOption(value: '1.0', label: '1.0 ponto'),
-                  SelectOption(value: '1.5', label: '1.5 pontos'),
-                  SelectOption(value: '2.0', label: '2.0 pontos'),
-                  SelectOption(value: '2.5', label: '2.5 pontos'),
-                  SelectOption(value: '3.0', label: '3.0 pontos'),
-                ],
-                value: viewModel.points.toString(),
-                required: true,
-                placeholder: 'Selecione os pontos',
-                onChanged: (value) {
-                  if (value != null) {
-                    viewModel.setPoints(double.parse(value));
-                  }
-                },
-              ),
-            ),
+            Expanded(child: pointsSelect),
           ],
         ),
       ],
