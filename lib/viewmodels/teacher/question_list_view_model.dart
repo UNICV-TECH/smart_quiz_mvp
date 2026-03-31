@@ -209,7 +209,7 @@ class QuestionListViewModel extends ChangeNotifier {
         }
         return q;
       }).toList();
-      _setSuccess(newActive ? 'Questão ativada!' : 'Questão desativada!');
+      _setSuccess(newActive ? 'Questao ativada!' : 'Questao desativada!');
       notifyListeners();
       return true;
     } catch (error) {

@@ -19,10 +19,6 @@ class TeacherShellScreen extends StatefulWidget {
 
 class _TeacherShellScreenState extends State<TeacherShellScreen> {
   bool _isQuestionMenuExpanded = false;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  bool _isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < 800;
 
   Future<void> _navigateToBranch(int branchIndex) async {
     if (widget.navigationShell.currentIndex == branchIndex) return;
@@ -41,12 +37,6 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
         return;
       }
       formProtection.markSaved();
-    }
-
-    if (!mounted) return;
-
-    if (_isMobile(context)) {
-      Navigator.of(context).pop();
     }
 
     widget.navigationShell.goBranch(branchIndex);
@@ -69,59 +59,19 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
     final isAdminViewing =
         sessionManager.isAdmin && sessionManager.viewingAsTeacher;
 
-    final isMobile = _isMobile(context);
-
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: isMobile
-          ? AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              ),
-              title: const Text(
-                'Menu do Professor',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              backgroundColor: const Color(0xFF2E7D32),
-              foregroundColor: Colors.white,
-              actions: isAdminViewing
-                  ? [
-                      TextButton.icon(
-                        onPressed: () {
-                          sessionManager.exitTeacherView();
-                          context.go('/admin');
-                        },
-                        icon: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 16),
-                        label: const Text('Admin',
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 13)),
-                      ),
-                    ]
-                  : null,
-            )
-          : null,
-      drawer: isMobile
-          ? Drawer(
-              child: _buildTeacherSideMenu(),
-            )
-          : null,
       body: Column(
         children: [
-          if (isAdminViewing && !isMobile)
-            _buildAdminBanner(context, sessionManager),
+          if (isAdminViewing) _buildAdminBanner(context, sessionManager),
           Expanded(
-            child: isMobile
-                ? widget.navigationShell
-                : Row(
-                    children: [
-                      _buildTeacherSideMenu(),
-                      Expanded(
-                        child: widget.navigationShell,
-                      ),
-                    ],
-                  ),
+            child: Row(
+              children: [
+                _buildTeacherSideMenu(),
+                Expanded(
+                  child: widget.navigationShell,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -175,7 +125,7 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
 
   Widget _buildTeacherSideMenu() {
     return Container(
-      width: _isMobile(context) ? null : 280,
+      width: 280,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -246,10 +196,14 @@ class _TeacherShellScreenState extends State<TeacherShellScreen> {
       ),
       child: Column(
         children: [
-          Image.asset(
-            'assets/images/SmartQuiz_branca.png',
-            height: _isMobile(context) ? 100 : 200,
-            fit: BoxFit.contain,
+          SizedBox(
+            height: 200,
+            child: Image.asset(
+              'assets/images/SmartQuiz_branca.png',
+              width: 500,
+              height: 500,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(height: 12),
           const Text(

@@ -45,8 +45,7 @@ class _StatsContent extends StatelessWidget {
         onRefresh: viewModel.refresh,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.all(
-              MediaQuery.of(context).size.width < 800 ? 12 : 24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,59 +154,48 @@ class _StatsContent extends StatelessWidget {
   }
 
   Widget _buildSummaryCards(TeacherDashboardViewModel viewModel) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cards = [
-          _SummaryCard(
-            title: 'Total de Questoes',
+    return Row(
+      children: [
+        Expanded(
+          child: _SummaryCard(
+            title: 'Total de Questões',
             value: viewModel.totalQuestions.toString(),
             subtitle: '${viewModel.activeQuestions} ativas',
             icon: Icons.quiz_outlined,
             color: Colors.blue,
           ),
-          _SummaryCard(
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _SummaryCard(
             title: 'Templates de Prova',
             value: viewModel.totalTemplates.toString(),
             subtitle: '${viewModel.publishedTemplates} publicados',
             icon: Icons.assignment_outlined,
             color: AppColors.green,
           ),
-          _SummaryCard(
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _SummaryCard(
             title: 'Provas Realizadas',
             value: viewModel.totalExamsTaken.toString(),
             subtitle: '${viewModel.totalPassed} aprovados',
             icon: Icons.people_outlined,
             color: Colors.purple,
           ),
-          _SummaryCard(
-            title: 'Taxa de Aprovacao',
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _SummaryCard(
+            title: 'Taxa de Aprovação',
             value: '${viewModel.overallPassRate.toStringAsFixed(1)}%',
             subtitle: 'Media: ${viewModel.overallAvgScore.toStringAsFixed(1)} pts',
             icon: Icons.trending_up,
             color: Colors.orange,
           ),
-        ];
-
-        if (constraints.maxWidth < 600) {
-          return Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: cards
-                .map((card) => SizedBox(
-                      width: (constraints.maxWidth - 12) / 2,
-                      child: card,
-                    ))
-                .toList(),
-          );
-        }
-
-        return Row(
-          children: cards
-              .expand((card) => [Expanded(child: card), const SizedBox(width: 16)])
-              .toList()
-            ..removeLast(),
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -354,60 +342,36 @@ class _QuestionStatsCard extends StatelessWidget {
           ),
         ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < 500;
-          final header = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                courseName,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$categoriesUsed categorias utilizadas',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          );
-          final stats = Row(
-            mainAxisAlignment: isMobile
-                ? MainAxisAlignment.spaceAround
-                : MainAxisAlignment.end,
-            mainAxisSize: isMobile ? MainAxisSize.max : MainAxisSize.min,
-            children: [
-              _buildStatColumn('Total', totalQuestions.toString()),
-              _buildStatColumn('Ativas', activeQuestions.toString()),
-              _buildStatColumn('Pontos', avgPoints.toStringAsFixed(1)),
-            ],
-          );
-
-          if (isMobile) {
-            return Column(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                header,
-                const SizedBox(height: 12),
-                stats,
+                Text(
+                  courseName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$categoriesUsed categorias utilizadas',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                ),
               ],
-            );
-          }
-
-          return Row(
-            children: [
-              Expanded(flex: 2, child: header),
-              stats,
-            ],
-          );
-        },
+            ),
+          ),
+          _buildStatColumn('Total', totalQuestions.toString()),
+          _buildStatColumn('Ativas', activeQuestions.toString()),
+          _buildStatColumn('Pontos', avgPoints.toStringAsFixed(1)),
+        ],
       ),
     );
   }
@@ -510,40 +474,29 @@ class _ExamStatsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final metrics = [
-                _buildMetric(
-                  'Provas realizadas',
-                  totalExamsTaken.toString(),
-                  Icons.assignment_turned_in_outlined,
-                ),
-                _buildMetric(
-                  'Media de pontos',
-                  avgScore.toStringAsFixed(1),
-                  Icons.score_outlined,
-                ),
-                _buildMetric(
-                  'Aprovados',
-                  totalPassed.toString(),
-                  Icons.check_circle_outline,
-                ),
-                _buildMetric(
-                  'Taxa de aprovacao',
-                  '${passRate.toStringAsFixed(1)}%',
-                  Icons.trending_up,
-                ),
-              ];
-
-              if (constraints.maxWidth < 500) {
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 12,
-                  children: metrics,
-                );
-              }
-              return Row(children: metrics);
-            },
+          Row(
+            children: [
+              _buildMetric(
+                'Provas realizadas',
+                totalExamsTaken.toString(),
+                Icons.assignment_turned_in_outlined,
+              ),
+              _buildMetric(
+                'Media de pontos',
+                avgScore.toStringAsFixed(1),
+                Icons.score_outlined,
+              ),
+              _buildMetric(
+                'Aprovados',
+                totalPassed.toString(),
+                Icons.check_circle_outline,
+              ),
+              _buildMetric(
+                'Taxa de aprovação',
+                '${passRate.toStringAsFixed(1)}%',
+                Icons.trending_up,
+              ),
+            ],
           ),
         ],
       ),

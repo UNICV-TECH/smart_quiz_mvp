@@ -121,9 +121,7 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
+        child: DataTable(
           sortColumnIndex: viewModel.sortColumnIndex,
           sortAscending: viewModel.sortAscending,
           headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
@@ -184,7 +182,6 @@ class AdminContentScreen extends StatelessWidget {
             );
           }).toList(),
         ),
-        ),
       ),
     );
   }
@@ -211,9 +208,7 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
+        child: DataTable(
           headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
           columns: const [
             DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -231,7 +226,6 @@ class AdminContentScreen extends StatelessWidget {
               ],
             );
           }).toList(),
-        ),
         ),
       ),
     );
@@ -259,9 +253,7 @@ class AdminContentScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
+        child: DataTable(
           headingRowColor: WidgetStateProperty.all(const Color(0xFFF5F5F5)),
           columns: const [
             DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -275,7 +267,6 @@ class AdminContentScreen extends StatelessWidget {
               ],
             );
           }).toList(),
-        ),
         ),
       ),
     );

@@ -65,7 +65,7 @@ class _SubjectListContent extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, SubjectListViewModel viewModel) {
     return Container(
-      padding: EdgeInsets.all(MediaQuery.of(context).size.width < 800 ? 12 : 24),
+      padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
@@ -112,54 +112,6 @@ class _SubjectListContent extends StatelessWidget {
   }
 
   Widget _buildFilters(BuildContext context, SubjectListViewModel viewModel) {
-    final isMobile = MediaQuery.of(context).size.width < 800;
-    final hasFilters = viewModel.selectedCourseId != null;
-
-    if (isMobile) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () =>
-                    _showFilterBottomSheet(context, viewModel),
-                icon: Badge(
-                  isLabelVisible: hasFilters,
-                  backgroundColor: AppColors.green,
-                  smallSize: 8,
-                  child: const Icon(Icons.filter_list, size: 20),
-                ),
-                label: Text(hasFilters ? 'Filtros ativos' : 'Filtros'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor:
-                      hasFilters ? AppColors.green : Colors.grey[700],
-                  side: BorderSide(
-                    color:
-                        hasFilters ? AppColors.green : Colors.grey[300]!,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            if (hasFilters) ...[
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => viewModel.setFilterCourse(null),
-                icon: const Icon(Icons.clear, size: 20),
-                tooltip: 'Limpar filtros',
-                style: IconButton.styleFrom(foregroundColor: Colors.grey[600]),
-              ),
-            ],
-          ],
-        ),
-      );
-    }
-
     final courseOptions = viewModel.courses
         .map((c) => SelectOption(value: c.id, label: c.title))
         .toList();
@@ -184,109 +136,6 @@ class _SubjectListContent extends StatelessWidget {
           const Spacer(),
         ],
       ),
-    );
-  }
-
-  void _showFilterBottomSheet(
-      BuildContext context, SubjectListViewModel viewModel) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return ChangeNotifierProvider.value(
-          value: viewModel,
-          child: Consumer<SubjectListViewModel>(
-            builder: (context, vm, _) {
-              final courseOptions = vm.courses
-                  .map((c) => SelectOption(value: c.id, label: c.title))
-                  .toList();
-
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 12),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.filter_list,
-                              color: Color(0xFF2E7D32)),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Filtros',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: () {
-                              vm.setFilterCourse(null);
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Limpar'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Divider(height: 1),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: SelectPesquisa(
-                        label: 'Curso',
-                        options: courseOptions,
-                        value: vm.selectedCourseId,
-                        placeholder: 'Selecione um curso',
-                        onChanged: vm.setFilterCourse,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E7D32),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Aplicar Filtros',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 
@@ -375,7 +224,7 @@ class _SubjectListContent extends StatelessWidget {
   Widget _buildSubjectList(
       BuildContext context, SubjectListViewModel viewModel) {
     return ListView.builder(
-      padding: EdgeInsets.all(MediaQuery.of(context).size.width < 800 ? 12 : 24),
+      padding: const EdgeInsets.all(24),
       itemCount: viewModel.subjects.length,
       itemBuilder: (context, index) {
         final subject = viewModel.subjects[index];
@@ -410,8 +259,8 @@ class _SubjectListContent extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Nova Matéria'),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
+        content: SizedBox(
+          width: 400,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -474,8 +323,8 @@ class _SubjectListContent extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Editar Matéria'),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
+        content: SizedBox(
+          width: 400,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

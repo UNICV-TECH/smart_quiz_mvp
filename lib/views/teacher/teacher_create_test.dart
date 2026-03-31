@@ -418,7 +418,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -437,14 +437,12 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Informações da Prova',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark,
-                        ),
-                  ),
+                Text(
+                  'Informações da Prova',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
                 ),
               ],
             ),
@@ -538,37 +536,34 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
           // Cabeçalho do card com número e ações
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Questão ${index + 1}',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: AppColors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Questão ${index + 1}',
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 140, minWidth: 80),
-                      child: TextFormField(
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 140,
+                        child: TextFormField(
                           initialValue:
                               question.score == null ? '' : '${question.score}',
                           keyboardType: const TextInputType.numberWithOptions(
@@ -604,6 +599,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
                       ),
                     ],
                   ),
+                ),
                 // Botões de ação
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -970,7 +966,7 @@ class _TeacherCreateTestViewState extends State<TeacherCreateTestView>
     final hasSearch = _answerSearchController.text.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),

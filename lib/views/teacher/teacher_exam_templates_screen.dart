@@ -71,69 +71,61 @@ class _ExamTemplatesContent extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, ExamTemplateViewModel viewModel) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(color: Color(0xFFEEEEEE)),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Templates de Prova',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E7D32),
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Crie e gerencie seus modelos de prova',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Templates de Prova',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
                 ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showTemplateEditor(context, viewModel),
-                icon: const Icon(Icons.add),
-                label: const Text('Novo Template'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                SizedBox(height: 4),
+                Text(
+                  'Crie e gerencie seus modelos de prova',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _buildStatChip(
-                'Publicados',
-                viewModel.publishedCount.toString(),
-                AppColors.green,
-              ),
-              _buildStatChip(
-                'Rascunhos',
-                viewModel.draftCount.toString(),
-                Colors.orange,
-              ),
-            ],
+          // Stats
+          _buildStatChip(
+            'Publicados',
+            viewModel.publishedCount.toString(),
+            AppColors.green,
+          ),
+          const SizedBox(width: 12),
+          _buildStatChip(
+            'Rascunhos',
+            viewModel.draftCount.toString(),
+            Colors.orange,
+          ),
+          const SizedBox(width: 16),
+          // New template button
+          ElevatedButton.icon(
+            onPressed: () => _showTemplateEditor(context, viewModel),
+            icon: const Icon(Icons.add),
+            label: const Text('Novo Template'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
           ),
         ],
       ),
@@ -253,7 +245,7 @@ class _ExamTemplatesContent extends StatelessWidget {
   Widget _buildTemplateList(
       BuildContext context, ExamTemplateViewModel viewModel) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       itemCount: viewModel.templates.length,
       itemBuilder: (context, index) {
         final template = viewModel.templates[index];
@@ -413,20 +405,22 @@ class _TemplateCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Info row
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
+            Row(
               children: [
-                if (courseName != null)
+                if (courseName != null) ...[
                   _buildInfoChip(Icons.school_outlined, courseName!),
+                  const SizedBox(width: 16),
+                ],
                 _buildInfoChip(
                     Icons.format_list_numbered, '$questionCount questões'),
+                const SizedBox(width: 16),
                 _buildInfoChip(
                   Icons.timer_outlined,
                   timeLimitMinutes != null
                       ? '$timeLimitMinutes min'
                       : 'Sem limite',
                 ),
+                const SizedBox(width: 16),
                 _buildInfoChip(Icons.check_circle_outline,
                     'Aprovação: ${passingScore.toInt()}%'),
               ],
@@ -434,10 +428,7 @@ class _TemplateCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Actions row
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            Row(
               children: [
                 Text(
                   'Criado em ${_formatDate(createdAt)}',
@@ -446,11 +437,13 @@ class _TemplateCard extends StatelessWidget {
                     color: Colors.grey[500],
                   ),
                 ),
+                const Spacer(),
                 TextButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   label: const Text('Editar'),
                 ),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: onPublish,
                   icon: Icon(
@@ -461,6 +454,7 @@ class _TemplateCard extends StatelessWidget {
                   ),
                   label: Text(isPublished ? 'Despublicar' : 'Publicar'),
                 ),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline, size: 18),
@@ -574,18 +568,11 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
   Widget build(BuildContext context) {
     final viewModel = context.watch<ExamTemplateViewModel>();
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isMobile = screenWidth < 800;
-
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 80,
-        vertical: isMobile ? 24 : 40,
-      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
       child: SizedBox(
-        width: isMobile ? screenWidth - 32 : 900,
-        height: isMobile ? screenHeight - 48 : 700,
+        width: 900,
+        height: 700,
         child: Column(
           children: [
             _buildHeader(viewModel),
@@ -666,7 +653,7 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
 
   Widget _buildInfoTab(ExamTemplateViewModel viewModel) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -712,14 +699,9 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
             ),
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
+          Row(
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width < 600
-                    ? double.infinity
-                    : 200,
+              Expanded(
                 child: TextFormField(
                   initialValue: viewModel.questionCount.toString(),
                   decoration: const InputDecoration(
@@ -735,10 +717,8 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   },
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width < 600
-                    ? double.infinity
-                    : 200,
+              const SizedBox(width: 16),
+              Expanded(
                 child: TextFormField(
                   initialValue:
                       viewModel.timeLimitMinutes?.toString() ?? '',
@@ -755,10 +735,8 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
                   },
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width < 600
-                    ? double.infinity
-                    : 200,
+              const SizedBox(width: 16),
+              Expanded(
                 child: TextFormField(
                   initialValue:
                       viewModel.passingScorePercentage.toString(),
@@ -839,25 +817,17 @@ class _TemplateEditorDialogState extends State<_TemplateEditorDialog>
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          child: Row(
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.format_list_numbered,
-                      color: Colors.grey[600], size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${viewModel.templateQuestions.length} questao(oes) no template',
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w500),
-                  ),
-                ],
+              Icon(Icons.format_list_numbered,
+                  color: Colors.grey[600], size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '${viewModel.templateQuestions.length} questão(ões) no template',
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w500),
               ),
+              const Spacer(),
               ElevatedButton.icon(
                 onPressed: () => _showQuestionSelector(viewModel),
                 icon: const Icon(Icons.add, size: 20),
@@ -1084,18 +1054,11 @@ class _QuestionSelectorDialog extends StatelessWidget {
         .where((q) => !templateQuestionIds.contains(q.id))
         .toList();
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isMobile = screenWidth < 800;
-
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 120,
-        vertical: isMobile ? 24 : 60,
-      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
       child: SizedBox(
-        width: isMobile ? screenWidth - 32 : 700,
-        height: isMobile ? screenHeight - 48 : 500,
+        width: 700,
+        height: 500,
         child: Column(
           children: [
             Container(

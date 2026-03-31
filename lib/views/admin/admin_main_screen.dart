@@ -21,13 +21,9 @@ class AdminMainScreen extends StatefulWidget {
 
 class _AdminMainScreenState extends State<AdminMainScreen> {
   int _selectedIndex = 0;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const _goldColor = Color(0xFFB8860B);
   static const _goldLight = Color(0xFFFFF8E1);
-
-  bool _isMobile(BuildContext context) =>
-      MediaQuery.of(context).size.width < 800;
 
   Map<String, dynamic> get _userData {
     final sessionManager = context.watch<SessionManager>();
@@ -39,15 +35,6 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     };
   }
 
-  void _selectIndex(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    if (_isMobile(context)) {
-      Navigator.of(context).pop();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final adminRepo = context.read<AdminRepository?>();
@@ -57,35 +44,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       );
     }
 
-    final isMobile = _isMobile(context);
-
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: isMobile
-          ? AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              ),
-              title: const Text(
-                'Painel Admin',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              backgroundColor: _goldColor,
-              foregroundColor: Colors.white,
-            )
-          : null,
-      drawer: isMobile ? Drawer(child: _buildSideMenu()) : null,
-      body: isMobile
-          ? _buildContent(adminRepo)
-          : Row(
-              children: [
-                _buildSideMenu(),
-                Expanded(
-                  child: _buildContent(adminRepo),
-                ),
-              ],
-            ),
+      body: Row(
+        children: [
+          _buildSideMenu(),
+          Expanded(
+            child: _buildContent(adminRepo),
+          ),
+        ],
+      ),
     );
   }
 
@@ -117,7 +84,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
 
   Widget _buildSideMenu() {
     return Container(
-      width: _isMobile(context) ? null : 280,
+      width: 280,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -202,10 +169,13 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       ),
       child: Column(
         children: [
-          Image.asset(
-            'assets/images/SmartQuiz_branca.png',
-            height: _isMobile(context) ? 80 : 150,
-            fit: BoxFit.contain,
+          SizedBox(
+            child: Image.asset(
+              'assets/images/SmartQuiz_branca.png',
+              width: 250,
+              height: 150,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -233,12 +203,12 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       color: isSelected ? _goldLight : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
-        onTap: onTap != null
-            ? () {
-                if (_isMobile(context)) Navigator.of(context).pop();
-                onTap();
-              }
-            : () => _selectIndex(index),
+        onTap: onTap ??
+            () {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
