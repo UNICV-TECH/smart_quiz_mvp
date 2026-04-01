@@ -56,8 +56,31 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    if (result.success && !result.needsEmailConfirmation) {
-      context.go('/login');
+    if (result.success) {
+      if (result.needsEmailConfirmation) {
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Verifique seu e-mail'),
+            content: Text(
+              'Enviamos um link de confirmação para ${_emailController.text.trim()}. '
+              'Verifique sua caixa de entrada e clique no link para ativar sua conta.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  context.go('/login');
+                },
+                child: const Text('Ir para login'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        context.go('/login');
+      }
     }
   }
 
@@ -210,8 +233,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                       if (value == null || value.isEmpty) {
                                         return 'Por favor, insira sua senha';
                                       }
-                                      if (value.length < 6) {
-                                        return 'Sua senha deve ter ao menos 6 caracteres';
+                                      if (value.length < 8) {
+                                        return 'Sua senha deve ter ao menos 8 caracteres';
+                                      }
+                                      if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                                        return 'A senha deve conter ao menos uma letra maiúscula';
+                                      }
+                                      if (!RegExp(r'\d').hasMatch(value)) {
+                                        return 'A senha deve conter ao menos um número';
                                       }
                                       return null;
                                     },
