@@ -362,38 +362,41 @@ class _QuizConfigScreenState extends State<QuizConfigScreen> {
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.only(top: 12, bottom: 20),
                   child: Column(
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: DefaultButtonArrowBack(
-                          onPressed: () => context.pop(),
-                          iconColor: Colors.white,
-                        ),
+                      Row(
+                        children: [
+                          DefaultButtonArrowBack(
+                            onPressed: () => context.pop(),
+                            iconColor: Colors.white,
+                          ),
+                          const Spacer(),
+                          Image.asset(
+                            'assets/images/SmartQuiz_branca.png',
+                            height: 60,
+                            fit: BoxFit.contain,
+                          ),
+                          const Spacer(),
+                          const SizedBox(width: 48),
+                        ],
                       ),
-                      Image.asset(
-                        'assets/images/SmartQuiz.png',
-                        width: 200,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       Text(
                         courseTitle,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 24,
+                          fontSize: 30,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontFamily: 'Poppins',
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
                         'Prepare-se para o desafio!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 16,
                           color: Colors.white.withValues(alpha: 0.7),
                           fontFamily: 'Poppins',
                         ),
