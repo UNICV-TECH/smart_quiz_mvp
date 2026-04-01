@@ -204,7 +204,24 @@ class AdminDashboardScreen extends StatelessWidget {
           child: AdminBarChart(data: viewModel.courseStats),
         ),
         const SizedBox(height: 16),
-        ...viewModel.courseStats.map((course) => _CourseStatsCard(stats: course)),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth >= 700 ? 2 : 1;
+            final spacing = 20.0;
+            final cardWidth = (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              alignment: WrapAlignment.center,
+              children: viewModel.courseStats.map((course) {
+                return SizedBox(
+                  width: cardWidth,
+                  child: _CourseStatsCard(stats: course),
+                );
+              }).toList(),
+            );
+          },
+        ),
       ],
     );
   }
@@ -320,38 +337,40 @@ class _SummaryCard extends StatelessWidget {
 class _CourseStatsCard extends StatelessWidget {
   const _CourseStatsCard({required this.stats});
 
+  static const _goldColor = Color(0xFFB8860B);
+
   final dynamic stats;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.grey.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             stats.courseName,
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: _goldColor,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _statChip('Questões', stats.totalQuestions.toString()),
               _statChip('Templates', stats.totalTemplates.toString()),
@@ -371,12 +390,14 @@ class _CourseStatsCard extends StatelessWidget {
           value,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 18,
+            color: Colors.black87,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
       ],
     );

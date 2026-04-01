@@ -52,12 +52,19 @@ class AdminLineChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 30,
+              interval: data.length > 10 ? (data.length / 6).ceilToDouble() : 1,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
                 if (index < 0 || index >= data.length) return const SizedBox();
                 final parts = data[index].month.split('-');
+                // Formato: DD/MM para datas YYYY-MM-DD, ou MM/AA para YYYY-MM
+                final label = parts.length >= 3
+                    ? '${parts[2]}/${parts[1]}'
+                    : parts.length >= 2
+                        ? '${parts[1]}/${parts[0].substring(2)}'
+                        : '';
                 return Text(
-                  parts.length >= 2 ? '${parts[1]}/${parts[0].substring(2)}' : '',
+                  label,
                   style: const TextStyle(fontSize: 10, color: Colors.grey),
                 );
               },
