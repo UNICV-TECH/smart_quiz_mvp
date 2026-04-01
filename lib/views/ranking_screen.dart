@@ -209,7 +209,7 @@ class _PodiumSection extends StatelessWidget {
                 child: _PodiumItem(
                   entry: third,
                   position: 3,
-                  podiumHeight: 60,
+                  podiumHeight: 72,
                   color: const Color(0xFFCD7F32),
                   isCurrentUser: third.userId == currentUserId,
                 ),
@@ -242,7 +242,7 @@ class _PodiumItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final level = GamificationLevel.fromPoints(entry.seasonPoints);
     final firstName = entry.userName.split(' ').first;
-    final avatarSize = position == 1 ? 52.0 : 44.0;
+    final avatarSize = position == 1 ? 58.0 : 50.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -269,7 +269,7 @@ class _PodiumItem extends StatelessWidget {
         Text(
           firstName,
           style: TextStyle(
-            fontSize: position == 1 ? 14 : 13,
+            fontSize: position == 1 ? 16 : 15,
             fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w600,
             color: isCurrentUser ? AppColors.green : AppColors.primaryDark,
             fontFamily: 'Poppins',
@@ -282,7 +282,7 @@ class _PodiumItem extends StatelessWidget {
         Text(
           '${entry.seasonPoints.toStringAsFixed(0)} pts',
           style: TextStyle(
-            fontSize: position == 1 ? 13 : 12,
+            fontSize: position == 1 ? 15 : 14,
             fontWeight: FontWeight.w700,
             color: color,
             fontFamily: 'Poppins',
@@ -336,21 +336,21 @@ class _PodiumItem extends StatelessWidget {
                 child: Text(
                   '$position',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: color,
                     fontFamily: 'Poppins',
                   ),
                 ),
               ),
-              if (podiumHeight > 70) ...[
+              if (podiumHeight >= 60) ...[
                 const SizedBox(height: 2),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     level.label,
                     style: TextStyle(
-                      fontSize: 8,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: Colors.white.withAlpha(220),
                       fontFamily: 'Poppins',
@@ -426,7 +426,7 @@ Widget _buildRankingContent({
                     child: Text(
                       'Demais participantes',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColors.secondaryDark,
                         fontFamily: 'Poppins',
@@ -486,12 +486,12 @@ Widget _buildUserPositionCard(RankingEntry entry) {
     ),
     child: Row(
       children: [
-        const Icon(Icons.person, color: AppColors.green, size: 20),
-        const SizedBox(width: 8),
+        const Icon(Icons.person, color: AppColors.green, size: 22),
+        const SizedBox(width: 10),
         Text(
           'Você: #${entry.rankPosition} — ${entry.seasonPoints.toStringAsFixed(0)} pts',
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: AppColors.green,
             fontFamily: 'Poppins',
@@ -879,8 +879,8 @@ class _RankingListItem extends StatelessWidget {
         children: [
           // Position
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: const BoxDecoration(
               color: Color(0xFFF5F5F5),
               shape: BoxShape.circle,
@@ -889,22 +889,22 @@ class _RankingListItem extends StatelessWidget {
             child: Text(
               '${entry.rankPosition}',
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryDark,
                 fontFamily: 'Poppins',
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
 
           // Avatar with medal
           AvatarWithMedal(
             avatarUrl: entry.avatarUrl,
             medalAsset: level.medalAsset,
-            size: 44,
+            size: 48,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
 
           // Name + level
           Expanded(
@@ -914,7 +914,7 @@ class _RankingListItem extends StatelessWidget {
                 Text(
                   entry.userName,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight:
                         isCurrentUser ? FontWeight.w700 : FontWeight.w500,
                     color: AppColors.primaryDark,
@@ -926,7 +926,7 @@ class _RankingListItem extends StatelessWidget {
                 Text(
                   level.label,
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 13,
                     color: AppColors.secondaryDark,
                     fontFamily: 'Poppins',
                   ),
@@ -937,7 +937,7 @@ class _RankingListItem extends StatelessWidget {
 
           // Points
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.green.withAlpha(20),
               borderRadius: BorderRadius.circular(8),
@@ -945,7 +945,7 @@ class _RankingListItem extends StatelessWidget {
             child: Text(
               '${entry.seasonPoints.toStringAsFixed(0)} pts',
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.green,
                 fontFamily: 'Poppins',
