@@ -25,7 +25,6 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
   @override
   void initState() {
     super.initState();
-    context.read<SessionManager>().clearPendingPasswordRecovery();
   }
 
   @override
@@ -94,13 +93,20 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
       return;
     }
 
+    // Limpar flag de recovery e fazer signOut para evitar redirect duplo
+    final sessionManager = context.read<SessionManager>();
+    sessionManager.clearPendingPasswordRecovery();
+    await sessionManager.signOut();
+
+    if (!mounted) return;
+
     // Mostra dialog de sucesso com botão OK que redireciona para login
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Senha alterada'),
-        content: const Text('Senha alterada com sucesso!'),
+        content: const Text('Senha alterada com sucesso! Faça login com sua nova senha.'),
         actions: [
           TextButton(
             onPressed: () {

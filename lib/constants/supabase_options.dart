@@ -51,7 +51,7 @@ class SupabaseOptions {
     if (defineUrl.isNotEmpty) {
       return defineUrl;
     }
-    return 'https://smart-quiz-mvp.vercel.app';
+    return 'https://smartquiz.unicvtech.com.br';
   }
 
   static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;

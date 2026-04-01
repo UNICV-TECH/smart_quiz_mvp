@@ -69,6 +69,14 @@ GoRouter createAppRouter(SessionManager sessionManager) {
         return '/reset-password/confirm';
       }
 
+      // 2b. If on confirm screen without pending recovery and not authenticated,
+      //     redirect to reset-password (user navigated directly without email link)
+      if (!pendingRecovery &&
+          !isAuthenticated &&
+          location == '/reset-password/confirm') {
+        return '/reset-password';
+      }
+
       // 3. Define public routes
       const publicRoutes = [
         '/splash',
