@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirme seu email - Smart Quiz</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F5F7F3;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F7F3;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#2F4A2B,#3B5C34,#4D7B58);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#FFFFFF;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Smart Quiz</h1>
+              <p style="margin:6px 0 0;color:#A5D6A7;font-size:13px;font-weight:500;">UniCV - Plataforma de Estudos</p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px;">
+              <h2 style="margin:0 0 8px;color:#2E2E2E;font-size:20px;font-weight:600;">Confirme seu email</h2>
+              <p style="margin:0 0 24px;color:#666666;font-size:15px;line-height:1.6;">
+                Bem-vindo ao Smart Quiz! Para ativar sua conta e comecar a estudar, confirme seu endereco de email clicando no botao abaixo.
+              </p>
+              <!-- CTA Button -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:8px 0 28px;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;background-color:#3B5C34;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
+                      Confirmar meu email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 16px;color:#888888;font-size:13px;line-height:1.5;">
+                Se o botao nao funcionar, copie e cole este link no seu navegador:
+              </p>
+              <p style="margin:0 0 24px;word-break:break-all;color:#3B5C34;font-size:13px;">
+                {{ .ConfirmationURL }}
+              </p>
+              <hr style="border:none;border-top:1px solid #E8E8E8;margin:24px 0;">
+              <p style="margin:0;color:#999999;font-size:12px;line-height:1.5;">
+                Se voce nao criou uma conta no Smart Quiz, ignore este email.
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#F9F9F9;padding:20px 40px;text-align:center;border-top:1px solid #E8E8E8;">
+              <p style="margin:0;color:#B3B3B3;font-size:11px;">
+                Smart Quiz &copy; 2026 - Centro Universitario UniCV
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
