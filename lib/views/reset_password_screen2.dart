@@ -23,11 +23,6 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
   String? _confirmError;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _passwordController.dispose();
     _confirmController.dispose();
@@ -93,14 +88,11 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
       return;
     }
 
-    // Limpar flag de recovery e fazer signOut para evitar redirect duplo
-    final sessionManager = context.read<SessionManager>();
-    sessionManager.clearPendingPasswordRecovery();
-    await sessionManager.signOut();
+    // Limpar flag de recovery (não dispara notifyListeners, GoRouter não reage)
+    context.read<SessionManager>().clearPendingPasswordRecovery();
 
-    if (!mounted) return;
-
-    // Mostra dialog de sucesso com botão OK que redireciona para login
+    // Mostra dialog de sucesso; signOut acontece ao clicar OK
+    // para evitar que GoRouter redirecione antes do dialog aparecer
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -109,9 +101,12 @@ class _ResetPasswordScreen2State extends State<ResetPasswordScreen2> {
         content: const Text('Senha alterada com sucesso! Faça login com sua nova senha.'),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              final router = GoRouter.of(context);
+              final sessionManager = context.read<SessionManager>();
               Navigator.of(dialogContext).pop();
-              context.go('/login');
+              await sessionManager.signOut();
+              router.go('/login');
             },
             child: const Text('OK'),
           ),
