@@ -249,8 +249,12 @@ class _ExamScreenState extends State<ExamScreen> {
                             ...supportingTextWidgets,
                             const SizedBox(height: 16),
                           ],
-                          _buildEnunciation(
-                              currentExamQuestion.question.enunciation),
+                          if (currentExamQuestion
+                              .question.enunciation
+                              .trim()
+                              .isNotEmpty)
+                            _buildEnunciation(
+                                currentExamQuestion.question.enunciation),
                           if (hasQuestionBody) ...[
                             const SizedBox(height: 16),
                             _buildQuestionBody(questionBody),
