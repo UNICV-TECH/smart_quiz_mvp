@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen>
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 20),
+                        padding: const EdgeInsets.fromLTRB(0, 16, 0, 20),
                         child: Column(
                           children: [
                             Center(
