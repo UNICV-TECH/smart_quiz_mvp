@@ -653,6 +653,7 @@ class _ExamScreenState extends State<ExamScreen> {
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
+              key: const Key('dialog_finish'),
               onPressed: () {
                 Navigator.pop(dialogContext);
                 _submitExam(viewModel);
