@@ -78,12 +78,11 @@ CI secrets (GitHub): `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 
 ## Migrations
 
-`supabase/migrations/` aplicadas em ordem numérica via `supabase db push` ou Dashboard SQL.
+Fonte da verdade = **baseline único** `supabase/migrations/20260707211430_baseline_prod.sql`, gerado do schema real de prod via `supabase db pull` (2026-07-07). As 23 migrations históricas (Teacher/Gamification/Admin/etc.) ficam em `supabase/migrations_archive/` só como referência — a CLI e o deploy **só olham `migrations/`**; não reintroduzir as arquivadas.
 
-Marcos:
-- `20250204000001` — Teacher module
-- `20260224000001` — Gamification
-- `20260303000001` — Admin module
+**Deploy automático:** merge na `main` → integração GitHub do Supabase aplica migrations pendentes (check "Supabase Preview" no commit). Fluxo: escreva migrations NOVAS incrementais em `supabase/migrations/` (ALTERs contra o baseline) → PR → merge.
+
+CLI precisa estar logada na conta dona `unicvtech@unicv.edu.br` (a org "Firstep" não enxerga o projeto); ref `mrqovopbwfdffumhtcaz`. Histórico: `supabase migration list`.
 
 ## Gotchas (legacy naming preservado)
 
