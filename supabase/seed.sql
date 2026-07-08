@@ -1,0 +1,3 @@
+-- Seed base do Supabase local (referenciado em config.toml -> [db.seed] sql_paths).
+-- Intencionalmente vazio: o seed determinístico do E2E é feito por scripts/e2e_setup.sh
+-- (aluno de teste + curso "Curso E2E" + questões), rodado após `supabase start`.

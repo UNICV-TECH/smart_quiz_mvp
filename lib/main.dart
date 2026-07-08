@@ -32,7 +32,7 @@ bool _supabaseInitialized = false;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  usePathUrlStrategy();
+  if (kIsWeb) usePathUrlStrategy();
 
   AuthRepository authRepository;
 
@@ -61,11 +61,11 @@ Future<void> main() async {
   final supabaseUrl = SupabaseOptions.url;
   final supabaseKey = SupabaseOptions.anonKey;
 
+  String preview(String v) =>
+      v.length <= 30 ? v : '${v.substring(0, 30)}...';
   debugPrint('Verificando configuração do Supabase:');
-  debugPrint(
-      '  URL: ${supabaseUrl.isNotEmpty ? "${supabaseUrl.substring(0, 30)}..." : "VAZIO"}');
-  debugPrint(
-      '  Key: ${supabaseKey.isNotEmpty ? "${supabaseKey.substring(0, 30)}..." : "VAZIO"}');
+  debugPrint('  URL: ${supabaseUrl.isNotEmpty ? preview(supabaseUrl) : "VAZIO"}');
+  debugPrint('  Key: ${supabaseKey.isNotEmpty ? preview(supabaseKey) : "VAZIO"}');
   debugPrint('  isConfigured: ${SupabaseOptions.isConfigured}');
 
   if (SupabaseOptions.isConfigured) {

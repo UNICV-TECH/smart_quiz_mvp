@@ -94,7 +94,7 @@ CLI precisa estar logada na conta dona `unicvtech@unicv.edu.br` (a org "Firstep"
 | `user.surename` (typo de surname) | tabela user |
 | `user_responses` antes era `userresponse` | renomeado em migration 006 |
 
-**RLS**: ativo em `question_category`, `exam_template*`, `subject`, `gamification_*`. Demais tabelas sem RLS — checar no service layer.
+**RLS**: ativo em **todas** as tabelas de dados. As 9 antes expostas (`user`, `course`, `exam`, `question`, `examquestion`, `answerchoice`, `user_responses`, `supportingtext`, `user_exam_attempts`) foram cobertas na migration `20260707220000`. Idioma das policies: helpers `is_admin()`/`is_teacher_or_admin()` SECURITY DEFINER (evitam recursão), escopo por dono (`auth.uid()`)/role, leituras compartilhadas restritas a `authenticated`; escrita de teacher/admin via RPCs SECURITY DEFINER (bypassam RLS). Trigger `handle_new_user` provisiona `public.user` no signup. Regressão: `scripts/test_rls.sh` (bate na REST real com JWTs).
 
 ## Conventions
 
