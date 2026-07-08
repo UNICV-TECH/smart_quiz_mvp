@@ -59,21 +59,9 @@ void main() {
       'Qual a alternativa correta?',
     );
 
-    // Alternativa A (correta) + alternativa B.
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Digite o texto da alternativa A'),
-      'CERTA E2E',
-    );
-    final addAlt = find.text('Adicionar Alternativa');
-    await tester.ensureVisible(addAlt);
-    await tester.tap(addAlt);
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Digite o texto da alternativa B'),
-      'ERRADA E2E',
-    );
-
-    // Marca A como correta (o toque no circulo da letra sobe pro GestureDetector).
+    // O form ja vem com 5 alternativas vazias (A-E). Marca A como correta ANTES
+    // de digitar: marcar dispara rebuild e o TextField da alternativa recria o
+    // controller no build, apagando qualquer texto ja digitado.
     final circuloA = find.text('A');
     await tester.ensureVisible(circuloA);
     await tester.tap(circuloA);
@@ -81,7 +69,25 @@ void main() {
     expect(find.text('Alternativa A (Correta)'), findsOneWidget,
         reason: 'a alternativa A deveria ficar marcada como correta');
 
-    // Salva.
+    // Preenche TODAS as 5 alternativas por ULTIMO — nenhum rebuild daqui ate o
+    // Salvar, senao o controller recriado no build apaga o texto. A validacao
+    // exige que nenhuma alternativa preenchida fique vazia.
+    const alternativas = {
+      'A': 'CERTA E2E',
+      'B': 'ERRADA A',
+      'C': 'ERRADA B',
+      'D': 'ERRADA C',
+      'E': 'ERRADA D',
+    };
+    for (final alt in alternativas.entries) {
+      await tester.enterText(
+        find.widgetWithText(
+            TextField, 'Digite o texto da alternativa ${alt.key}'),
+        alt.value,
+      );
+    }
+
+    // Salva (sem pump/rebuild entre o preenchimento e o toque).
     final salvar = find.text('Salvar Questão');
     await tester.ensureVisible(salvar);
     await tester.tap(salvar);
