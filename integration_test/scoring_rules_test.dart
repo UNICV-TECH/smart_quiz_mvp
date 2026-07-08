@@ -1,4 +1,4 @@
-// Teste E2E: regras de scoring que faltavam no happy-path.
+// Teste E2E: regras de scoring que faltavam no happy-path, num unico fluxo.
 //
 // Cenarios:
 //   1. Reprovado (< 70%): 2/5 = 40% -> sem bonus de tempo (time_bonus == 0).
@@ -14,36 +14,33 @@ import 'helpers.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('reprovado (40%): sem bonus de tempo',
+  testWidgets('reprovado (<70%) sem bonus de tempo; faixa 10q = 1.25/acerto',
       (WidgetTester tester) async {
     await bootAndReachHome(tester);
 
-    await fazerSimulado(tester, corretas: 2); // 2/5 = 40%
+    // ── Cenario 1: 2/5 = 40% -> reprovado, sem bonus de tempo ──────────────
+    await fazerSimulado(tester, corretas: 2);
     await pumpUntil(tester, find.text('40%'));
     expect(find.text('40%'), findsOneWidget);
     expect(find.textContaining('acertou 2 de 5'), findsOneWidget);
 
-    // Regra: bonus de tempo exige >= 70% de acerto -> aqui deve ser zero.
-    final reg = await ultimoRegistroDePontos();
-    expect(comoDouble(reg['percentage_score']), 40.0);
-    expect(reg['correct_count'], 2);
-    expect(comoDouble(reg['time_bonus']), 0.0,
+    final regReprovado = await ultimoRegistroDePontos();
+    expect(comoDouble(regReprovado['percentage_score']), 40.0);
+    expect(regReprovado['correct_count'], 2);
+    expect(comoDouble(regReprovado['time_bonus']), 0.0,
         reason: 'prova reprovada (<70%) nao pode ganhar bonus de tempo');
-  });
 
-  testWidgets('faixa de pontos: 10 questoes valem 1.25 por acerto',
-      (WidgetTester tester) async {
-    await bootAndReachHome(tester);
+    await voltarParaHome(tester);
 
-    await fazerSimulado(tester, corretas: 10, total: 10); // 10/10 = 100%
+    // ── Cenario 2: 10/10 = 100% -> faixa 6-10 questoes vale 1.25/acerto ─────
+    await fazerSimulado(tester, corretas: 10, total: 10);
     await pumpUntil(tester, find.text('100%'));
     expect(find.text('100%'), findsOneWidget);
 
-    // Regra de faixa (6-10 questoes = 1.25/acerto): base = 10 * 1.25 = 12.5.
-    final reg = await ultimoRegistroDePontos();
-    expect(reg['question_count'], 10);
-    expect(reg['correct_count'], 10);
-    expect(comoDouble(reg['base_points']), 12.5,
+    final regFaixa = await ultimoRegistroDePontos();
+    expect(regFaixa['question_count'], 10);
+    expect(regFaixa['correct_count'], 10);
+    expect(comoDouble(regFaixa['base_points']), 12.5,
         reason: 'faixa 6-10 questoes deve valer 1.25 por acerto');
   });
 }

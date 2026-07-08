@@ -47,63 +47,80 @@ Future<int> pumpUntilAny(
   throw TestFailure('Timeout esperando por qualquer um de: $finders');
 }
 
-/// Desloga (se houver sessao) para que o proximo boot caia na Welcome. Usado
-/// entre cenarios de login com contas diferentes no mesmo arquivo de teste.
-Future<void> deslogar() async {
-  try {
-    if (Supabase.instance.client.auth.currentUser != null) {
-      await Supabase.instance.client.auth.signOut();
-    }
-  } catch (_) {
-    // Supabase ainda nao inicializado — nada a fazer.
-  }
-}
-
-/// Sobe o app e faz login com a conta dada, partindo da Welcome. Nao assere o
-/// destino — cada teste verifica para onde o role redireciona.
-Future<void> bootELogar(
+/// Preenche os campos de login (ja visiveis) e submete via acao "done" do campo
+/// senha (onFieldSubmitted -> _handleLogin), sem depender do botao na viewport.
+Future<void> preencherELogar(
   WidgetTester tester, {
   required String email,
   String senha = senhaPadrao,
 }) async {
-  app.main();
-  await tester.pump(const Duration(seconds: 2));
-
-  await pumpUntil(tester, find.text('Bem-vindo'));
-  await tester.tap(find.text('Entrar'));
-  await tester.pump(const Duration(milliseconds: 500));
-
   await pumpUntil(tester, find.byType(TextFormField));
   final campos = find.byType(TextFormField);
   await tester.enterText(campos.at(0), email);
   await tester.enterText(campos.at(1), senha);
   await tester.pump(const Duration(milliseconds: 300));
-  // Submete via acao "done" do campo senha (onFieldSubmitted -> _handleLogin).
   await tester.testTextInput.receiveAction(TextInputAction.done);
 }
 
-/// Sobe o app, garante login como o ALUNO e para na Home. Tolera sessao ja
-/// persistida em disco (nesse caso cai direto na Home, sem passar pela Welcome).
-Future<void> bootAndReachHome(WidgetTester tester) async {
+/// Sobe o app UMA vez e leva ate a tela de login (campos visiveis). Tolera
+/// Welcome (toca "Entrar") e sessao ja persistida em disco (desloga -> /login).
+///
+/// IMPORTANTE: chame no maximo uma vez por teste. Um 2o `app.main()` no mesmo
+/// processo re-dispara o dotenv.load e o erro vaza como falha — por isso cada
+/// arquivo de teste deve ter um unico testWidgets. Para trocar de usuario no
+/// meio do teste, use [relogar] (nao rebota o app).
+Future<void> irParaLogin(WidgetTester tester) async {
   app.main();
   await tester.pump(const Duration(seconds: 2));
 
-  final idx = await pumpUntilAny(
-    tester,
-    [find.text('Bem-vindo'), find.text('Curso E2E')],
-  );
-
-  if (idx == 0) {
-    await tester.tap(find.text('Entrar'));
+  // Se caiu logado (sessao persistida de outro arquivo), desloga -> vai a /login.
+  for (var i = 0;
+      i < 10 &&
+          find.byType(TextFormField).evaluate().isEmpty &&
+          find.text('Bem-vindo').evaluate().isEmpty;
+      i++) {
+    try {
+      if (Supabase.instance.client.auth.currentUser != null) {
+        await Supabase.instance.client.auth.signOut();
+      }
+    } catch (_) {}
     await tester.pump(const Duration(milliseconds: 500));
-    await pumpUntil(tester, find.byType(TextFormField));
-    final campos = find.byType(TextFormField);
-    await tester.enterText(campos.at(0), alunoEmail);
-    await tester.enterText(campos.at(1), senhaPadrao);
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.testTextInput.receiveAction(TextInputAction.done);
   }
 
+  // Welcome -> Login.
+  if (find.text('Bem-vindo').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Entrar'));
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+  await pumpUntil(tester, find.byType(TextFormField));
+}
+
+/// Sobe o app e faz login com a conta dada. Nao assere o destino — cada teste
+/// verifica para onde o role redireciona.
+Future<void> bootELogar(
+  WidgetTester tester, {
+  required String email,
+  String senha = senhaPadrao,
+}) async {
+  await irParaLogin(tester);
+  await preencherELogar(tester, email: email, senha: senha);
+}
+
+/// Troca de usuario SEM rebootar o app: desloga (redireciona para /login pela
+/// regra do router) e loga com a nova conta.
+Future<void> relogar(
+  WidgetTester tester, {
+  required String email,
+  String senha = senhaPadrao,
+}) async {
+  await Supabase.instance.client.auth.signOut();
+  await pumpUntil(tester, find.byType(TextFormField));
+  await preencherELogar(tester, email: email, senha: senha);
+}
+
+/// Sobe o app, loga como o ALUNO e para na Home.
+Future<void> bootAndReachHome(WidgetTester tester) async {
+  await bootELogar(tester, email: alunoEmail);
   await pumpUntil(tester, find.text('Curso E2E'));
 }
 

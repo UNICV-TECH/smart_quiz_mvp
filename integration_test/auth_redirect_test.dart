@@ -1,4 +1,5 @@
 // Teste E2E: login redireciona conforme o papel (role) e trata credencial invalida.
+// Um unico testWidgets (um app.main); troca de usuario via relogar() sem rebootar.
 //
 // Cenarios:
 //   1. Professor -> tela de Templates de Prova (/teacher/templates).
@@ -16,31 +17,22 @@ import 'helpers.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('professor cai na tela de Templates de Prova',
+  testWidgets('redirect por role (professor/admin) e senha errada',
       (WidgetTester tester) async {
-    await deslogar();
+    // ── Professor -> Templates de Prova ────────────────────────────────────
     await bootELogar(tester, email: profEmail);
-
     await pumpUntil(tester, find.text('Templates de Prova'));
     expect(find.text('Templates de Prova'), findsWidgets);
-  });
 
-  testWidgets('admin cai no Painel Admin', (WidgetTester tester) async {
-    await deslogar();
-    await bootELogar(tester, email: adminEmail);
-
+    // ── Admin -> Painel Admin ──────────────────────────────────────────────
+    await relogar(tester, email: adminEmail);
     await pumpUntil(tester, find.text('Painel Admin'));
     expect(find.text('Painel Admin'), findsWidgets);
-  });
 
-  testWidgets('senha errada mostra erro e permanece no login',
-      (WidgetTester tester) async {
-    await deslogar();
-    await bootELogar(tester, email: alunoEmail, senha: 'senha-errada');
-
+    // ── Senha errada -> erro, permanece no login ───────────────────────────
+    await relogar(tester, email: alunoEmail, senha: 'senha-errada');
     await pumpUntil(tester, find.textContaining('Verifique suas credenciais'));
     expect(find.textContaining('Verifique suas credenciais'), findsWidgets);
-    // Nao redirecionou: os campos de login continuam na tela.
     expect(find.byType(TextFormField), findsWidgets);
   });
 }
