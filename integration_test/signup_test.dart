@@ -23,7 +23,9 @@ void main() {
 
     // /login -> /signup.
     await tester.tap(find.text('Cadastre-se'));
-    await pumpUntil(tester, find.text('Cadastrar'));
+    // O botao (nao o titulo, que tambem e "Cadastrar") desambiguado pelo tipo.
+    final botaoCadastrar = find.widgetWithText(ElevatedButton, 'Cadastrar');
+    await pumpUntil(tester, botaoCadastrar);
 
     // Campos na ordem: Nome, E-mail, Senha, Confirmar Senha.
     final campos = find.byType(TextFormField);
@@ -34,14 +36,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // Aceita os termos (obrigatorio) e cadastra.
+    await tester.ensureVisible(find.byType(Checkbox));
     await tester.tap(find.byType(Checkbox));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.ensureVisible(find.text('Cadastrar'));
-    await tester.tap(find.text('Cadastrar'));
+    await tester.ensureVisible(botaoCadastrar);
+    await tester.tap(botaoCadastrar);
 
-    // Confirmacao de e-mail ligada -> dialog "Ir para login".
-    await pumpUntil(tester, find.text('Ir para login'));
-    await tester.tap(find.text('Ir para login'));
+    // Pos-cadastro: dialog "Ir para login" (confirmacao ligada) OU ja navegou
+    // direto para /login (confirmacao desligada). Tolera os dois.
+    final idx = await pumpUntilAny(
+      tester,
+      [find.text('Ir para login'), find.text('Cadastre-se')],
+    );
+    if (idx == 0) {
+      await tester.tap(find.text('Ir para login'));
+    }
 
     // Verifica via ADMIN que o novo usuario nasceu student.
     await preencherELogar(tester, email: adminEmail);
