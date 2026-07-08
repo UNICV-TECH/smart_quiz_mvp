@@ -216,3 +216,14 @@ Future<Map<String, dynamic>> ultimoRegistroDePontos() async {
 
 /// Converte um valor numerico do Supabase (num ou String) para double.
 double comoDouble(dynamic v) => double.parse(v.toString());
+
+/// Linha de public.user pelo e-mail (ou null). Requer estar logado como staff
+/// (a policy user_select_own_or_staff permite teacher/admin lerem todos).
+Future<Map<String, dynamic>?> usuarioPorEmail(String email) async {
+  final rows = await Supabase.instance.client
+      .from('user')
+      .select('role, email, first_name')
+      .eq('email', email);
+  final list = rows as List;
+  return list.isEmpty ? null : list.first as Map<String, dynamic>;
+}
