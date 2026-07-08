@@ -1,11 +1,12 @@
 // Teste E2E: cadastro (signup) pela UI valida o trigger handle_new_user.
 //
-// Um novo aluno se cadastra em /signup; o trigger deve criar public.user com
-// role='student'. Como o stack local tem confirmacao de e-mail ligada (o novo
-// usuario nao loga na hora), a verificacao e feita logando como ADMIN (que pela
-// policy user_select_own_or_staff pode ler todos os usuarios) e checando o role.
+// Um novo aluno se cadastra em /signup. Com a confirmacao de e-mail desligada no
+// stack local (config.toml), o signup ja retorna sessao: o app redireciona por
+// papel -> como o trigger cria public.user com role='student', o novo usuario cai
+// direto na Home. Alem do redirect, checamos o role lendo a propria linha (RLS
+// permite ler o proprio registro).
 //
-// Pre-requisitos: `supabase start` + `bash scripts/e2e_setup.sh` (conta admin).
+// Pre-requisitos: `supabase start` + `bash scripts/e2e_setup.sh`.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -42,20 +43,12 @@ void main() {
     await tester.ensureVisible(botaoCadastrar);
     await tester.tap(botaoCadastrar);
 
-    // Pos-cadastro: dialog "Ir para login" (confirmacao ligada) OU ja navegou
-    // direto para /login (confirmacao desligada). Tolera os dois.
-    final idx = await pumpUntilAny(
-      tester,
-      [find.text('Ir para login'), find.text('Cadastre-se')],
-    );
-    if (idx == 0) {
-      await tester.tap(find.text('Ir para login'));
-    }
+    // Signup auto-loga (confirmacao off) e o redirect por papel leva o novo
+    // aluno para a Home -> prova que o trigger o criou como student.
+    await pumpUntil(tester, find.text('Curso E2E'));
+    expect(find.text('Curso E2E'), findsWidgets);
 
-    // Verifica via ADMIN que o novo usuario nasceu student.
-    await preencherELogar(tester, email: adminEmail);
-    await pumpUntil(tester, find.text('Painel Admin'));
-
+    // Reforco: le a propria linha em public.user e confirma o role.
     final novo = await usuarioPorEmail(novoEmail);
     expect(novo, isNotNull,
         reason: 'o trigger handle_new_user deveria criar public.user no signup');
