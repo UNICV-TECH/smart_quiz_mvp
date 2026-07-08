@@ -227,3 +227,18 @@ Future<Map<String, dynamic>?> usuarioPorEmail(String email) async {
   final list = rows as List;
   return list.isEmpty ? null : list.first as Map<String, dynamic>;
 }
+
+/// Marca o Checkbox de termos (do signup) de forma robusta: rola ate ele, toca e
+/// verifica que ficou marcado, com algumas tentativas (tap pode "escorregar" na
+/// borda apos ensureVisible). Retorna true se ficou marcado.
+Future<bool> aceitarTermos(WidgetTester tester) async {
+  final cb = find.byType(Checkbox);
+  for (var i = 0; i < 4; i++) {
+    await tester.ensureVisible(cb);
+    await tester.pump(const Duration(milliseconds: 200));
+    if (tester.widget<Checkbox>(cb).value == true) return true;
+    await tester.tap(cb, warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+  return tester.widget<Checkbox>(cb).value == true;
+}

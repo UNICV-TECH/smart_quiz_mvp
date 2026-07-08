@@ -36,10 +36,10 @@ void main() {
     await tester.enterText(campos.at(3), 'Senha1234');
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Aceita os termos (obrigatorio) e cadastra.
-    await tester.ensureVisible(find.byType(Checkbox));
-    await tester.tap(find.byType(Checkbox));
-    await tester.pump(const Duration(milliseconds: 300));
+    // Aceita os termos (obrigatorio) — checa que realmente marcou.
+    final marcou = await aceitarTermos(tester);
+    expect(marcou, isTrue, reason: 'checkbox de termos precisa ficar marcado');
+
     await tester.ensureVisible(botaoCadastrar);
     await tester.tap(botaoCadastrar);
 
