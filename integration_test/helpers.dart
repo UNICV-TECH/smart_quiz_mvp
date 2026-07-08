@@ -15,6 +15,9 @@ const profEmail = 'e2e-prof@test.dev';
 const adminEmail = 'e2e-admin@test.dev';
 const senhaPadrao = 'pass1234';
 
+/// Template publicado "Prova E2E" semeado por scripts/e2e_setup.sh.
+const templateE2eId = 'e2e11111-1111-1111-1111-111111111111';
+
 /// Bombeia frames ate `finder` aparecer (ou estourar o timeout). Evita
 /// pumpAndSettle, que trava com o ConfettiWidget da tela de resultado e com
 /// loaders/animacoes contínuas.
@@ -168,6 +171,46 @@ Future<void> fazerSimulado(
   await responderExame(tester, corretas: corretas, total: total);
 }
 
+/// Da a Home, inicia a prova de TEMPLATE publicado "Prova E2E" (aba "Provas" do
+/// QuizConfig -> RPC generate_exam_from_template) e responde `corretas` de 5.
+/// Deixa na tela de resultado.
+Future<void> fazerProvaTemplate(
+  WidgetTester tester, {
+  required int corretas,
+}) async {
+  await tester.tap(find.text('Curso E2E'));
+  await pumpUntil(tester, find.text('Provas')); // aba do modo "Provas"
+  await tester.tap(find.text('Provas'));
+  await pumpUntil(tester, find.text('Iniciar Prova'));
+  await tester.tap(find.text('Iniciar Prova'));
+  await responderExame(tester, corretas: corretas, total: 5);
+}
+
+/// Registros de pontos do aluno logado para um template (best-score por
+/// exam_template_id), em ordem cronologica.
+Future<List<dynamic>> pontosDoTemplate([String templateId = templateE2eId]) async {
+  final client = Supabase.instance.client;
+  final uid = client.auth.currentUser!.id;
+  final rows = await client
+      .from('user_gamification_points')
+      .select('total_points, created_at')
+      .eq('user_id', uid)
+      .eq('exam_template_id', templateId)
+      .order('created_at', ascending: true);
+  return rows as List;
+}
+
+/// Nome da temporada (season) ativa — deve seguir o formato "YYYY.S".
+Future<String> nomeSeasonAtiva() async {
+  final client = Supabase.instance.client;
+  final rows = await client
+      .from('gamification_season')
+      .select('name')
+      .eq('is_active', true)
+      .limit(1);
+  return ((rows as List).first as Map)['name'].toString();
+}
+
 /// Rola a tela de resultado (CustomScrollView lazy) ate o `alvo` ser construido
 /// e o toca. Drag manual (pump, nao pumpAndSettle) por causa do confetti.
 Future<void> scrollAteTocar(WidgetTester tester, Finder alvo) async {
@@ -240,4 +283,30 @@ Future<int> contarQuestoesDoProfessor(String enunciationLike) async {
       .eq('id_teacher', uid)
       .ilike('enunciation', enunciationLike);
   return (rows as List).length;
+}
+
+/// Linha de public.user pelo e-mail (ou null). Requer estar logado como staff
+/// (a policy user_select_own_or_staff permite teacher/admin lerem todos).
+Future<Map<String, dynamic>?> usuarioPorEmail(String email) async {
+  final rows = await Supabase.instance.client
+      .from('user')
+      .select('role, email, first_name')
+      .eq('email', email);
+  final list = rows as List;
+  return list.isEmpty ? null : list.first as Map<String, dynamic>;
+}
+
+/// Marca o Checkbox de termos (do signup) de forma robusta: rola ate ele, toca e
+/// verifica que ficou marcado, com algumas tentativas (tap pode "escorregar" na
+/// borda apos ensureVisible). Retorna true se ficou marcado.
+Future<bool> aceitarTermos(WidgetTester tester) async {
+  final cb = find.byType(Checkbox);
+  for (var i = 0; i < 4; i++) {
+    await tester.ensureVisible(cb);
+    await tester.pump(const Duration(milliseconds: 200));
+    if (tester.widget<Checkbox>(cb).value == true) return true;
+    await tester.tap(cb, warnIfMissed: false);
+    await tester.pump(const Duration(milliseconds: 300));
+  }
+  return tester.widget<Checkbox>(cb).value == true;
 }
