@@ -31,8 +31,8 @@ void main() {
 
     // ── Senha errada -> erro, permanece no login ───────────────────────────
     await relogar(tester, email: alunoEmail, senha: 'senha-errada');
-    await pumpUntil(tester, find.textContaining('Verifique suas credenciais'));
-    expect(find.textContaining('Verifique suas credenciais'), findsWidgets);
+    await pumpUntil(tester, find.textContaining('Credenciais inválidas'));
+    expect(find.textContaining('Credenciais inválidas'), findsWidgets);
     expect(find.byType(TextFormField), findsWidgets);
   });
 }
