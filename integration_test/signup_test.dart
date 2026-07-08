@@ -30,8 +30,18 @@ void main() {
     final botaoCadastrar = find.widgetWithText(ElevatedButton, 'Cadastrar');
     await pumpUntil(tester, botaoCadastrar);
 
+    // Espera a transicao /login -> /signup terminar: durante a animacao os 2
+    // campos do login coexistem com os 4 do signup e baguncam os indices.
+    for (var i = 0;
+        i < 25 && find.byType(TextFormField).evaluate().length != 4;
+        i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
     // Campos na ordem: Nome, E-mail, Senha, Confirmar Senha.
     final campos = find.byType(TextFormField);
+    expect(campos.evaluate().length, 4,
+        reason: 'esperado 4 campos na tela de signup');
     await tester.enterText(campos.at(0), 'Aluno Signup');
     await tester.enterText(campos.at(1), novoEmail);
     await tester.enterText(campos.at(2), 'Senha1234');
