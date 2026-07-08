@@ -1,0 +1,123 @@
+// Teste E2E: o PROFESSOR cria uma questao pela UI (RPC create_teacher_question).
+//
+// Loga como professor, navega Menu -> "Criar Questoes" -> "Nova Questao",
+// seleciona o curso (unico obrigatorio; dificuldade='medio' e pontos=1.0 ja vem
+// por padrao), preenche enunciado/pergunta + 2 alternativas (marca a correta) e
+// salva. Valida:
+//   1) banner de sucesso "Questao criada com sucesso!";
+//   2) a questao aparece em public.question com id_teacher = o professor logado
+//      (a RPC create_teacher_question gravou; RLS deixa o dono ler a propria).
+//
+// Pre-requisitos: `supabase start` + `bash scripts/e2e_setup.sh` (professor
+// e2e-prof@test.dev + curso "Curso E2E").
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+
+import 'helpers.dart';
+
+// Enunciado distintivo para localizar a questao no banco depois.
+const _enunciado = 'Questao E2E criada pelo professor via UI';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('professor cria questao (RPC create_teacher_question)',
+      (WidgetTester tester) async {
+    // Janela larga: garante o menu lateral do professor sempre visivel (>=768),
+    // evitando o Drawer mobile.
+    await tester.binding.setSurfaceSize(const Size(1400, 1000));
+
+    await bootELogar(tester, email: profEmail);
+    await pumpUntil(tester, find.text('Templates de Prova'));
+
+    // Menu -> acordeao "Criar Questoes" -> "Nova Questao".
+    await tester.tap(find.text('Criar Questões'));
+    await pumpUntil(tester, find.text('Nova Questão'));
+    await tester.tap(find.text('Nova Questão'));
+
+    // Espera o form de contexto carregar (enquanto isLoading, so aparece spinner;
+    // o label "Curso" so existe apos os cursos carregarem).
+    await pumpUntil(tester, find.text('Criar Nova Questão'));
+    await pumpUntil(tester, find.text('Curso'));
+
+    // Seleciona o curso: abre o SelectPesquisa e escolhe "Curso E2E".
+    final abrirCurso = find.text('Selecione o curso');
+    await tester.ensureVisible(abrirCurso);
+    await tester.tap(abrirCurso);
+    await pumpUntil(tester, find.text('Curso E2E'));
+    await tester.tap(find.text('Curso E2E'));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Enunciado e pergunta (ambos obrigatorios).
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Digite o enunciado aqui...'),
+      _enunciado,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Digite a pergunta clara e objetiva'),
+      'Qual a alternativa correta?',
+    );
+
+    // O form ja vem com 5 alternativas vazias (A-E). Marca A como correta ANTES
+    // de digitar: marcar dispara rebuild e o TextField da alternativa recria o
+    // controller no build, apagando qualquer texto ja digitado.
+    final circuloA = find.text('A');
+    await tester.ensureVisible(circuloA);
+    await tester.tap(circuloA);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Alternativa A (Correta)'), findsOneWidget,
+        reason: 'a alternativa A deveria ficar marcada como correta');
+
+    // Preenche TODAS as 5 alternativas por ULTIMO — nenhum rebuild daqui ate o
+    // Salvar, senao o controller recriado no build apaga o texto. A validacao
+    // exige que nenhuma alternativa preenchida fique vazia.
+    const alternativas = {
+      'A': 'CERTA E2E',
+      'B': 'ERRADA A',
+      'C': 'ERRADA B',
+      'D': 'ERRADA C',
+      'E': 'ERRADA D',
+    };
+    for (final alt in alternativas.entries) {
+      await tester.enterText(
+        find.widgetWithText(
+            TextField, 'Digite o texto da alternativa ${alt.key}'),
+        alt.value,
+      );
+    }
+
+    // Salva (sem pump/rebuild entre o preenchimento e o toque).
+    final salvar = find.text('Salvar Questão');
+    await tester.ensureVisible(salvar);
+    await tester.tap(salvar);
+
+    // Sucesso na UI (banner do ViewModel). Se nao aparecer, coleta os textos de
+    // erro/validacao visiveis para diagnosticar (form barrou? VM deu erro?).
+    final sucesso = find.text('Questão criada com sucesso!');
+    try {
+      await pumpUntil(tester, sucesso, timeout: const Duration(seconds: 8));
+    } catch (_) {
+      final relevantes = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data)
+          .whereType<String>()
+          .where((s) =>
+              s.contains('Erro') ||
+              s.contains('obrigat') ||
+              s.contains('Preencha') ||
+              s.contains('Selecione') ||
+              s.contains('devem ter') ||
+              s.contains('alternativa') ||
+              s.contains('Alternativa'))
+          .toSet()
+          .toList();
+      fail('Banner de sucesso nao apareceu. Textos relevantes: $relevantes');
+    }
+
+    // Reforco no banco: a questao existe para este professor.
+    final qtd = await contarQuestoesDoProfessor('%professor via UI%');
+    expect(qtd, greaterThanOrEqualTo(1),
+        reason: 'create_teacher_question deveria ter gravado a questao do prof');
+  });
+}

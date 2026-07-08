@@ -43,6 +43,17 @@ insert into public.course(id,name,title,course_key,created_at,updated_at,is_acti
 values ('e2eccccc-0000-0000-0000-000000000000','Curso E2E','Curso E2E','e2e',now(),now(),true)
 on conflict (id) do nothing;
 
+-- Template de prova em RASCUNHO do professor (para o E2E de publicar).
+insert into public.exam_template(
+  id,name,description,id_course,id_teacher,question_count,
+  passing_score_percentage,is_published,is_active,created_at,updated_at)
+values (
+  'e2eddddd-0000-0000-0000-000000000000','Template C E2E','Rascunho para publicar no E2E',
+  'e2eccccc-0000-0000-0000-000000000000',
+  (select id from auth.users where email = 'e2e-prof@test.dev'),
+  5, 60.0, false, true, now(), now())
+on conflict (id) do nothing;
+
 -- 12 questões ENADE (id_teacher NULL) + alternativas + texto de apoio.
 do $$
 declare
