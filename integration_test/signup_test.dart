@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'helpers.dart';
 
@@ -42,6 +43,15 @@ void main() {
 
     await tester.ensureVisible(botaoCadastrar);
     await tester.tap(botaoCadastrar);
+
+    // Diagnostico: apos submeter, o signUp (confirmacao off) deve ter criado
+    // sessao para o novo usuario. Se nao houver, o signup falhou (confirmacao
+    // ainda ligada no CI? email ja existente?).
+    await tester.pump(const Duration(seconds: 5));
+    final user = Supabase.instance.client.auth.currentUser;
+    expect(user, isNotNull,
+        reason: 'apos signup nao ha currentUser — signUp falhou (confirmacao?)');
+    expect(user!.email, novoEmail);
 
     // Signup auto-loga (confirmacao off) e o redirect por papel leva o novo
     // aluno para a Home -> prova que o trigger o criou como student.
