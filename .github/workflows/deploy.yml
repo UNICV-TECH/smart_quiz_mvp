@@ -105,10 +105,15 @@ jobs:
       - name: Rodar integration_test (Linux desktop, headless via xvfb)
         run: |
           ANON=$(supabase status -o env | grep '^ANON_KEY=' | cut -d'"' -f2)
-          xvfb-run -a flutter test integration_test/ \
-            -d linux \
-            --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
-            --dart-define=SUPABASE_ANON_KEY="$ANON"
+          # Cada arquivo numa invocacao separada: o desktop embedder so lanca o
+          # app uma vez por `flutter test` (rodar o diretorio inteiro faz os
+          # arquivos seguintes falharem com "Unable to start the app").
+          for f in integration_test/*_test.dart; do
+            echo "==================== $f ===================="
+            xvfb-run -a flutter test "$f" -d linux \
+              --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
+              --dart-define=SUPABASE_ANON_KEY="$ANON" || exit 1
+          done
 
       - name: Parar Supabase local
         if: always()
