@@ -64,6 +64,29 @@ begin
       (gen_random_uuid(),'D','ERRADA C', false, qid, now(), now());
   end loop;
 end $$;
+
+-- Template PUBLICADO "Prova E2E" (5 questoes) do professor E2E, para testar o
+-- best-score-only "de verdade" (comparacao de pontos por exam_template_id).
+-- shuffle desligado -> ordem deterministica; questoes 1..5 ligadas ao template.
+insert into public.exam_template(
+  id, created_at, updated_at, name, id_course, id_teacher,
+  question_count, passing_score_percentage,
+  shuffle_questions, shuffle_choices, show_correct_answers, allow_review,
+  is_published, is_active)
+select 'e2e11111-1111-1111-1111-111111111111', now(), now(), 'Prova E2E',
+       'e2eccccc-0000-0000-0000-000000000000', a.id,
+       5, 70, false, false, true, true, true, true
+from auth.users a where a.email = 'e2e-prof@test.dev'
+on conflict (id) do nothing;
+
+insert into public.exam_template_question(id, created_at, id_exam_template, id_question, question_order)
+select gen_random_uuid(), now(), 'e2e11111-1111-1111-1111-111111111111',
+       ('e2e00000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid, i
+from generate_series(1,5) as i
+where not exists (
+  select 1 from public.exam_template_question
+  where id_exam_template = 'e2e11111-1111-1111-1111-111111111111'
+);
 SQL
 
 echo "==> Seed E2E pronto (aluno/professor/admin, curso='Curso E2E', 12 questões)"
