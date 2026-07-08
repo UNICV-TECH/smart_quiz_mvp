@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Seed determinístico para o integration_test E2E, contra o Supabase LOCAL.
-# Cria um aluno de teste (login conhecido) e um curso "Curso E2E" com 6 questões ENADE
-# (id_teacher NULL), cada uma com 4 alternativas — a correta tem conteúdo "CERTA" e as
-# erradas "ERRADA A/B/C" — para o teste tocar por texto sem depender de ordem/shuffle.
+# Seed determinístico para os integration_test E2E, contra o Supabase LOCAL.
+# Cria contas de teste (aluno/professor/admin) e um curso "Curso E2E" com 12 questões
+# ENADE (id_teacher NULL), cada uma com 4 alternativas — a correta tem conteúdo "CERTA"
+# e as erradas "ERRADA A/B/C" — para os testes tocarem por texto sem depender de shuffle.
+# São 12 questões para permitir simulados de 5 e de 10 questões.
 #
-# Login do aluno:  e2e@test.dev / pass1234
+# Contas (todas senha=pass1234):
+#   aluno:     e2e@test.dev       (role student, first_name "AlunoE2E")
+#   professor: e2e-prof@test.dev  (role teacher)
+#   admin:     e2e-admin@test.dev (role admin)
 # Pré-requisito: `supabase start` rodando; jq, psql, curl no PATH.
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -12,28 +16,41 @@ cd "$(dirname "$0")/.."
 eval "$(supabase status -o env | grep -E '^(API_URL|ANON_KEY|SERVICE_ROLE_KEY|DB_URL)=')"
 API="$API_URL"; SR="$SERVICE_ROLE_KEY"; DB="$DB_URL"
 
-echo "==> Criando aluno de teste (e2e@test.dev)"
-curl -s -X POST "$API/auth/v1/admin/users" -H "apikey: $SR" -H "Authorization: Bearer $SR" \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"e2e@test.dev","password":"pass1234","email_confirm":true}' >/dev/null
-# o trigger handle_new_user cria public.user como student
+criar_usuario() {
+  # $1 = email
+  curl -s -X POST "$API/auth/v1/admin/users" -H "apikey: $SR" -H "Authorization: Bearer $SR" \
+    -H 'Content-Type: application/json' \
+    -d "{\"email\":\"$1\",\"password\":\"pass1234\",\"email_confirm\":true}" >/dev/null
+}
 
-echo "==> Semeando curso + questões + alternativas + textos de apoio"
-CID=e2eccccc-0000-0000-0000-000000000000
+echo "==> Criando contas de teste (aluno / professor / admin)"
+criar_usuario 'e2e@test.dev'        # trigger handle_new_user cria public.user como student
+criar_usuario 'e2e-prof@test.dev'
+criar_usuario 'e2e-admin@test.dev'
+
+echo "==> Ajustando papéis/nome + semeando curso, questões e alternativas"
 psql "$DB" -q -v ON_ERROR_STOP=1 <<'SQL'
--- curso
+-- Papéis e nome (o trigger cria todos como student por padrão).
+update public."user" u set first_name = 'AlunoE2E'
+  from auth.users a where a.id = u.id and a.email = 'e2e@test.dev';
+update public."user" u set role = 'teacher'
+  from auth.users a where a.id = u.id and a.email = 'e2e-prof@test.dev';
+update public."user" u set role = 'admin'
+  from auth.users a where a.id = u.id and a.email = 'e2e-admin@test.dev';
+
+-- Curso
 insert into public.course(id,name,title,course_key,created_at,updated_at,is_active)
 values ('e2eccccc-0000-0000-0000-000000000000','Curso E2E','Curso E2E','e2e',now(),now(),true)
 on conflict (id) do nothing;
 
--- 6 questões ENADE (id_teacher NULL) + alternativas + texto de apoio
+-- 12 questões ENADE (id_teacher NULL) + alternativas + texto de apoio.
 do $$
 declare
   i int;
   qid uuid;
 begin
-  for i in 1..6 loop
-    qid := ('e2e00000-0000-0000-0000-00000000000' || i)::uuid;
+  for i in 1..12 loop
+    qid := ('e2e00000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid;
     insert into public.question(id,enunciation,id_course,is_active,number,created_at,updated_at,id_teacher)
       values (qid, 'Questão E2E número ' || i || '. Qual a alternativa correta?',
               'e2eccccc-0000-0000-0000-000000000000', true, i, now(), now(), null)
@@ -49,4 +66,4 @@ begin
 end $$;
 SQL
 
-echo "==> Seed E2E pronto (aluno=e2e@test.dev / senha=pass1234, curso='Curso E2E', 6 questões)"
+echo "==> Seed E2E pronto (aluno/professor/admin, curso='Curso E2E', 12 questões)"
