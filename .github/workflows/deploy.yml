@@ -102,6 +102,15 @@ jobs:
       - name: Semear dados E2E (aluno + curso + questões)
         run: bash scripts/e2e_setup.sh
 
+      - name: (diag) signup na API local — confirmacao off?
+        run: |
+          eval "$(supabase status -o env | grep -E '^(API_URL|ANON_KEY)=')"
+          echo "resposta do /auth/v1/signup:"
+          curl -s -X POST "$API_URL/auth/v1/signup" \
+            -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+            -d '{"email":"diag-ci@test.dev","password":"Senha1234"}' \
+            | jq '{session:(if .access_token then "SESSION" else "NO_SESSION" end), msg:.msg, code:.code, confirmed_at:.user.confirmed_at}'
+
       - name: Rodar integration_test (Linux desktop, headless via xvfb)
         run: |
           ANON=$(supabase status -o env | grep '^ANON_KEY=' | cut -d'"' -f2)
