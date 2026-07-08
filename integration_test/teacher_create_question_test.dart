@@ -86,8 +86,28 @@ void main() {
     await tester.ensureVisible(salvar);
     await tester.tap(salvar);
 
-    // Sucesso na UI (banner do ViewModel).
-    await pumpUntil(tester, find.text('Questão criada com sucesso!'));
+    // Sucesso na UI (banner do ViewModel). Se nao aparecer, coleta os textos de
+    // erro/validacao visiveis para diagnosticar (form barrou? VM deu erro?).
+    final sucesso = find.text('Questão criada com sucesso!');
+    try {
+      await pumpUntil(tester, sucesso, timeout: const Duration(seconds: 8));
+    } catch (_) {
+      final relevantes = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data)
+          .whereType<String>()
+          .where((s) =>
+              s.contains('Erro') ||
+              s.contains('obrigat') ||
+              s.contains('Preencha') ||
+              s.contains('Selecione') ||
+              s.contains('devem ter') ||
+              s.contains('alternativa') ||
+              s.contains('Alternativa'))
+          .toSet()
+          .toList();
+      fail('Banner de sucesso nao apareceu. Textos relevantes: $relevantes');
+    }
 
     // Reforco no banco: a questao existe para este professor.
     final qtd = await contarQuestoesDoProfessor('%professor via UI%');
