@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unicv_tech_mvp/ui/components/default_inline_message.dart';
 
 import 'helpers.dart';
 
@@ -48,9 +49,13 @@ void main() {
     // sessao para o novo usuario. Se nao houver, o signup falhou (confirmacao
     // ainda ligada no CI? email ja existente?).
     await tester.pump(const Duration(seconds: 5));
+    final inline = find.byType(DefaultInlineMessage);
+    final erroNaTela = inline.evaluate().isNotEmpty
+        ? tester.widget<DefaultInlineMessage>(inline).message
+        : '(sem mensagem de erro na tela)';
     final user = Supabase.instance.client.auth.currentUser;
     expect(user, isNotNull,
-        reason: 'apos signup nao ha currentUser — signUp falhou (confirmacao?)');
+        reason: 'signUp nao criou sessao. Erro exibido: "$erroNaTela"');
     expect(user!.email, novoEmail);
 
     // Signup auto-loga (confirmacao off) e o redirect por papel leva o novo
