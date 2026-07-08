@@ -216,3 +216,28 @@ Future<Map<String, dynamic>> ultimoRegistroDePontos() async {
 
 /// Converte um valor numerico do Supabase (num ou String) para double.
 double comoDouble(dynamic v) => double.parse(v.toString());
+
+/// True se o template esta publicado (le exam_template com o cliente logado —
+/// a policy "Teachers can manage their templates" deixa o dono ler o proprio).
+Future<bool> templatePublicado(String templateId) async {
+  final rows = await Supabase.instance.client
+      .from('exam_template')
+      .select('is_published')
+      .eq('id', templateId);
+  final list = rows as List;
+  if (list.isEmpty) return false;
+  return (list.first as Map)['is_published'] == true;
+}
+
+/// Conta as questoes que o professor logado criou (RLS deixa o dono ler as
+/// proprias). Filtra por enunciado para isolar a questao de um teste.
+Future<int> contarQuestoesDoProfessor(String enunciationLike) async {
+  final client = Supabase.instance.client;
+  final uid = client.auth.currentUser!.id;
+  final rows = await client
+      .from('question')
+      .select('id')
+      .eq('id_teacher', uid)
+      .ilike('enunciation', enunciationLike);
+  return (rows as List).length;
+}
