@@ -23,10 +23,11 @@ criar_usuario() {
     -d "{\"email\":\"$1\",\"password\":\"pass1234\",\"email_confirm\":true}" >/dev/null
 }
 
-echo "==> Criando contas de teste (aluno / professor / admin)"
+echo "==> Criando contas de teste (aluno / professor / admin / alvo)"
 criar_usuario 'e2e@test.dev'        # trigger handle_new_user cria public.user como student
 criar_usuario 'e2e-prof@test.dev'
 criar_usuario 'e2e-admin@test.dev'
+criar_usuario 'e2e-target@test.dev' # alvo descartavel p/ testes de admin (mudar role)
 
 echo "==> Ajustando papéis/nome + semeando curso, questões e alternativas"
 psql "$DB" -q -v ON_ERROR_STOP=1 <<'SQL'
@@ -37,6 +38,8 @@ update public."user" u set role = 'teacher'
   from auth.users a where a.id = u.id and a.email = 'e2e-prof@test.dev';
 update public."user" u set role = 'admin'
   from auth.users a where a.id = u.id and a.email = 'e2e-admin@test.dev';
+update public."user" u set first_name = 'AlvoE2E'
+  from auth.users a where a.id = u.id and a.email = 'e2e-target@test.dev';
 
 -- Curso
 insert into public.course(id,name,title,course_key,created_at,updated_at,is_active)
