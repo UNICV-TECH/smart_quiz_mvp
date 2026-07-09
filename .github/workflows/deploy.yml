@@ -59,13 +59,37 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  # Job 3: E2E (integration_test dirigindo o app real contra Supabase local)
+  # Job 3a: descobre os arquivos de integration_test e gera a matrix.
   # Roda só em PRs para main e push na main (não em push de develop).
-  e2e:
-    name: E2E (regras de negócio)
+  e2e-list:
+    name: E2E (listar testes)
     needs: analyze
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    outputs:
+      files: ${{ steps.set.outputs.files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Listar *_test.dart como JSON
+        id: set
+        run: |
+          files=$(printf '%s\n' integration_test/*_test.dart | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          echo "matrix: $files"
+
+  # Job 3b: E2E (integration_test dirigindo o app real contra Supabase local).
+  # Cada arquivo roda em PARALELO, em seu próprio job, com um Supabase fresco +
+  # seed dedicado — isolamento total (nenhum teste depende do estado de outro).
+  e2e:
+    name: 'E2E: ${{ matrix.file }}'
+    needs: e2e-list
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file: ${{ fromJson(needs.e2e-list.outputs.files) }}
 
     steps:
       - name: Checkout repository
@@ -102,18 +126,12 @@ jobs:
       - name: Semear dados E2E (aluno + curso + questões)
         run: bash scripts/e2e_setup.sh
 
-      - name: Rodar integration_test (Linux desktop, headless via xvfb)
+      - name: Rodar ${{ matrix.file }} (Linux desktop, headless via xvfb)
         run: |
           ANON=$(supabase status -o env | grep '^ANON_KEY=' | cut -d'"' -f2)
-          # Cada arquivo numa invocacao separada: o desktop embedder so lanca o
-          # app uma vez por `flutter test` (rodar o diretorio inteiro faz os
-          # arquivos seguintes falharem com "Unable to start the app").
-          for f in integration_test/*_test.dart; do
-            echo "==================== $f ===================="
-            xvfb-run -a flutter test "$f" -d linux \
-              --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
-              --dart-define=SUPABASE_ANON_KEY="$ANON" || exit 1
-          done
+          xvfb-run -a flutter test "${{ matrix.file }}" -d linux \
+            --dart-define=SUPABASE_URL=http://127.0.0.1:54321 \
+            --dart-define=SUPABASE_ANON_KEY="$ANON"
 
       - name: Parar Supabase local
         if: always()
