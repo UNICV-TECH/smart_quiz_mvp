@@ -102,10 +102,20 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+      # Instala a CLI pinada baixando o asset direto do CDN de releases (com
+      # retry). Evita a action supabase/setup-cli@v1, que resolve "latest" via
+      # API do GitHub e flaka sob varios jobs paralelos.
+      - name: Instalar Supabase CLI (pinado, com retry)
+        run: |
+          VER=2.107.0
+          URL="https://github.com/supabase/cli/releases/download/v${VER}/supabase_${VER}_linux_amd64.tar.gz"
+          for i in 1 2 3; do
+            if curl -fsSL "$URL" -o supabase.tar.gz; then break; fi
+            echo "download da CLI falhou (tentativa $i); aguardando 5s"; sleep 5
+          done
+          tar -xzf supabase.tar.gz supabase
+          sudo install supabase /usr/local/bin/supabase
+          supabase --version
 
       - name: Instalar dependências de Linux desktop + ferramentas de seed
         run: |
