@@ -72,3 +72,10 @@ e2e/test-results/
 e2e/playwright-report/
 e2e/screenshots/
 e2e/.env
+
+# Build local: apenas build/web e versionado (deploy); ignora o resto (macOS,
+# dirs de composite com hash, etc.)
+build/*/
+!build/web/
+# Estado local da CLI do Supabase (analogo a supabase/.temp/)
+supabase/.branches/
