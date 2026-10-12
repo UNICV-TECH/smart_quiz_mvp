@@ -29,6 +29,9 @@ sel()      { curl -s -H "apikey: $ANON" -H "Authorization: Bearer $1" "$API/rest
 sel_anon() { curl -s -H "apikey: $ANON" "$API/rest/v1/$1" | jq 'if type=="array" then length else -1 end'; }
 ins()      { curl -s -o /dev/null -w '%{http_code}' -X POST -H "apikey: $ANON" -H "Authorization: Bearer $1" \
                   -H 'Content-Type: application/json' -H 'Prefer: return=minimal' "$API/rest/v1/$2" -d "$3"; }
+val()      { curl -s -H "apikey: $ANON" -H "Authorization: Bearer $1" "$API/rest/v1/$2" | jq -r "$3"; }
+rpc()      { curl -s -o /dev/null -w '%{http_code}' -X POST -H "apikey: $ANON" ${2:+-H "Authorization: Bearer $2"} \
+                  -H 'Content-Type: application/json' "$API/rest/v1/rpc/$1" -d '{}'; }
 nested_ac(){ curl -s -H "apikey: $ANON" -H "Authorization: Bearer $1" \
                   "$API/rest/v1/question?select=id,answerchoice(id)&id=eq.$2" | jq '.[0].answerchoice | length'; }
 
@@ -43,12 +46,14 @@ echo "==> Criando usuarios reais via Auth admin (trigger cria public.user como s
 mkuser() { curl -s -X POST "$API/auth/v1/admin/users" -H "apikey: $SR" -H "Authorization: Bearer $SR" \
                 -H 'Content-Type: application/json' \
                 -d "{\"email\":\"$1\",\"password\":\"pass1234\",\"email_confirm\":true}" | jq -r '.id'; }
-S1=$(mkuser s1@test.dev); S2=$(mkuser s2@test.dev); T1=$(mkuser t1@test.dev)
+S1=$(mkuser s1@test.dev); S2=$(mkuser s2@test.dev); T1=$(mkuser t1@test.dev); A1=$(mkuser a1@test.dev)
 psql "$DB" -q -c "update public.\"user\" set role='teacher' where id='$T1';"
+psql "$DB" -q -c "update public.\"user\" set role='admin' where id='$A1';"
 
 echo "==> Checando trigger de provisionamento (public.user criado no signup)"
 PROV=$(psql "$DB" -tAc "select count(*) from public.\"user\" where id in ('$S1','$S2','$T1');")
 eq "trigger handle_new_user provisionou 3 users" "$PROV" "3"
+psql "$DB" -q -c "update public.\"user\" set first_name='Aluno1' where id='$S1'; update public.\"user\" set first_name='Aluno2' where id='$S2';"
 
 echo "==> Seed de conteudo (dono = student1)"
 CID=cccccccc-cccc-cccc-cccc-cccccccccccc
@@ -56,6 +61,10 @@ Q1=a1111111-1111-1111-1111-111111111111
 Q2=a2222222-2222-2222-2222-222222222222
 E1=e1111111-1111-1111-1111-111111111111
 AT1=a7777777-7777-7777-7777-777777777777
+AT2=a8888888-8888-8888-8888-888888888888
+E2=e2222222-2222-2222-2222-222222222222
+TPL=f1111111-1111-1111-1111-111111111111
+SEA=5ea50000-0000-0000-0000-000000000001
 psql "$DB" -q -v ON_ERROR_STOP=1 <<SQL
 insert into public.course(id,name,created_at,updated_at,is_active) values ('$CID','Curso X',now(),now(),true) on conflict do nothing;
 insert into public.question(id,enunciation,id_course,is_active,number,created_at,updated_at,id_teacher) values
@@ -72,12 +81,24 @@ insert into public.user_exam_attempts(id,user_id,exam_id,course_id,question_coun
  ('$AT1','$S1','$E1','$CID',1,now(),'completed',now(),now(),false) on conflict do nothing;
 insert into public.user_responses(id,created_at,exam_id,question_id,attempt_id) values
  (gen_random_uuid(),now(),'$E1','$Q1','$AT1');
+-- gamificacao + template publicado do teacher1 (alimenta as 9 views)
+insert into public.exam_template(id,name,id_course,id_teacher,is_published,is_active) values
+ ('$TPL','Simulado T1','$CID','$T1',true,true);
+update public.exam set id_exam_template='$TPL', score=80, passed=true where id='$E1';
+insert into public.exam(id,id_user,id_course,id_exam_template) values ('$E2','$S2','$CID','$TPL');
+insert into public.user_exam_attempts(id,user_id,exam_id,course_id,question_count,started_at,status,created_at,updated_at,is_retake) values
+ ('$AT2','$S2','$E2','$CID',1,now(),'completed',now(),now(),false);
+insert into public.gamification_season(id,name,starts_at,ends_at,is_active) values
+ ('$SEA','2026.2',now()-interval '1 day',now()+interval '90 days',true);
+insert into public.user_gamification_points(user_id,season_id,attempt_id,exam_id,course_id,exam_template_id,question_count,correct_count,percentage_score,duration_seconds,base_points,total_points) values
+ ('$S1','$SEA','$AT1','$E1','$CID','$TPL',1,1,100,60,1,1),
+ ('$S2','$SEA','$AT2','$E2','$CID','$TPL',1,0,0,60,0,0.5);
 SQL
 
 echo "==> Login (JWT real)"
 signin() { curl -s -X POST "$API/auth/v1/token?grant_type=password" -H "apikey: $ANON" \
                 -H 'Content-Type: application/json' -d "{\"email\":\"$1\",\"password\":\"pass1234\"}" | jq -r '.access_token'; }
-JS1=$(signin s1@test.dev); JS2=$(signin s2@test.dev); JT1=$(signin t1@test.dev)
+JS1=$(signin s1@test.dev); JS2=$(signin s2@test.dev); JT1=$(signin t1@test.dev); JA1=$(signin a1@test.dev)
 
 echo ""
 echo "### FLUXO DO ALUNO (student1) — deve funcionar como antes"
@@ -97,7 +118,7 @@ eq "inicia PROPRIA tentativa" "$W2" 201
 
 echo ""
 echo "### ISOLAMENTO (student2 nao acessa dados do student1)"
-eq "student2 nao ve tentativa alheia"   "$(sel "$JS2" 'user_exam_attempts?select=*')" 0
+eq "student2 nao ve tentativa alheia"   "$(sel "$JS2" "user_exam_attempts?user_id=eq.$S1")" 0
 eq "student2 nao ve respostas alheias"  "$(sel "$JS2" 'user_responses?select=*')" 0
 ge "student2 ainda le conteudo (questoes)" "$(sel "$JS2" 'question?select=*')" 2
 BLK=$(ins "$JS2" 'user_responses' "{\"exam_id\":\"$E1\",\"question_id\":\"$Q2\",\"attempt_id\":\"$AT1\"}")
@@ -115,6 +136,39 @@ echo "### ANON (sem login) — tudo bloqueado"
 eq "anon nao le questoes" "$(sel_anon 'question?select=*')" 0
 eq "anon nao le users"    "$(sel_anon 'user?select=*')" 0
 eq "anon nao le cursos"   "$(sel_anon 'course?select=*')" 0
+
+
+echo ""
+echo "### VIEWS — anon sem acesso (antes: SECURITY DEFINER + GRANT ALL a anon)"
+for v in teacher_student_responses ranking_global_view ranking_course_view ranking_template_view \
+         teacher_exam_stats teacher_question_stats admin_platform_stats admin_course_stats admin_monthly_activity; do
+  eq "anon nao le $v (permission denied)" "$(sel_anon "$v?select=*")" -1
+done
+R=$(rpc ranking_profiles)
+[ "$R" != "200" ] && ok "anon nao executa rpc ranking_profiles (http $R)" || bad "anon executou rpc ranking_profiles (200!)"
+
+echo ""
+echo "### VIEWS — rankings seguem funcionando para aluno (nome/avatar via ranking_profiles)"
+eq "aluno ve ranking global com os 2 alunos"   "$(sel "$JS1" "ranking_global_view?season_id=eq.$SEA")" 2
+eq "aluno ve ranking do curso com os 2 alunos" "$(sel "$JS1" "ranking_course_view?season_id=eq.$SEA&course_id=eq.$CID")" 2
+eq "aluno ve ranking do template com os 2"     "$(sel "$JS1" "ranking_template_view?season_id=eq.$SEA&exam_template_id=eq.$TPL")" 2
+eq "ranking traz nome do outro aluno"          "$(val "$JS1" "ranking_global_view?season_id=eq.$SEA&user_id=eq.$S2" '.[0].user_name')" Aluno2
+eq "rank_position do aluno1 = 1"               "$(val "$JS1" "ranking_global_view?season_id=eq.$SEA&user_id=eq.$S1" '.[0].rank_position')" 1
+eq "ranking_profiles nao expoe email"          "$(curl -s -X POST -H "apikey: $ANON" -H "Authorization: Bearer $JS1" -H 'Content-Type: application/json' "$API/rest/v1/rpc/ranking_profiles" -d '{}' | jq -r '[.[] | has("email")] | any')" false
+
+echo ""
+echo "### VIEWS — teacher_student_responses fechada (nao usada pelo app; PII)"
+eq "aluno nao le teacher_student_responses"     "$(sel "$JS1" 'teacher_student_responses?select=*')" -1
+eq "professor nao le teacher_student_responses" "$(sel "$JT1" 'teacher_student_responses?select=*')" -1
+
+echo ""
+echo "### VIEWS — estatisticas de professor e admin (security_invoker, via RLS)"
+ge "professor le teacher_exam_stats dele"     "$(sel "$JT1" "teacher_exam_stats?id_teacher=eq.$T1")" 1
+ge "professor le teacher_question_stats dele" "$(sel "$JT1" "teacher_question_stats?id_teacher=eq.$T1")" 1
+eq "admin_platform_stats (admin) conta 4 users"  "$(val "$JA1" 'admin_platform_stats?select=total_users' '.[0].total_users')" 4
+ge "admin le admin_course_stats"              "$(sel "$JA1" 'admin_course_stats?select=*')" 1
+eq "admin_monthly_activity (admin) ve 2 users ativos" "$(val "$JA1" 'admin_monthly_activity?select=active_users' '.[0].active_users')" 2
+eq "aluno em admin_platform_stats so conta a si" "$(val "$JS1" 'admin_platform_stats?select=total_users' '.[0].total_users')" 1
 
 echo ""
 echo "============================================"
