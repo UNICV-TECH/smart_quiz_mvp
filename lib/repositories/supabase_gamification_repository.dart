@@ -75,11 +75,15 @@ class SupabaseGamificationRepository implements GamificationRepository {
 
     // 3. Compare: only save if improved
     if (totalPoints <= previousBest) {
+      final seasonPoints =
+          await getUserSeasonPoints(userId: userId, seasonId: seasonId);
       return SavePointsResult(
         accumulatedPoints: previousBest,
         previousPoints: previousBest,
         didImprove: false,
         pointsSaved: 0,
+        seasonPoints: seasonPoints,
+        previousSeasonPoints: seasonPoints,
       );
     }
 
@@ -105,11 +109,16 @@ class SupabaseGamificationRepository implements GamificationRepository {
     await _client.from('user_gamification_points').insert(insertData);
 
     final accumulatedPoints = previousBest + difference;
+    // Read the season total after the insert so it matches the rankings.
+    final seasonPoints =
+        await getUserSeasonPoints(userId: userId, seasonId: seasonId);
     return SavePointsResult(
       accumulatedPoints: accumulatedPoints,
       previousPoints: previousBest,
       didImprove: true,
       pointsSaved: difference,
+      seasonPoints: seasonPoints,
+      previousSeasonPoints: seasonPoints - difference,
     );
   }
 

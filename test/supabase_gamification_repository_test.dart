@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 // ignore: depend_on_referenced_packages
 import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:unicv_tech_mvp/models/gamification_points.dart';
 import 'package:unicv_tech_mvp/repositories/supabase_gamification_repository.dart';
 
 typedef _Handler = Object Function(http.Request request);
@@ -60,6 +61,90 @@ Map<String, dynamic> _rankingRow(int position, double points) => {
     };
 
 void main() {
+  group('saveAttemptPoints reports the season total (level source)', () {
+    // Scenario of the bug report: the student already has 97 pts in the season
+    // from other exams and scores 10 pts on a template for the first time. The
+    // ranking shows 107 pts, so the result screen must get 107 too (not 10).
+    Object Function(http.Request) handler({
+      required List<double> templateRecords,
+      required List<double> seasonRecords,
+    }) {
+      return (request) {
+        final path = request.url.path;
+        final query = request.url.queryParameters;
+        if (path == '/rest/v1/exam') {
+          return {'id_exam_template': 'template-1'};
+        }
+        if (path == '/rest/v1/user_gamification_points') {
+          if (request.method == 'POST') return <Object>[];
+          final rows = query.containsKey('exam_template_id')
+              ? templateRecords
+              : seasonRecords;
+          return rows.map((p) => {'total_points': p}).toList();
+        }
+        throw StateError('unexpected request: ${request.method} $path');
+      };
+    }
+
+    Future<SavePointsResult> save(_FakePostgrest fake, double totalPoints) {
+      return fake.repository().saveAttemptPoints(
+            userId: 'user-1',
+            seasonId: 'season-1',
+            attemptId: 'attempt-1',
+            examId: 'exam-1',
+            courseId: 'course-1',
+            questionCount: 5,
+            correctCount: 5,
+            percentageScore: 100,
+            durationSeconds: 60,
+            basePoints: 5,
+            timeBonus: 5,
+            totalPoints: totalPoints,
+          );
+    }
+
+    test('first attempt on the template: 97 + 10 = 107 in the season',
+        () async {
+      // After the insert the season query already sees the new 10 pts row.
+      final fake = _FakePostgrest(
+        handler(templateRecords: [], seasonRecords: [97, 10]),
+      );
+
+      final result = await save(fake, 10);
+
+      expect(result.didImprove, isTrue);
+      expect(result.pointsSaved, 10);
+      expect(result.accumulatedPoints, 10, reason: 'best of this template');
+      expect(result.seasonPoints, 107);
+      expect(result.previousSeasonPoints, 97);
+
+      final season = fake
+          .to('user_gamification_points')
+          .where((r) => r.method == 'GET')
+          .map((r) => r.url.queryParameters)
+          .firstWhere((q) => !q.containsKey('exam_template_id'));
+      expect(season['user_id'], 'eq.user-1');
+      expect(season['season_id'], 'eq.season-1');
+    });
+
+    test('no improvement: nothing saved, season total unchanged', () async {
+      final fake = _FakePostgrest(
+        handler(templateRecords: [10], seasonRecords: [97, 10]),
+      );
+
+      final result = await save(fake, 8);
+
+      expect(result.didImprove, isFalse);
+      expect(result.pointsSaved, 0);
+      expect(result.seasonPoints, 107);
+      expect(result.previousSeasonPoints, 107);
+      expect(
+        fake.to('user_gamification_points').where((r) => r.method == 'POST'),
+        isEmpty,
+      );
+    });
+  });
+
   group('rankings are requested 1st → last', () {
     // The fake returns rows in the order PostgREST would for the requested
     // direction, so a descending request reproduces the reported bug.
