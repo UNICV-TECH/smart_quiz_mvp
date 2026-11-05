@@ -134,6 +134,8 @@ class SupabaseGamificationRepository implements GamificationRepository {
   }
 
   // ── Rankings ────────────────────────────────────────────
+  // postgrest-dart's order() defaults to DESCENDING, so `ascending: true` is
+  // required to list 1st → last (and to keep the top 50, not the bottom 50).
 
   @override
   Future<List<RankingEntry>> getGlobalRanking({
@@ -144,7 +146,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .from('ranking_global_view')
         .select()
         .eq('season_id', seasonId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
@@ -179,7 +181,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .select()
         .eq('season_id', seasonId)
         .eq('course_id', courseId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
@@ -198,7 +200,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .select()
         .eq('season_id', seasonId)
         .eq('exam_template_id', templateId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
