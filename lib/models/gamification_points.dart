@@ -84,17 +84,18 @@ class SavePointsResult {
 
   /// Student's total in the season after the save. Levels are derived from
   /// this total, the same number the rankings show as season_points.
-  final double seasonPoints;
+  /// Null when the total could not be read (the points were still saved).
+  final double? seasonPoints;
 
   /// Student's total in the season before the save (for level-up detection).
-  final double previousSeasonPoints;
+  final double? previousSeasonPoints;
 
   const SavePointsResult({
     required this.accumulatedPoints,
     required this.previousPoints,
     required this.didImprove,
     required this.pointsSaved,
-    required this.seasonPoints,
-    required this.previousSeasonPoints,
+    this.seasonPoints,
+    this.previousSeasonPoints,
   });
 }

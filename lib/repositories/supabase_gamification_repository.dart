@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/gamification_season.dart';
@@ -75,8 +76,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
 
     // 3. Compare: only save if improved
     if (totalPoints <= previousBest) {
-      final seasonPoints =
-          await getUserSeasonPoints(userId: userId, seasonId: seasonId);
+      final seasonPoints = await _seasonPointsOrNull(userId, seasonId);
       return SavePointsResult(
         accumulatedPoints: previousBest,
         previousPoints: previousBest,
@@ -110,16 +110,28 @@ class SupabaseGamificationRepository implements GamificationRepository {
 
     final accumulatedPoints = previousBest + difference;
     // Read the season total after the insert so it matches the rankings.
-    final seasonPoints =
-        await getUserSeasonPoints(userId: userId, seasonId: seasonId);
+    final seasonPoints = await _seasonPointsOrNull(userId, seasonId);
     return SavePointsResult(
       accumulatedPoints: accumulatedPoints,
       previousPoints: previousBest,
       didImprove: true,
       pointsSaved: difference,
       seasonPoints: seasonPoints,
-      previousSeasonPoints: seasonPoints - difference,
+      previousSeasonPoints:
+          seasonPoints == null ? null : seasonPoints - difference,
     );
+  }
+
+  /// Season total used for the level on the result screen. A failure here must
+  /// not turn an already persisted save into "not saved", so it degrades to
+  /// null (the screen then hides the level block).
+  Future<double?> _seasonPointsOrNull(String userId, String seasonId) async {
+    try {
+      return await getUserSeasonPoints(userId: userId, seasonId: seasonId);
+    } catch (e) {
+      debugPrint('Season total unavailable after saving points: $e');
+      return null;
+    }
   }
 
   // ── User points ─────────────────────────────────────────

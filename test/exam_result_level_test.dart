@@ -9,8 +9,8 @@ import 'package:unicv_tech_mvp/views/exam_result_screen.dart';
 
 Map<String, dynamic> _results({
   required double totalPoints,
-  required double seasonPoints,
-  required double previousSeasonPoints,
+  double? seasonPoints,
+  double? previousSeasonPoints,
 }) =>
     {
       'totalQuestions': 5,
@@ -24,8 +24,9 @@ Map<String, dynamic> _results({
       'gamificationTimeBonus': 5.0,
       'gamificationHasTimeBonus': true,
       'gamificationTotalPoints': totalPoints,
-      'gamificationSeasonPoints': seasonPoints,
-      'gamificationPreviousSeasonPoints': previousSeasonPoints,
+      if (seasonPoints != null) 'gamificationSeasonPoints': seasonPoints,
+      if (previousSeasonPoints != null)
+        'gamificationPreviousSeasonPoints': previousSeasonPoints,
     };
 
 Future<void> _pumpResult(WidgetTester tester, Map<String, dynamic> results) async {
@@ -74,6 +75,16 @@ void main() {
     );
 
     expect(find.text('60 / 100 pts'), findsOneWidget);
+    expect(find.textContaining('Parabéns! Você alcançou'), findsNothing);
+  });
+
+  testWidgets('season total unknown: points shown, level block hidden',
+      (tester) async {
+    await _pumpResult(tester, _results(totalPoints: 10));
+
+    expect(find.text('+10.0 pts'), findsOneWidget);
+    expect(find.text('Iniciante'), findsNothing);
+    expect(find.textContaining('/ 100 pts'), findsNothing);
     expect(find.textContaining('Parabéns! Você alcançou'), findsNothing);
   });
 }

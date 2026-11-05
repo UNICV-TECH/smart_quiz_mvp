@@ -18,6 +18,12 @@ import 'package:unicv_tech_mvp/repositories/supabase_gamification_repository.dar
 
 typedef _Handler = Object Function(http.Request request);
 
+/// Thrown by a handler to answer with an HTTP error instead of 200.
+class _HttpError implements Exception {
+  _HttpError(this.status);
+  final int status;
+}
+
 class _FakePostgrest {
   _FakePostgrest(this.handler);
 
@@ -30,12 +36,15 @@ class _FakePostgrest {
       'test-anon-key',
       httpClient: MockClient((request) async {
         requests.add(request);
-        return http.Response(
-          jsonEncode(handler(request)),
-          200,
-          headers: {'content-type': 'application/json; charset=utf-8'},
-          request: request,
-        );
+        const headers = {'content-type': 'application/json; charset=utf-8'};
+        try {
+          return http.Response(jsonEncode(handler(request)), 200,
+              headers: headers, request: request);
+        } on _HttpError catch (e) {
+          return http.Response(
+              jsonEncode({'message': 'fake error ${e.status}'}), e.status,
+              headers: headers, request: request);
+        }
       }),
       authOptions: const AuthClientOptions(autoRefreshToken: false),
     );
@@ -65,10 +74,14 @@ void main() {
     // Scenario of the bug report: the student already has 97 pts in the season
     // from other exams and scores 10 pts on a template for the first time. The
     // ranking shows 107 pts, so the result screen must get 107 too (not 10).
+    // Stateful fake: the POST appends its row to the season, so the season
+    // total is only 107 if it is read AFTER the insert.
     Object Function(http.Request) handler({
       required List<double> templateRecords,
-      required List<double> seasonRecords,
+      required List<double> otherSeasonRecords,
+      bool seasonReadFails = false,
     }) {
+      final season = [...otherSeasonRecords, ...templateRecords];
       return (request) {
         final path = request.url.path;
         final query = request.url.queryParameters;
@@ -76,11 +89,16 @@ void main() {
           return {'id_exam_template': 'template-1'};
         }
         if (path == '/rest/v1/user_gamification_points') {
-          if (request.method == 'POST') return <Object>[];
-          final rows = query.containsKey('exam_template_id')
-              ? templateRecords
-              : seasonRecords;
-          return rows.map((p) => {'total_points': p}).toList();
+          if (request.method == 'POST') {
+            final row = jsonDecode(request.body) as Map<String, dynamic>;
+            season.add((row['total_points'] as num).toDouble());
+            return <Object>[];
+          }
+          if (query.containsKey('exam_template_id')) {
+            return templateRecords.map((p) => {'total_points': p}).toList();
+          }
+          if (seasonReadFails) throw _HttpError(503);
+          return season.map((p) => {'total_points': p}).toList();
         }
         throw StateError('unexpected request: ${request.method} $path');
       };
@@ -105,9 +123,8 @@ void main() {
 
     test('first attempt on the template: 97 + 10 = 107 in the season',
         () async {
-      // After the insert the season query already sees the new 10 pts row.
       final fake = _FakePostgrest(
-        handler(templateRecords: [], seasonRecords: [97, 10]),
+        handler(templateRecords: [], otherSeasonRecords: [97]),
       );
 
       final result = await save(fake, 10);
@@ -125,11 +142,31 @@ void main() {
           .firstWhere((q) => !q.containsKey('exam_template_id'));
       expect(season['user_id'], 'eq.user-1');
       expect(season['season_id'], 'eq.season-1');
+
+      final calls = fake.requests.map((r) => r.method).toList();
+      expect(calls.indexOf('POST'), lessThan(calls.lastIndexOf('GET')),
+          reason: 'season total must be read after the insert');
+    });
+
+    test('season total unreadable: save still reported, level unknown',
+        () async {
+      final fake = _FakePostgrest(handler(
+        templateRecords: [],
+        otherSeasonRecords: [97],
+        seasonReadFails: true,
+      ));
+
+      final result = await save(fake, 10);
+
+      expect(result.didImprove, isTrue);
+      expect(result.pointsSaved, 10);
+      expect(result.seasonPoints, isNull);
+      expect(result.previousSeasonPoints, isNull);
     });
 
     test('no improvement: nothing saved, season total unchanged', () async {
       final fake = _FakePostgrest(
-        handler(templateRecords: [10], seasonRecords: [97, 10]),
+        handler(templateRecords: [10], otherSeasonRecords: [97]),
       );
 
       final result = await save(fake, 8);
