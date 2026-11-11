@@ -45,11 +45,11 @@ const RESOURCES = {"assets/assets/images/medal_lendario.png": "761c491b64c1ce237
 "icons/Icon-maskable-512.png": "df7954b7552389d759359bb69e246573",
 "favicon.png": "7b07b595397b38ca106ad1bbe5b84d77",
 "manifest.json": "9420a6dbd6519a7817e882ac64706aca",
-"main.dart.js": "2c1cf97813d62f82a829ad216da0deca",
-"index.html": "e165ff38a22eb76ef17ff5638d06184b",
-"/": "e165ff38a22eb76ef17ff5638d06184b",
+"main.dart.js": "d9b866d26d0564f798d1a0f1fc52c7c4",
+"index.html": "2459af1117c457ac4e12891988b955c2",
+"/": "2459af1117c457ac4e12891988b955c2",
 "version.json": "48dbe1dd505e72b7682d698f38de93f2",
-"flutter_bootstrap.js": "bc8cef6d09707e692c2ca19a5a11e498",
+"flutter_bootstrap.js": "cc86c1b2ade5ceb78adc29af1be8e4d3",
 "404.html": "58547fa9a7196ce4f27f4ea136bc8231"};
 // The application shell files that are downloaded before a service worker can
 // start.
