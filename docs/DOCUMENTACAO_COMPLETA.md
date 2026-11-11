@@ -186,7 +186,7 @@ O sistema atende inicialmente 5 cursos, com possibilidade de expansao:
 | RF10.1 | O sistema deve calcular pontos base por resposta correta (escala com quantidade de questoes) | Alta |
 | RF10.2 | O sistema deve conceder bonus de tempo quando o aluno atinge >=70% de acerto em <=80% do tempo normal | Alta |
 | RF10.3 | O sistema deve implementar politica "best score only" - apenas melhorias sao registradas | Alta |
-| RF10.4 | O sistema deve manter 4 niveis de progressao: Iniciante (0-100), Explorador (101-200), Mestre do Conteudo (201-300), Lendario (301+) | Alta |
+| RF10.4 | O sistema deve manter 4 niveis de progressao: Iniciante (0-99), Explorador (100-199), Mestre do Conteudo (200-299), Lendario (300+) | Alta |
 | RF10.5 | O sistema deve operar em temporadas semestrais (1o sem: fev-jul, 2o sem: ago-dez) | Alta |
 | RF10.6 | O sistema deve criar automaticamente a temporada ativa baseada no semestre atual | Alta |
 | RF10.7 | O sistema deve exibir mensagens motivacionais contextuais baseadas no desempenho | Media |
@@ -982,10 +982,10 @@ O sistema de gamificacao motiva os alunos atraves de:
 
 | Nivel | Label | Faixa de Pontos | Medalha |
 |-------|-------|-----------------|---------|
-| 1 | Iniciante | 0 - 100 pts | `medal_iniciante.png` |
-| 2 | Explorador | 101 - 200 pts | `medal_explorador.png` |
-| 3 | Mestre do Conteudo | 201 - 300 pts | `medal_mestre.png` |
-| 4 | Lendario | 301+ pts | `medal_lendario.png` |
+| 1 | Iniciante | 0 - 99 pts | `medal_iniciante.png` |
+| 2 | Explorador | 100 - 199 pts | `medal_explorador.png` |
+| 3 | Mestre do Conteudo | 200 - 299 pts | `medal_mestre.png` |
+| 4 | Lendario | 300+ pts | `medal_lendario.png` |
 
 ### 11.3 Calculo de Pontos
 
@@ -1871,10 +1871,10 @@ Seus pontos acumulados determinam seu nivel:
 
 | Medalha | Nivel | Pontos Necessarios |
 |---------|-------|--------------------|
-| Iniciante | 1 | 0 - 100 pts |
-| Explorador | 2 | 101 - 200 pts |
-| Mestre do Conteudo | 3 | 201 - 300 pts |
-| Lendario | 4 | 301+ pts |
+| Iniciante | 1 | 0 - 99 pts |
+| Explorador | 2 | 100 - 199 pts |
+| Mestre do Conteudo | 3 | 200 - 299 pts |
+| Lendario | 4 | 300+ pts |
 
 ### 17.8 Como Ganhar Mais Pontos
 

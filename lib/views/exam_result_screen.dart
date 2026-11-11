@@ -59,11 +59,13 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
       (widget.results['gamificationTotalPoints'] as num?)?.toDouble() ?? 0;
   bool get _gamificationHasTimeBonus =>
       widget.results['gamificationHasTimeBonus'] as bool? ?? false;
-  double get _gamificationAccumulatedPoints =>
-      (widget.results['gamificationAccumulatedPoints'] as num?)?.toDouble() ??
-      0;
-  double get _gamificationPreviousPoints =>
-      (widget.results['gamificationPreviousPoints'] as num?)?.toDouble() ?? 0;
+  // Null when the season total is unknown: the level block is then hidden
+  // instead of showing a level computed from a wrong number.
+  double? get _gamificationSeasonPoints =>
+      (widget.results['gamificationSeasonPoints'] as num?)?.toDouble();
+  double? get _gamificationPreviousSeasonPoints =>
+      (widget.results['gamificationPreviousSeasonPoints'] as num?)
+          ?.toDouble();
   bool get _gamificationDidImprove =>
       widget.results['gamificationDidImprove'] as bool? ?? false;
   bool get _isRetake => widget.results['isRetake'] as bool? ?? false;
@@ -230,13 +232,15 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                   ),
                 ),
               // Gamification: Level Up Card
-              if (_gamificationSaved) ...[
+              if (_gamificationSaved &&
+                  _gamificationSeasonPoints != null &&
+                  _gamificationPreviousSeasonPoints != null) ...[
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: _LevelUpCard(
-                      previousPoints: _gamificationPreviousPoints,
-                      accumulatedPoints: _gamificationAccumulatedPoints,
+                      previousSeasonPoints: _gamificationPreviousSeasonPoints!,
+                      seasonPoints: _gamificationSeasonPoints!,
                     ),
                   ),
                 ),
@@ -252,7 +256,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
                       timeBonus: _gamificationTimeBonus,
                       totalPoints: _gamificationTotalPoints,
                       hasTimeBonus: _gamificationHasTimeBonus,
-                      accumulatedPoints: _gamificationAccumulatedPoints,
+                      seasonPoints: _gamificationSeasonPoints,
                       percentageScore: _percentageScore,
                       didImprove: _gamificationDidImprove,
                       gamificationSaved: _gamificationSaved,
@@ -499,12 +503,12 @@ class _SummaryCard extends StatelessWidget {
 
 class _LevelUpCard extends StatefulWidget {
   const _LevelUpCard({
-    required this.previousPoints,
-    required this.accumulatedPoints,
+    required this.previousSeasonPoints,
+    required this.seasonPoints,
   });
 
-  final double previousPoints;
-  final double accumulatedPoints;
+  final double previousSeasonPoints;
+  final double seasonPoints;
 
   @override
   State<_LevelUpCard> createState() => _LevelUpCardState();
@@ -520,8 +524,8 @@ class _LevelUpCardState extends State<_LevelUpCard>
   @override
   void initState() {
     super.initState();
-    _previousLevel = GamificationLevel.fromPoints(widget.previousPoints);
-    _currentLevel = GamificationLevel.fromPoints(widget.accumulatedPoints);
+    _previousLevel = GamificationLevel.fromPoints(widget.previousSeasonPoints);
+    _currentLevel = GamificationLevel.fromPoints(widget.seasonPoints);
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -632,7 +636,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
     required this.timeBonus,
     required this.totalPoints,
     required this.hasTimeBonus,
-    required this.accumulatedPoints,
+    this.seasonPoints,
     required this.percentageScore,
     required this.didImprove,
     required this.gamificationSaved,
@@ -644,7 +648,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
   final double timeBonus;
   final double totalPoints;
   final bool hasTimeBonus;
-  final double accumulatedPoints;
+  final double? seasonPoints;
   final double percentageScore;
   final bool didImprove;
   final bool gamificationSaved;
@@ -655,7 +659,8 @@ class _GamificationFeedbackCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!gamificationSaved && totalPoints <= 0) return const SizedBox.shrink();
 
-    final level = GamificationLevel.fromPoints(accumulatedPoints);
+    final season = seasonPoints;
+    final level = GamificationLevel.fromPoints(season ?? 0);
     final message = GamificationCalculator.getMotivationalMessage(
       percentageScore: percentageScore,
       hasTimeBonus: hasTimeBonus,
@@ -733,8 +738,8 @@ class _GamificationFeedbackCard extends StatelessWidget {
             ),
           ],
 
-          // Level progress (only if saved)
-          if (gamificationSaved) ...[
+          // Level progress (only if saved and the season total is known)
+          if (gamificationSaved && season != null) ...[
             const SizedBox(height: 14),
             Row(
               children: [
@@ -776,7 +781,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        level.pointsLabel(accumulatedPoints),
+                        level.pointsLabel(season),
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.gamificationOlive,
@@ -792,7 +797,7 @@ class _GamificationFeedbackCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
-                value: level.progressInLevel(accumulatedPoints),
+                value: level.progressInLevel(season),
                 minHeight: 10,
                 backgroundColor: AppColors.gamificationBorder,
                 valueColor:

@@ -73,15 +73,29 @@ class GamificationPoints {
 }
 
 class SavePointsResult {
+  /// Best score of THIS exam/template after the save (best-score-only scope).
   final double accumulatedPoints;
+
+  /// Best score of THIS exam/template before the save.
   final double previousPoints;
+
   final bool didImprove;
   final double pointsSaved;
+
+  /// Student's total in the season after the save. Levels are derived from
+  /// this total, the same number the rankings show as season_points.
+  /// Null when the total could not be read (the points were still saved).
+  final double? seasonPoints;
+
+  /// Student's total in the season before the save (for level-up detection).
+  final double? previousSeasonPoints;
 
   const SavePointsResult({
     required this.accumulatedPoints,
     required this.previousPoints,
     required this.didImprove,
     required this.pointsSaved,
+    this.seasonPoints,
+    this.previousSeasonPoints,
   });
 }

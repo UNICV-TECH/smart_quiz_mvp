@@ -709,9 +709,13 @@ class _ExamScreenState extends State<ExamScreen> {
           );
           if (!mounted) return;
 
-          results['gamificationAccumulatedPoints'] =
-              saveResult.accumulatedPoints;
-          results['gamificationPreviousPoints'] = saveResult.previousPoints;
+          // Level, progress bar and level-up use the season total (same
+          // number as the rankings), not the best score of this exam.
+          if (saveResult.seasonPoints != null) {
+            results['gamificationSeasonPoints'] = saveResult.seasonPoints;
+            results['gamificationPreviousSeasonPoints'] =
+                saveResult.previousSeasonPoints;
+          }
           results['gamificationDidImprove'] = saveResult.didImprove;
           results['gamificationPointsSaved'] = saveResult.pointsSaved;
           results['gamificationSeasonName'] = season.name;

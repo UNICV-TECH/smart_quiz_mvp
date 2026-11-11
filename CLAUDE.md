@@ -57,10 +57,12 @@ Repositórios Supabase-dependentes são nullable em DI — UI lida com `null` qu
 
 | Level | Range | Medal asset |
 |---|---|---|
-| Iniciante | 0-100 | `medal_iniciante.png` |
-| Explorador | 101-200 | `medal_explorador.png` |
-| Mestre do Conteúdo | 201-300 | `medal_mestre.png` |
-| Lendário | 301+ | `medal_lendario.png` |
+| Iniciante | 0–99 | `medal_iniciante.png` |
+| Explorador | 100–199 | `medal_explorador.png` |
+| Mestre do Conteúdo | 200–299 | `medal_mestre.png` |
+| Lendário | 300+ | `medal_lendario.png` |
+
+Fonte: `GamificationLevel.fromPoints` (cortes `>= 100/200/300`; pontos são fracionários). O nível sai do **total da temporada** (`season_points` dos rankings), nunca dos pontos de uma prova só.
 
 Pontos: `1.0pt` (≤5q) / `1.25pt` (6-10q) / `1.50pt` (11+q) por acerto. Bonus de tempo = N questões se ≥70% corretas em ≤80% do tempo (2min/questão).
 **Best Score Only**: só salva delta acima do anterior.
@@ -103,6 +105,7 @@ CLI precisa estar logada na conta dona `unicvtech@unicv.edu.br` (a org "Firstep"
 - Models com `fromJson`/`toJson` + `copyWith`
 - UI components com prefixo `default_` em `lib/ui/components/`
 - Rotas registradas em `app_routes.dart`, protegidas por `ProtectedRoute`
+- `.order()` do postgrest-dart é **decrescente por padrão**: sempre passe `ascending:` explícito
 - Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`
 
 ## Pre-commit checklist

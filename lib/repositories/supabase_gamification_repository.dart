@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/gamification_season.dart';
@@ -75,11 +76,14 @@ class SupabaseGamificationRepository implements GamificationRepository {
 
     // 3. Compare: only save if improved
     if (totalPoints <= previousBest) {
+      final seasonPoints = await _seasonPointsOrNull(userId, seasonId);
       return SavePointsResult(
         accumulatedPoints: previousBest,
         previousPoints: previousBest,
         didImprove: false,
         pointsSaved: 0,
+        seasonPoints: seasonPoints,
+        previousSeasonPoints: seasonPoints,
       );
     }
 
@@ -105,12 +109,29 @@ class SupabaseGamificationRepository implements GamificationRepository {
     await _client.from('user_gamification_points').insert(insertData);
 
     final accumulatedPoints = previousBest + difference;
+    // Read the season total after the insert so it matches the rankings.
+    final seasonPoints = await _seasonPointsOrNull(userId, seasonId);
     return SavePointsResult(
       accumulatedPoints: accumulatedPoints,
       previousPoints: previousBest,
       didImprove: true,
       pointsSaved: difference,
+      seasonPoints: seasonPoints,
+      previousSeasonPoints:
+          seasonPoints == null ? null : seasonPoints - difference,
     );
+  }
+
+  /// Season total used for the level on the result screen. A failure here must
+  /// not turn an already persisted save into "not saved", so it degrades to
+  /// null (the screen then hides the level block).
+  Future<double?> _seasonPointsOrNull(String userId, String seasonId) async {
+    try {
+      return await getUserSeasonPoints(userId: userId, seasonId: seasonId);
+    } catch (e) {
+      debugPrint('Season total unavailable after saving points: $e');
+      return null;
+    }
   }
 
   // ── User points ─────────────────────────────────────────
@@ -134,6 +155,8 @@ class SupabaseGamificationRepository implements GamificationRepository {
   }
 
   // ── Rankings ────────────────────────────────────────────
+  // postgrest-dart's order() defaults to DESCENDING, so `ascending: true` is
+  // required to list 1st → last (and to keep the top 50, not the bottom 50).
 
   @override
   Future<List<RankingEntry>> getGlobalRanking({
@@ -144,7 +167,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .from('ranking_global_view')
         .select()
         .eq('season_id', seasonId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
@@ -179,7 +202,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .select()
         .eq('season_id', seasonId)
         .eq('course_id', courseId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
@@ -198,7 +221,7 @@ class SupabaseGamificationRepository implements GamificationRepository {
         .select()
         .eq('season_id', seasonId)
         .eq('exam_template_id', templateId)
-        .order('rank_position')
+        .order('rank_position', ascending: true)
         .limit(limit);
 
     return rows
